@@ -1,6 +1,7 @@
 class Param
   constructor: (@value = 0) ->
     @id = _.uniqueId("p")
+    @title = @id
 
   evaluate: (env) ->
     env.lookup(this) ? @value
@@ -49,12 +50,13 @@ class Chain
 
   appendLink: (fn) ->
     additionalParams = [0...fn.numParams-1].map -> new Param()
-    link = new ChainLink(fn, additionalParams)
+    link = new Link(fn, additionalParams)
     @links.push(link)
     return link
 
-class ChainLink
+class Link
   constructor: (@fn, @additionalParams) ->
+    @visible = true
 
 
 
@@ -101,9 +103,10 @@ class Editor
       for link in chain.links
         params = [apply].concat(link.additionalParams)
         apply = new Apply(link.fn, params)
-        graph.drawGraph (xValue) =>
-          env = @makeEnv(xValue)
-          apply.evaluate(env)
+        if link.visible
+          graph.drawGraph (xValue) =>
+            env = @makeEnv(xValue)
+            apply.evaluate(env)
 
     for param in @params
       graph.drawGraph (xValue) =>
@@ -152,7 +155,6 @@ do ->
 
   b = editor.addParam()
   b.value = 2
-  b.visible = true
 
   chain = editor.addChain(a)
 

@@ -24,6 +24,7 @@ refresh = ->
   graph.clear()
   graph.drawGrid()
   editor.draw(graph)
+  refreshView()
 
 
 

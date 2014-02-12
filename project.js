@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, ChainLink, Editor, Env, Fn, Graph, Param, capturePointer, compose, config, drawLine, editor, fnsToAdd, graph, lerp, pointerdown, refresh, resize, ticks, _base, _ref, _ref1;
+  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, capturePointer, compose, config, drawLine, editor, fnsToAdd, graph, lerp, pointerdown, refresh, refreshView, resize, ticks, _base, _ref, _ref1;
 
   config = {
     minGridSpacing: 70,
@@ -276,7 +276,8 @@ Need to see how close a point is to an object, for hit detection
   refresh = function() {
     graph.clear();
     graph.drawGrid();
-    return editor.draw(graph);
+    editor.draw(graph);
+    return refreshView();
   };
 
   pointerdown = function(e) {
@@ -287,6 +288,7 @@ Need to see how close a point is to an object, for hit detection
     function Param(value) {
       this.value = value != null ? value : 0;
       this.id = _.uniqueId("p");
+      this.title = this.id;
     }
 
     Param.prototype.evaluate = function(env) {
@@ -377,7 +379,7 @@ Need to see how close a point is to an object, for hit detection
       }).apply(this).map(function() {
         return new Param();
       });
-      link = new ChainLink(fn, additionalParams);
+      link = new Link(fn, additionalParams);
       this.links.push(link);
       return link;
     };
@@ -386,13 +388,14 @@ Need to see how close a point is to an object, for hit detection
 
   })();
 
-  ChainLink = (function() {
-    function ChainLink(fn, additionalParams) {
+  Link = (function() {
+    function Link(fn, additionalParams) {
       this.fn = fn;
       this.additionalParams = additionalParams;
+      this.visible = true;
     }
 
-    return ChainLink;
+    return Link;
 
   })();
 
@@ -438,11 +441,13 @@ Need to see how close a point is to an object, for hit detection
           link = _ref1[_j];
           params = [apply].concat(link.additionalParams);
           apply = new Apply(link.fn, params);
-          graph.drawGraph(function(xValue) {
-            var env;
-            env = _this.makeEnv(xValue);
-            return apply.evaluate(env);
-          });
+          if (link.visible) {
+            graph.drawGraph(function(xValue) {
+              var env;
+              env = _this.makeEnv(xValue);
+              return apply.evaluate(env);
+            });
+          }
         }
       }
       _ref2 = this.params;
@@ -510,7 +515,6 @@ Need to see how close a point is to an object, for hit detection
     editor.xParam = a;
     b = editor.addParam();
     b.value = 2;
-    b.visible = true;
     chain = editor.addChain(a);
     abs = chain.appendLink(fnsToAdd[4]);
     plu = chain.appendLink(fnsToAdd[0]);
@@ -573,5 +577,104 @@ Need to see how close a point is to an object, for hit detection
     window.addEventListener("pointermove", move);
     return window.addEventListener("pointerup", up);
   };
+
+  refreshView = (function() {
+    var ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, d, dif;
+    d = React.DOM;
+    dif = function(cond, fn) {
+      if (cond) {
+        return fn();
+      } else {
+        return null;
+      }
+    };
+    ParamValueView = React.createClass({
+      render: function() {
+        var param;
+        param = this.props.param;
+        return d.span({
+          className: "paramValue"
+        }, param.value);
+      }
+    });
+    ParamTitleView = React.createClass({
+      render: function() {
+        var param;
+        param = this.props.param;
+        return d.span({
+          className: "paramTitle"
+        }, param.title);
+      }
+    });
+    ParamView = React.createClass({
+      render: function() {
+        var param;
+        param = this.props.param;
+        return d.div({
+          className: "param row"
+        }, d.div({
+          style: {
+            float: "right"
+          }
+        }, ParamValueView({
+          param: param
+        })), ParamTitleView({
+          param: param
+        }));
+      }
+    });
+    ChainView = React.createClass({
+      render: function() {
+        var chain;
+        chain = this.props.chain;
+        return d.div({
+          className: "chain"
+        }, d.div({
+          className: "startParam row"
+        }, ParamTitleView({
+          param: chain.startParam
+        })), d.div({
+          className: "links"
+        }, chain.links.map(function(link) {
+          return LinkView({
+            link: link
+          });
+        })));
+      }
+    });
+    LinkView = React.createClass({
+      render: function() {
+        var link;
+        link = this.props.link;
+        return d.div({
+          className: "link row"
+        }, link.fn.title);
+      }
+    });
+    EditorView = React.createClass({
+      render: function() {
+        return d.div({
+          className: "editor"
+        }, d.div({
+          className: "heading row"
+        }, "Parameters"), editor.params.map(function(param) {
+          return ParamView({
+            param: param
+          });
+        }), d.div({
+          className: "heading row"
+        }, "Chain"), editor.chains.map(function(chain) {
+          return ChainView({
+            chain: chain
+          });
+        }));
+      }
+    });
+    return function() {
+      var manager;
+      manager = document.querySelector("#manager");
+      return React.renderComponent(EditorView(), manager);
+    };
+  })();
 
 }).call(this);
