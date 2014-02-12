@@ -26,6 +26,7 @@ fnsToAdd = [
   new Fn "/", 2, (a, b) -> a / b
   new Fn "abs", 1, (a) -> Math.abs(a)
   new Fn "sin", 1, (a) -> Math.sin(a)
+  new Fn "cos", 1, (a) -> Math.cos(a)
 ]
 
 
@@ -59,31 +60,51 @@ class Env
 
 
 class ParamCharacter
-  constructor: (@param) ->
-    @visible = true
+  constructor: ->
+    @param = new Param()
+    @visible = false
     @value = 0 # Can be a number or "x"
 
+class Chain
+  constructor: (@startParam) ->
+    @links = []
 
-class ApplyCharacter
-  constructor: (@apply) ->
-    @visible = true
+class ChainLink
+  constructor: (@fn, @additionalParams) ->
+
+
+
+
+
+
 
 
 class Editor
   constructor: ->
-    @paramCharacters = {}
-    @applyCharacters = {}
+    @paramCharacters = []
+    @chains = []
 
 
   # ===========================================================================
   # Manipulating
   # ===========================================================================
 
-  addParam: (param) ->
-    @paramCharacters[param.id] = new ParamCharacter(param)
+  addParamCharacter: ->
+    paramCharacter = new ParamCharacter()
+    @paramCharacters.push paramCharacter
+    return paramCharacter
 
-  addApply: (apply) ->
-    @applyCharacters[apply.id] = new ApplyCharacter(apply)
+  addChain: (startParam) ->
+    chain = new Chain(startParam)
+    @chains.push(chain)
+    return chain
+
+  appendLink: (chain, fn) ->
+    additionalParams = [0...fn.numParams-1].map =>
+      @addParamCharacter().param
+    link = new ChainLink(fn, additionalParams)
+    chain.links.push(link)
+    return link
 
 
   # ===========================================================================
@@ -92,24 +113,29 @@ class Editor
 
   makeEnv: (xValue) ->
     env = new Env()
-    for own paramId, paramCharacter of @paramCharacters
+    for paramCharacter in @paramCharacters
       value = paramCharacter.value
       value = xValue if value == "x"
       env.set(paramCharacter.param, value)
     return env
 
   draw: (graph) ->
-    for own applyId, applyCharacter of @applyCharacters
-      continue unless applyCharacter.visible
-      graph.drawGraph (xValue) =>
-        env = @makeEnv(xValue)
-        applyCharacter.apply.evaluate(env)
+    for chain in @chains
+      apply = chain.startParam
+      for link in chain.links
+        params = [apply].concat(link.additionalParams)
+        apply = new Apply(link.fn, params)
+        graph.drawGraph (xValue) =>
+          env = @makeEnv(xValue)
+          apply.evaluate(env)
 
-    for own paramId, paramCharacter of @paramCharacters
+    for paramCharacter in @paramCharacters
       continue unless paramCharacter.visible
       graph.drawGraph (xValue) =>
         env = @makeEnv(xValue)
         paramCharacter.param.evaluate(env)
+
+
 
 
   # ===========================================================================
@@ -143,31 +169,23 @@ class Editor
 
 
 
-editor = do ->
-  a = new Param()
-  b = new Param()
-  applyAbs = new Apply(fnsToAdd[4], [a])
+editor = new Editor()
 
-  applyPlu = new Apply(fnsToAdd[0], [applyAbs, b])
-  applySin = new Apply(fnsToAdd[5], [applyPlu])
+do ->
+  a = editor.addParamCharacter()
+  a.value = "x"
+  a.visible = true
 
-  editor = new Editor()
+  b = editor.addParamCharacter()
+  b.value = 2
+  b.visible = true
 
-  aChar = editor.addParam(a)
-  bChar = editor.addParam(b)
+  chain = editor.addChain(a.param)
 
-  editor.addApply(applyAbs)
-  editor.addApply(applySin)
-  editor.addApply(applyPlu)
-
-  aChar.value = "x"
-  bChar.value = 2
-
-  return editor
-
-
-
-
+  abs = editor.appendLink(chain, fnsToAdd[4])
+  plu = editor.appendLink(chain, fnsToAdd[0])
+  plu.additionalParams[0] = b.param
+  sin = editor.appendLink(chain, fnsToAdd[5])
 
 
 
