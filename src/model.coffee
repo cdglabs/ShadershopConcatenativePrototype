@@ -8,6 +8,8 @@ Need to capture:
 class Param
   constructor: ->
     @id = _.uniqueId("p")
+  evaluate: (env) ->
+    env.lookup(this)
 
 ###
 title
@@ -15,7 +17,7 @@ number of parameters (at least 1?)
 how to compute its result given its parameter values
 ###
 class Fn
-  constructor: (@title, @numParams, @evaluate) ->
+  constructor: (@title, @numParams, @compute) ->
 
 fnsToAdd = [
   new Fn "+", 2, (a, b) -> a + b
@@ -37,8 +39,8 @@ class Apply
 
   evaluate: (env) ->
     paramValues = @params.map (param) ->
-      env.lookup(param)
-    @fn.evaluate(paramValues)
+      param.evaluate(env)
+    @fn.compute(paramValues...)
 
 
 class Env
@@ -72,16 +74,23 @@ class Editor
     @paramCharacters = {}
     @applyCharacters = {}
 
+  addParam: (param) ->
+    @paramCharacters[param.id] = new ParamCharacter(param)
+
+  addApply: (apply) ->
+    @applyCharacters[apply.id] = new ApplyCharacter(apply)
+
+
   makeEnv: (xValue) ->
     env = new Env()
-    for paramId, paramCharacter in @paramCharacters
+    for own paramId, paramCharacter of @paramCharacters
       value = paramCharacter.value
       value = xValue if value == "x"
       env.set(paramCharacter.param, value)
     return env
 
   draw: (graph) ->
-    for applyId, applyCharacter in @applyCharacters
+    for own applyId, applyCharacter of @applyCharacters
       continue unless applyCharacter.visible
       graph.drawGraph (xValue) =>
         env = @makeEnv(xValue)
@@ -91,7 +100,26 @@ class Editor
 
 
 
+editor = do ->
+  a = new Param()
+  b = new Param()
+  applyAbs = new Apply(fnsToAdd[4], [a])
+  applySin = new Apply(fnsToAdd[5], [applyAbs])
+  applyPlu = new Apply(fnsToAdd[0], [applySin, b])
 
+  editor = new Editor()
+
+  aChar = editor.addParam(a)
+  bChar = editor.addParam(b)
+
+  editor.addApply(applyAbs)
+  editor.addApply(applySin)
+  editor.addApply(applyPlu)
+
+  aChar.value = "x"
+  bChar.value = 2
+
+  return editor
 
 
 
