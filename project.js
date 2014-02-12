@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, ChainLink, Editor, Env, Fn, Graph, Param, ParamCharacter, capturePointer, compose, config, drawLine, editor, fnsToAdd, graph, lerp, pointerdown, refresh, resize, ticks, _base, _ref, _ref1;
+  var Apply, Chain, ChainLink, Editor, Env, Fn, Graph, Param, capturePointer, compose, config, drawLine, editor, fnsToAdd, graph, lerp, pointerdown, refresh, resize, ticks, _base, _ref, _ref1;
 
   config = {
     minGridSpacing: 70,
@@ -283,33 +283,37 @@ Need to see how close a point is to an object, for hit detection
     return editor.pointerdown(e, graph);
   };
 
-  /*
-  Need to capture:
-    is it displayed always or a "constant"?
-    is it the x-axis? if not, what is its current value?
-    title
-  */
-
-
   Param = (function() {
-    function Param() {
+    function Param(value) {
+      this.value = value != null ? value : 0;
       this.id = _.uniqueId("p");
     }
 
     Param.prototype.evaluate = function(env) {
-      return env.lookup(this);
+      var _ref;
+      return (_ref = env.lookup(this)) != null ? _ref : this.value;
     };
 
     return Param;
 
   })();
 
-  /*
-  title
-  number of parameters (at least 1?)
-  how to compute its result given its parameter values
-  */
+  Env = (function() {
+    function Env() {
+      this.paramValues = {};
+    }
 
+    Env.prototype.set = function(param, value) {
+      return this.paramValues[param.id] = value;
+    };
+
+    Env.prototype.lookup = function(param) {
+      return this.paramValues[param.id];
+    };
+
+    return Env;
+
+  })();
 
   Fn = (function() {
     function Fn(title, numParams, compute) {
@@ -340,17 +344,10 @@ Need to see how close a point is to an object, for hit detection
     })
   ];
 
-  /*
-  its Fn
-  its parameters
-  */
-
-
   Apply = (function() {
     function Apply(fn, params) {
       this.fn = fn;
       this.params = params;
-      this.id = _.uniqueId("a");
     }
 
     Apply.prototype.evaluate = function(env) {
@@ -365,39 +362,25 @@ Need to see how close a point is to an object, for hit detection
 
   })();
 
-  Env = (function() {
-    function Env() {
-      this.paramValues = {};
-    }
-
-    Env.prototype.set = function(param, value) {
-      return this.paramValues[param.id] = value;
-    };
-
-    Env.prototype.lookup = function(param) {
-      return this.paramValues[param.id];
-    };
-
-    return Env;
-
-  })();
-
-  ParamCharacter = (function() {
-    function ParamCharacter() {
-      this.param = new Param();
-      this.visible = false;
-      this.value = 0;
-    }
-
-    return ParamCharacter;
-
-  })();
-
   Chain = (function() {
     function Chain(startParam) {
       this.startParam = startParam;
       this.links = [];
     }
+
+    Chain.prototype.appendLink = function(fn) {
+      var additionalParams, link, _i, _ref, _results;
+      additionalParams = (function() {
+        _results = [];
+        for (var _i = 0, _ref = fn.numParams - 1; 0 <= _ref ? _i < _ref : _i > _ref; 0 <= _ref ? _i++ : _i--){ _results.push(_i); }
+        return _results;
+      }).apply(this).map(function() {
+        return new Param();
+      });
+      link = new ChainLink(fn, additionalParams);
+      this.links.push(link);
+      return link;
+    };
 
     return Chain;
 
@@ -415,15 +398,16 @@ Need to see how close a point is to an object, for hit detection
 
   Editor = (function() {
     function Editor() {
-      this.paramCharacters = [];
+      this.params = [];
       this.chains = [];
+      this.xParam = null;
     }
 
-    Editor.prototype.addParamCharacter = function() {
-      var paramCharacter;
-      paramCharacter = new ParamCharacter();
-      this.paramCharacters.push(paramCharacter);
-      return paramCharacter;
+    Editor.prototype.addParam = function() {
+      var param;
+      param = new Param();
+      this.params.push(param);
+      return param;
     };
 
     Editor.prototype.addChain = function(startParam) {
@@ -433,38 +417,17 @@ Need to see how close a point is to an object, for hit detection
       return chain;
     };
 
-    Editor.prototype.appendLink = function(chain, fn) {
-      var additionalParams, link, _i, _ref, _results,
-        _this = this;
-      additionalParams = (function() {
-        _results = [];
-        for (var _i = 0, _ref = fn.numParams - 1; 0 <= _ref ? _i < _ref : _i > _ref; 0 <= _ref ? _i++ : _i--){ _results.push(_i); }
-        return _results;
-      }).apply(this).map(function() {
-        return _this.addParamCharacter().param;
-      });
-      link = new ChainLink(fn, additionalParams);
-      chain.links.push(link);
-      return link;
-    };
-
     Editor.prototype.makeEnv = function(xValue) {
-      var env, paramCharacter, value, _i, _len, _ref;
+      var env;
       env = new Env();
-      _ref = this.paramCharacters;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        paramCharacter = _ref[_i];
-        value = paramCharacter.value;
-        if (value === "x") {
-          value = xValue;
-        }
-        env.set(paramCharacter.param, value);
+      if (this.xParam) {
+        env.set(this.xParam, xValue);
       }
       return env;
     };
 
     Editor.prototype.draw = function(graph) {
-      var apply, chain, link, paramCharacter, params, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results,
+      var apply, chain, link, param, params, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results,
         _this = this;
       _ref = this.chains;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -482,52 +445,57 @@ Need to see how close a point is to an object, for hit detection
           });
         }
       }
-      _ref2 = this.paramCharacters;
+      _ref2 = this.params;
       _results = [];
       for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        paramCharacter = _ref2[_k];
-        if (!paramCharacter.visible) {
-          continue;
-        }
+        param = _ref2[_k];
         _results.push(graph.drawGraph(function(xValue) {
           var env;
           env = _this.makeEnv(xValue);
-          return paramCharacter.param.evaluate(env);
+          return param.evaluate(env);
         }));
       }
       return _results;
     };
 
+    Editor.prototype.manipulableParams = function() {
+      var result,
+        _this = this;
+      result = this.params;
+      result = _.reject(result, function(param) {
+        return param === _this.xParam;
+      });
+      return result;
+    };
+
     Editor.prototype.hitDetect = function(e, graph) {
-      var foundIndex, manipulableParamCharacterValues, manipulableParamCharacters;
-      manipulableParamCharacters = _.filter(_.values(this.paramCharacters), function(paramCharacter) {
-        return paramCharacter.visible && _.isNumber(paramCharacter.value);
+      var foundIndex, paramValues, params;
+      params = this.manipulableParams();
+      paramValues = _.map(params, function(param) {
+        return param.value;
       });
-      manipulableParamCharacterValues = _.map(manipulableParamCharacters, function(paramCharacter) {
-        return paramCharacter.value;
-      });
-      foundIndex = graph.hitDetect(e.clientY, manipulableParamCharacterValues);
+      foundIndex = graph.hitDetect(e.clientY, paramValues);
       if (foundIndex != null) {
-        return manipulableParamCharacters[foundIndex];
+        return params[foundIndex];
       } else {
         return null;
       }
     };
 
     Editor.prototype.pointerdown = function(e, graph) {
-      var paramCharacter, setParamCharacter;
-      paramCharacter = this.hitDetect(e, graph);
-      if (!paramCharacter) {
+      var param, setParam;
+      param = this.hitDetect(e, graph);
+      if (!param) {
         return;
       }
-      setParamCharacter = function(e) {
+      setParam = function(e) {
         var x, y, _ref;
         _ref = graph.getCoords([e.clientX, e.clientY]), x = _ref[0], y = _ref[1];
-        paramCharacter.value = y;
+        param.value = y;
         return refresh();
       };
-      setParamCharacter(e);
-      return capturePointer(e, setParamCharacter);
+      setParam(e);
+      return capturePointer(e, setParam);
     };
 
     return Editor;
@@ -538,17 +506,16 @@ Need to see how close a point is to an object, for hit detection
 
   (function() {
     var a, abs, b, chain, plu, sin;
-    a = editor.addParamCharacter();
-    a.value = "x";
-    a.visible = true;
-    b = editor.addParamCharacter();
+    a = editor.addParam();
+    editor.xParam = a;
+    b = editor.addParam();
     b.value = 2;
     b.visible = true;
-    chain = editor.addChain(a.param);
-    abs = editor.appendLink(chain, fnsToAdd[4]);
-    plu = editor.appendLink(chain, fnsToAdd[0]);
-    plu.additionalParams[0] = b.param;
-    return sin = editor.appendLink(chain, fnsToAdd[5]);
+    chain = editor.addChain(a);
+    abs = chain.appendLink(fnsToAdd[4]);
+    plu = chain.appendLink(fnsToAdd[0]);
+    plu.additionalParams[0] = b;
+    return sin = chain.appendLink(fnsToAdd[5]);
   })();
 
   lerp = function(x, dMin, dMax, rMin, rMax) {
