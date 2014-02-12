@@ -1,0 +1,7 @@
+Pan and zoom canvas
+Make layer manager prettier
+Thumbnail graphs in layer manager
+Generic line parameter interface
+Snapping lines
+Fract
+Min/Max
