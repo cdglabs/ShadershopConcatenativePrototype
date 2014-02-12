@@ -61,7 +61,7 @@ class Env
 class ParamCharacter
   constructor: (@param) ->
     @visible = true
-    @value = 0 # or can be "x"
+    @value = 0 # Can be a number or "x"
 
 
 class ApplyCharacter
@@ -74,12 +74,21 @@ class Editor
     @paramCharacters = {}
     @applyCharacters = {}
 
+
+  # ===========================================================================
+  # Manipulating
+  # ===========================================================================
+
   addParam: (param) ->
     @paramCharacters[param.id] = new ParamCharacter(param)
 
   addApply: (apply) ->
     @applyCharacters[apply.id] = new ApplyCharacter(apply)
 
+
+  # ===========================================================================
+  # Rendering
+  # ===========================================================================
 
   makeEnv: (xValue) ->
     env = new Env()
@@ -96,7 +105,41 @@ class Editor
         env = @makeEnv(xValue)
         applyCharacter.apply.evaluate(env)
 
+    for own paramId, paramCharacter of @paramCharacters
+      continue unless paramCharacter.visible
+      graph.drawGraph (xValue) =>
+        env = @makeEnv(xValue)
+        paramCharacter.param.evaluate(env)
 
+
+  # ===========================================================================
+  # Direct Manipulating
+  # ===========================================================================
+
+  hitDetect: (e, graph) ->
+    manipulableParamCharacters = _.filter _.values(@paramCharacters), (paramCharacter) ->
+      paramCharacter.visible && _.isNumber(paramCharacter.value)
+
+    manipulableParamCharacterValues = _.map manipulableParamCharacters, (paramCharacter) ->
+      paramCharacter.value
+
+    foundIndex = graph.hitDetect(e.clientY, manipulableParamCharacterValues)
+
+    if foundIndex?
+      return manipulableParamCharacters[foundIndex]
+    else
+      return null
+
+  pointerdown: (e, graph) ->
+    paramCharacter = @hitDetect(e, graph)
+    return unless paramCharacter
+
+    setParamCharacter = (e) ->
+      [x, y] = graph.getCoords([e.clientX, e.clientY])
+      paramCharacter.value = y
+      refresh()
+    setParamCharacter(e)
+    capturePointer(e, setParamCharacter)
 
 
 
@@ -104,8 +147,9 @@ editor = do ->
   a = new Param()
   b = new Param()
   applyAbs = new Apply(fnsToAdd[4], [a])
-  applySin = new Apply(fnsToAdd[5], [applyAbs])
-  applyPlu = new Apply(fnsToAdd[0], [applySin, b])
+
+  applyPlu = new Apply(fnsToAdd[0], [applyAbs, b])
+  applySin = new Apply(fnsToAdd[5], [applyPlu])
 
   editor = new Editor()
 

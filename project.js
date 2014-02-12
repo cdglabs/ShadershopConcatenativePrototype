@@ -280,7 +280,9 @@ Need to see how close a point is to an object, for hit detection
     return editor.draw(graph);
   };
 
-  pointerdown = function(e) {};
+  pointerdown = function(e) {
+    return editor.pointerdown(e, graph);
+  };
 
   /*
   Need to capture:
@@ -431,23 +433,68 @@ Need to see how close a point is to an object, for hit detection
     };
 
     Editor.prototype.draw = function(graph) {
-      var applyCharacter, applyId, _ref, _results,
+      var applyCharacter, applyId, paramCharacter, paramId, _ref, _ref1, _results,
         _this = this;
       _ref = this.applyCharacters;
-      _results = [];
       for (applyId in _ref) {
         if (!__hasProp.call(_ref, applyId)) continue;
         applyCharacter = _ref[applyId];
         if (!applyCharacter.visible) {
           continue;
         }
-        _results.push(graph.drawGraph(function(xValue) {
+        graph.drawGraph(function(xValue) {
           var env;
           env = _this.makeEnv(xValue);
           return applyCharacter.apply.evaluate(env);
+        });
+      }
+      _ref1 = this.paramCharacters;
+      _results = [];
+      for (paramId in _ref1) {
+        if (!__hasProp.call(_ref1, paramId)) continue;
+        paramCharacter = _ref1[paramId];
+        if (!paramCharacter.visible) {
+          continue;
+        }
+        _results.push(graph.drawGraph(function(xValue) {
+          var env;
+          env = _this.makeEnv(xValue);
+          return paramCharacter.param.evaluate(env);
         }));
       }
       return _results;
+    };
+
+    Editor.prototype.hitDetect = function(e, graph) {
+      var foundIndex, manipulableParamCharacterValues, manipulableParamCharacters;
+      manipulableParamCharacters = _.filter(_.values(this.paramCharacters), function(paramCharacter) {
+        return paramCharacter.visible && _.isNumber(paramCharacter.value);
+      });
+      manipulableParamCharacterValues = _.map(manipulableParamCharacters, function(paramCharacter) {
+        return paramCharacter.value;
+      });
+      foundIndex = graph.hitDetect(e.clientY, manipulableParamCharacterValues);
+      if (foundIndex != null) {
+        return manipulableParamCharacters[foundIndex];
+      } else {
+        return null;
+      }
+    };
+
+    Editor.prototype.pointerdown = function(e, graph) {
+      var paramCharacter, setParamCharacter;
+      paramCharacter = this.hitDetect(e, graph);
+      if (!paramCharacter) {
+        return;
+      }
+      setParamCharacter = function(e) {
+        var x, y, _ref;
+        _ref = graph.getCoords([e.clientX, e.clientY]), x = _ref[0], y = _ref[1];
+        paramCharacter.value = y;
+        return refresh();
+      };
+      setParamCharacter(e);
+      return capturePointer(e, setParamCharacter);
     };
 
     return Editor;
@@ -459,8 +506,8 @@ Need to see how close a point is to an object, for hit detection
     a = new Param();
     b = new Param();
     applyAbs = new Apply(fnsToAdd[4], [a]);
-    applySin = new Apply(fnsToAdd[5], [applyAbs]);
-    applyPlu = new Apply(fnsToAdd[0], [applySin, b]);
+    applyPlu = new Apply(fnsToAdd[0], [applyAbs, b]);
+    applySin = new Apply(fnsToAdd[5], [applyPlu]);
     editor = new Editor();
     aChar = editor.addParam(a);
     bChar = editor.addParam(b);

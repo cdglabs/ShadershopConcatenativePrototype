@@ -29,7 +29,7 @@ refresh = ->
 
 
 pointerdown = (e) ->
-
+  editor.pointerdown(e, graph)
 
 
 
