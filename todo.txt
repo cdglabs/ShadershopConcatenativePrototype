@@ -1,5 +1,16 @@
 Manipulations of the apply chain
-  Add links
+  Reorder links
+
+Make popup-y thing
+  Remove links
+
+Default values for functions
+  (makes the architecture consistent)
 
 
 Drag parameters onto slots
+
+
+Selected link
+  Color things better
+  Show/manipulate its parameters

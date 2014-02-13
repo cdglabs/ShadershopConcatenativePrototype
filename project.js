@@ -407,6 +407,7 @@ Need to see how close a point is to an object, for hit detection
       this.params = [];
       this.chains = [];
       this.xParam = null;
+      this.selectedLink = null;
     }
 
     Editor.prototype.addParam = function() {
@@ -433,35 +434,50 @@ Need to see how close a point is to an object, for hit detection
     };
 
     Editor.prototype.draw = function(graph) {
-      var apply, chain, link, param, params, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results,
+      var apply, chain, color, graphFn, link, param, params, _i, _j, _len, _len1, _ref, _ref1, _results,
         _this = this;
-      _ref = this.chains;
+      _ref = this.manipulableParams();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        chain = _ref[_i];
-        apply = chain.startParam;
-        _ref1 = chain.links;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          link = _ref1[_j];
-          params = [apply].concat(link.additionalParams);
-          apply = new Apply(link.fn, params);
-          if (link.visible) {
-            graph.drawGraph(function(xValue) {
-              var env;
-              env = _this.makeEnv(xValue);
-              return apply.evaluate(env);
-            });
-          }
-        }
-      }
-      _ref2 = this.params;
-      _results = [];
-      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        param = _ref2[_k];
-        _results.push(graph.drawGraph(function(xValue) {
+        param = _ref[_i];
+        graphFn = function(xValue) {
           var env;
           env = _this.makeEnv(xValue);
           return param.evaluate(env);
-        }));
+        };
+        graph.drawGraph(graphFn, "green");
+      }
+      _ref1 = this.chains;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        chain = _ref1[_j];
+        apply = chain.startParam;
+        _results.push((function() {
+          var _k, _len2, _ref2, _results1,
+            _this = this;
+          _ref2 = chain.links;
+          _results1 = [];
+          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+            link = _ref2[_k];
+            params = [apply].concat(link.additionalParams);
+            apply = new Apply(link.fn, params);
+            if (link.visible) {
+              if (link === this.selectedLink) {
+                color = "#009";
+              } else {
+                color = "rgba(0,0,0,0.4)";
+              }
+              graphFn = function(xValue) {
+                var env;
+                env = _this.makeEnv(xValue);
+                return apply.evaluate(env);
+              };
+              _results1.push(graph.drawGraph(graphFn, color));
+            } else {
+              _results1.push(void 0);
+            }
+          }
+          return _results1;
+        }).call(this));
       }
       return _results;
     };
@@ -470,6 +486,9 @@ Need to see how close a point is to an object, for hit detection
       var result,
         _this = this;
       result = this.params;
+      if (this.selectedLink) {
+        result = _.union(result, this.selectedLink.additionalParams);
+      }
       result = _.reject(result, function(param) {
         return param === _this.xParam;
       });
@@ -513,15 +532,10 @@ Need to see how close a point is to an object, for hit detection
   editor = new Editor();
 
   (function() {
-    var a, abs, b, chain, plu, sin;
+    var a, chain;
     a = editor.addParam();
     editor.xParam = a;
-    b = editor.addParam();
-    b.value = 2;
-    chain = editor.addChain(a);
-    abs = chain.appendLink(fnsToAdd[4]);
-    plu = chain.appendLink(fnsToAdd[0]);
-    return sin = chain.appendLink(fnsToAdd[5]);
+    return chain = editor.addChain(a);
   })();
 
   lerp = function(x, dMin, dMax, rMin, rMax) {
@@ -581,8 +595,9 @@ Need to see how close a point is to an object, for hit detection
   };
 
   refreshView = (function() {
-    var ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, d, truncate;
+    var ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, cx, d, truncate;
     d = React.DOM;
+    cx = React.addons.classSet;
     truncate = function(value) {
       var decimalPlace, s;
       s = "" + value;
@@ -593,11 +608,18 @@ Need to see how close a point is to an object, for hit detection
     };
     ParamValueView = React.createClass({
       render: function() {
-        var param;
+        var param,
+          _this = this;
         param = this.props.param;
         return d.span({
           className: "paramValue"
-        }, truncate(param.value));
+        }, (function() {
+          if (editor.xParam === param) {
+            return d.i({}, "x");
+          } else {
+            return truncate(param.value);
+          }
+        })());
       }
     });
     ParamTitleView = React.createClass({
@@ -640,8 +662,20 @@ Need to see how close a point is to an object, for hit detection
       }
     });
     ChainView = React.createClass({
+      handleChange: function(e) {
+        var fn, i;
+        i = e.target.selectedIndex;
+        e.target.selectedIndex = 0;
+        if (i === 0) {
+          return;
+        }
+        fn = fnsToAdd[i - 1];
+        this.props.chain.appendLink(fn);
+        return refresh();
+      },
       render: function() {
-        var chain;
+        var chain,
+          _this = this;
         chain = this.props.chain;
         return d.div({
           className: "chain"
@@ -656,15 +690,33 @@ Need to see how close a point is to an object, for hit detection
             link: link,
             key: link.id
           });
-        })));
+        })), d.div({
+          className: "addFns row"
+        }, d.select({
+          onChange: this.handleChange
+        }, d.option({
+          value: "select"
+        }, "Add..."), fnsToAdd.map(function(fn) {
+          return d.option({}, fn.title);
+        }))));
       }
     });
     LinkView = React.createClass({
+      handleMouseDown: function() {
+        editor.selectedLink = this.props.link;
+        return refresh();
+      },
       render: function() {
-        var link;
+        var classNames, link;
         link = this.props.link;
+        classNames = cx({
+          "link": true,
+          "row": true,
+          "selectedLink": link === editor.selectedLink
+        });
         return d.div({
-          className: "link row"
+          className: classNames,
+          onMouseDown: this.handleMouseDown
         }, d.div({
           className: "additionalParams",
           style: {
@@ -682,7 +734,9 @@ Need to see how close a point is to an object, for hit detection
               key: i
             });
           }
-        })), link.fn.title);
+        })), d.div({
+          className: "linkTitle"
+        }, link.fn.title));
       }
     });
     EditorView = React.createClass({

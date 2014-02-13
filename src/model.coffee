@@ -71,6 +71,7 @@ class Editor
     @params = []
     @chains = []
     @xParam = null
+    @selectedLink = null
 
 
   # ===========================================================================
@@ -99,20 +100,26 @@ class Editor
     return env
 
   draw: (graph) ->
+    for param in @manipulableParams()
+      graphFn = (xValue) =>
+        env = @makeEnv(xValue)
+        param.evaluate(env)
+      graph.drawGraph(graphFn, "green")
+
     for chain in @chains
       apply = chain.startParam
       for link in chain.links
         params = [apply].concat(link.additionalParams)
         apply = new Apply(link.fn, params)
         if link.visible
-          graph.drawGraph (xValue) =>
+          if link == @selectedLink
+            color = "#009"
+          else
+            color = "rgba(0,0,0,0.4)"
+          graphFn = (xValue) =>
             env = @makeEnv(xValue)
             apply.evaluate(env)
-
-    for param in @params
-      graph.drawGraph (xValue) =>
-        env = @makeEnv(xValue)
-        param.evaluate(env)
+          graph.drawGraph(graphFn, color)
 
 
   # ===========================================================================
@@ -121,6 +128,8 @@ class Editor
 
   manipulableParams: ->
     result = @params
+    if @selectedLink
+      result = _.union result, @selectedLink.additionalParams
     result = _.reject result, (param) => param == @xParam
     return result
 
@@ -148,21 +157,27 @@ class Editor
 
 
 
+
+
+
+
+
+
 editor = new Editor()
 
 do ->
   a = editor.addParam()
   editor.xParam = a
 
-  b = editor.addParam()
-  b.value = 2
+  # b = editor.addParam()
+  # b.value = 2
 
   chain = editor.addChain(a)
 
-  abs = chain.appendLink(fnsToAdd[4])
-  plu = chain.appendLink(fnsToAdd[0])
-  # plu.additionalParams[0] = b
-  sin = chain.appendLink(fnsToAdd[5])
+  # abs = chain.appendLink(fnsToAdd[4])
+  # plu = chain.appendLink(fnsToAdd[0])
+  # # plu.additionalParams[0] = b
+  # sin = chain.appendLink(fnsToAdd[5])
 
 
 

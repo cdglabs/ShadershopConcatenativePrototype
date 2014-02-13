@@ -1,6 +1,7 @@
 refreshView = do ->
 
   d = React.DOM
+  cx = React.addons.classSet
 
 
   truncate = (value) ->
@@ -14,7 +15,11 @@ refreshView = do ->
     render: ->
       param = @props.param
       d.span {className: "paramValue"},
-        truncate(param.value)
+        do =>
+          if editor.xParam == param
+            d.i {}, "x"
+          else
+            truncate(param.value)
 
   ParamTitleView = React.createClass
     handleInput: ->
@@ -40,6 +45,15 @@ refreshView = do ->
 
 
   ChainView = React.createClass
+    handleChange: (e) ->
+      i = e.target.selectedIndex
+      e.target.selectedIndex = 0
+      return if i == 0
+
+      fn = fnsToAdd[i-1]
+      @props.chain.appendLink(fn)
+      refresh()
+
     render: ->
       chain = @props.chain
       d.div {className: "chain"},
@@ -48,18 +62,32 @@ refreshView = do ->
         d.div {className: "links"},
           chain.links.map (link) ->
             LinkView {link: link, key: link.id}
+        d.div {className: "addFns row"},
+          d.select {onChange: @handleChange},
+            d.option {value: "select"}, "Add..."
+            fnsToAdd.map (fn) =>
+              d.option {}, fn.title
 
   LinkView = React.createClass
+    handleMouseDown: ->
+      editor.selectedLink = @props.link
+      refresh()
     render: ->
       link = @props.link
-      d.div {className: "link row"},
+      classNames = cx {
+        "link": true
+        "row": true
+        "selectedLink": link == editor.selectedLink
+      }
+      d.div {className: classNames, onMouseDown: @handleMouseDown},
         d.div {className: "additionalParams", style: {float: "right"}},
           link.additionalParams.map (param, i) ->
             if _.contains editor.params, param
               ParamTitleView {param: param, key: i}
             else
               ParamValueView {param: param, key: i}
-        link.fn.title
+        d.div {className: "linkTitle"},
+          link.fn.title
 
   EditorView = React.createClass
     render: ->
