@@ -219,14 +219,8 @@ Need to see how close a point is to an object, for hit detection
       return this.ctx.restore();
     };
 
-    Graph.prototype.drawGraph = function(fn, color, lineWidth) {
-      var cx, cxMax, cxMin, cy, cyMax, cyMin, i, resolution, sizeX, sizeY, x, y, _i, _ref;
-      if (color == null) {
-        color = "#006";
-      }
-      if (lineWidth == null) {
-        lineWidth = 2;
-      }
+    Graph.prototype.drawGraph = function(fn, styleOpts) {
+      var cx, cxMax, cxMin, cy, cyMax, cyMin, i, resolution, sizeX, sizeY, x, y, _i, _ref, _ref1, _ref2, _ref3;
       this.ctx.save();
       sizeX = this.xMax - this.xMin;
       sizeY = this.yMax - this.yMin;
@@ -234,11 +228,12 @@ Need to see how close a point is to an object, for hit detection
       cxMax = this.width();
       cyMin = this.height();
       cyMax = 0;
-      this.ctx.lineWidth = lineWidth;
-      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = (_ref = styleOpts.lineWidth) != null ? _ref : 2;
+      this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
+      this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
       this.ctx.beginPath();
       resolution = 0.25;
-      for (i = _i = 0, _ref = this.width() / resolution; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = _i = 0, _ref3 = this.width() / resolution; 0 <= _ref3 ? _i <= _ref3 : _i >= _ref3; i = 0 <= _ref3 ? ++_i : --_i) {
         cx = i * resolution;
         x = lerp(cx, cxMin, cxMax, this.xMin, this.xMax);
         y = fn(x);
@@ -408,6 +403,7 @@ Need to see how close a point is to an object, for hit detection
       this.chains = [];
       this.xParam = null;
       this.selectedLink = null;
+      this.hoveredParam = null;
     }
 
     Editor.prototype.addParam = function() {
@@ -434,9 +430,9 @@ Need to see how close a point is to an object, for hit detection
     };
 
     Editor.prototype.draw = function(graph) {
-      var apply, chain, color, graphFn, link, param, params, _i, _j, _len, _len1, _ref, _ref1, _results,
+      var apply, chain, graphFn, link, param, params, styleOpts, _i, _j, _len, _len1, _ref, _ref1, _results,
         _this = this;
-      _ref = this.manipulableParams();
+      _ref = this.visibleParams();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         param = _ref[_i];
         graphFn = function(xValue) {
@@ -444,7 +440,9 @@ Need to see how close a point is to an object, for hit detection
           env = _this.makeEnv(xValue);
           return param.evaluate(env);
         };
-        graph.drawGraph(graphFn, "green");
+        graph.drawGraph(graphFn, {
+          color: "green"
+        });
       }
       _ref1 = this.chains;
       _results = [];
@@ -462,16 +460,20 @@ Need to see how close a point is to an object, for hit detection
             apply = new Apply(link.fn, params);
             if (link.visible) {
               if (link === this.selectedLink) {
-                color = "#009";
+                styleOpts = {
+                  color: "#009"
+                };
               } else {
-                color = "rgba(0,0,0,0.2)";
+                styleOpts = {
+                  color: "#ddd"
+                };
               }
               graphFn = function(xValue) {
                 var env;
                 env = _this.makeEnv(xValue);
                 return apply.evaluate(env);
               };
-              _results1.push(graph.drawGraph(graphFn, color));
+              _results1.push(graph.drawGraph(graphFn, styleOpts));
             } else {
               _results1.push(void 0);
             }
@@ -482,13 +484,22 @@ Need to see how close a point is to an object, for hit detection
       return _results;
     };
 
-    Editor.prototype.manipulableParams = function() {
-      var result,
-        _this = this;
+    Editor.prototype.visibleParams = function() {
+      var result;
       result = this.params;
       if (this.selectedLink) {
         result = _.union(result, this.selectedLink.additionalParams);
       }
+      if (this.hoveredParam) {
+        result = _.union(result, this.hoveredParam);
+      }
+      return result;
+    };
+
+    Editor.prototype.manipulableParams = function() {
+      var result,
+        _this = this;
+      result = this.visibleParams();
       result = _.reject(result, function(param) {
         return param === _this.xParam;
       });
@@ -645,9 +656,24 @@ Need to see how close a point is to an object, for hit detection
       }
     });
     ParamView = React.createClass({
+      handleMouseEnter: function() {
+        editor.hoveredParam = this.props.param;
+        return refresh();
+      },
+      handleMouseLeave: function() {
+        editor.hoveredParam = null;
+        return refresh();
+      },
       render: function() {
+        var classNames;
+        classNames = cx({
+          param: true,
+          hovered: this.props.param === editor.hoveredParam
+        });
         return d.div({
-          className: "param"
+          className: classNames,
+          onMouseEnter: this.handleMouseEnter,
+          onMouseLeave: this.handleMouseLeave
         }, ParamTitleView({
           param: this.props.param
         }), ParamValueView({

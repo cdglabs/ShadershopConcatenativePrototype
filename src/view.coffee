@@ -36,8 +36,18 @@ refreshView = do ->
         param.title
 
   ParamView = React.createClass
+    handleMouseEnter: ->
+      editor.hoveredParam = @props.param
+      refresh()
+    handleMouseLeave: ->
+      editor.hoveredParam = null
+      refresh()
     render: ->
-      d.div {className: "param"},
+      classNames = cx {
+        param: true
+        hovered: @props.param == editor.hoveredParam
+      }
+      d.div {className: classNames, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
         ParamTitleView {param: @props.param}
         ParamValueView {param: @props.param}
 

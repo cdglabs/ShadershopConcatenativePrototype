@@ -188,7 +188,7 @@ class Graph
     @ctx.restore()
 
 
-  drawGraph: (fn, color="#006", lineWidth=2) ->
+  drawGraph: (fn, styleOpts) ->
     @ctx.save()
     sizeX = @xMax - @xMin
     sizeY = @yMax - @yMin
@@ -198,8 +198,9 @@ class Graph
     cyMin = @height()
     cyMax = 0
 
-    @ctx.lineWidth = lineWidth
-    @ctx.strokeStyle = color
+    @ctx.lineWidth = styleOpts.lineWidth ? 2
+    @ctx.strokeStyle = styleOpts.color ? "#006"
+    @ctx.globalAlpha = styleOpts.opacity ? 1
     # @ctx.shadowColor = "rgba(0,0,0,0.65)"
     # @ctx.shadowBlur = 3
 

@@ -56,6 +56,9 @@ canvas {
 }
 
 .param {
+  display: inline-block;
+  border-radius: 4px;
+  overflow: hidden;
 }
 .paramTitle, .paramValue {
   padding: 0.1em 0.4em;
@@ -63,13 +66,19 @@ canvas {
   display: inline-block;
 }
 .paramTitle {
-  border-radius: 4px 0px 0px 4px;
-  background-color: #ccc;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .paramValue {
-  border-radius: 0px 4px 4px 0px;
-  background-color: #eee;
+  background-color: rgba(0, 0, 0, 0.1);
 }
+
+.param.hovered {
+  background-color: rgba(0, 128, 0, 0.2);
+}
+
+
+
+
 
 .selectedLink {
   background-color: #eef;

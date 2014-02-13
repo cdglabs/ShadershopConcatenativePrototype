@@ -1,3 +1,9 @@
+Get drawing order correct
+
+Hovered link
+
+Scrub parameter values
+
 Manipulations of the apply chain
   Reorder links
 
@@ -11,6 +17,12 @@ Default values for functions
 Drag parameters onto slots
 
 
-Selected link
-  Color things better
-  Show/manipulate its parameters
+
+
+
+
+Long term:
+  Sweep, time, etc. in addition to x for parameters
+  Function abstraction
+  Higher-dimensional
+  Different types of vis (i.e. color map = shader)

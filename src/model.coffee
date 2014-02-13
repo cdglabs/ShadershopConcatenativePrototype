@@ -71,7 +71,9 @@ class Editor
     @params = []
     @chains = []
     @xParam = null
+
     @selectedLink = null
+    @hoveredParam = null
 
 
   # ===========================================================================
@@ -100,11 +102,11 @@ class Editor
     return env
 
   draw: (graph) ->
-    for param in @manipulableParams()
+    for param in @visibleParams()
       graphFn = (xValue) =>
         env = @makeEnv(xValue)
         param.evaluate(env)
-      graph.drawGraph(graphFn, "green")
+      graph.drawGraph(graphFn, {color: "green"})
 
     for chain in @chains
       apply = chain.startParam
@@ -113,23 +115,29 @@ class Editor
         apply = new Apply(link.fn, params)
         if link.visible
           if link == @selectedLink
-            color = "#009"
+            styleOpts = {color: "#009"}
           else
-            color = "rgba(0,0,0,0.2)"
+            styleOpts = {color: "#ddd"}
           graphFn = (xValue) =>
             env = @makeEnv(xValue)
             apply.evaluate(env)
-          graph.drawGraph(graphFn, color)
+          graph.drawGraph(graphFn, styleOpts)
 
 
   # ===========================================================================
   # Direct Manipulating
   # ===========================================================================
 
-  manipulableParams: ->
+  visibleParams: ->
     result = @params
     if @selectedLink
       result = _.union result, @selectedLink.additionalParams
+    if @hoveredParam
+      result = _.union result, @hoveredParam
+    return result
+
+  manipulableParams: ->
+    result = @visibleParams()
     result = _.reject result, (param) => param == @xParam
     return result
 
