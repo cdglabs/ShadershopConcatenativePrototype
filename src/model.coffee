@@ -57,6 +57,7 @@ class Chain
 class Link
   constructor: (@fn, @additionalParams) ->
     @visible = true
+    @id = _.uniqueId("l")
 
 
 
@@ -160,7 +161,7 @@ do ->
 
   abs = chain.appendLink(fnsToAdd[4])
   plu = chain.appendLink(fnsToAdd[0])
-  plu.additionalParams[0] = b
+  # plu.additionalParams[0] = b
   sin = chain.appendLink(fnsToAdd[5])
 
 

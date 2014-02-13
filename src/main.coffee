@@ -30,6 +30,8 @@ refresh = ->
 
 
 pointerdown = (e) ->
+  e.preventDefault()
+  document.activeElement.blur()
   editor.pointerdown(e, graph)
 
 

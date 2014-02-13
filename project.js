@@ -281,6 +281,8 @@ Need to see how close a point is to an object, for hit detection
   };
 
   pointerdown = function(e) {
+    e.preventDefault();
+    document.activeElement.blur();
     return editor.pointerdown(e, graph);
   };
 
@@ -393,6 +395,7 @@ Need to see how close a point is to an object, for hit detection
       this.fn = fn;
       this.additionalParams = additionalParams;
       this.visible = true;
+      this.id = _.uniqueId("l");
     }
 
     return Link;
@@ -518,7 +521,6 @@ Need to see how close a point is to an object, for hit detection
     chain = editor.addChain(a);
     abs = chain.appendLink(fnsToAdd[4]);
     plu = chain.appendLink(fnsToAdd[0]);
-    plu.additionalParams[0] = b;
     return sin = chain.appendLink(fnsToAdd[5]);
   })();
 
@@ -579,13 +581,14 @@ Need to see how close a point is to an object, for hit detection
   };
 
   refreshView = (function() {
-    var ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, d, dif;
+    var ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, d, truncate;
     d = React.DOM;
-    dif = function(cond, fn) {
-      if (cond) {
-        return fn();
-      } else {
-        return null;
+    truncate = function(value) {
+      var decimalPlace, s;
+      s = "" + value;
+      decimalPlace = s.indexOf(".");
+      if (decimalPlace) {
+        return s.substr(0, decimalPlace + 4);
       }
     };
     ParamValueView = React.createClass({
@@ -594,15 +597,28 @@ Need to see how close a point is to an object, for hit detection
         param = this.props.param;
         return d.span({
           className: "paramValue"
-        }, param.value);
+        }, truncate(param.value));
       }
     });
     ParamTitleView = React.createClass({
+      handleInput: function() {
+        var el, newTitle;
+        el = this.refs.span.getDOMNode();
+        newTitle = el.textContent;
+        if (el.innerHTML !== newTitle) {
+          el.innerHTML = newTitle;
+        }
+        this.props.param.title = newTitle;
+        return refresh();
+      },
       render: function() {
         var param;
         param = this.props.param;
         return d.span({
-          className: "paramTitle"
+          className: "paramTitle",
+          contentEditable: "true",
+          onInput: this.handleInput,
+          ref: "span"
         }, param.title);
       }
     });
@@ -637,7 +653,8 @@ Need to see how close a point is to an object, for hit detection
           className: "links"
         }, chain.links.map(function(link) {
           return LinkView({
-            link: link
+            link: link,
+            key: link.id
           });
         })));
       }
@@ -648,7 +665,24 @@ Need to see how close a point is to an object, for hit detection
         link = this.props.link;
         return d.div({
           className: "link row"
-        }, link.fn.title);
+        }, d.div({
+          className: "additionalParams",
+          style: {
+            float: "right"
+          }
+        }, link.additionalParams.map(function(param, i) {
+          if (_.contains(editor.params, param)) {
+            return ParamTitleView({
+              param: param,
+              key: i
+            });
+          } else {
+            return ParamValueView({
+              param: param,
+              key: i
+            });
+          }
+        })), link.fn.title);
       }
     });
     EditorView = React.createClass({
@@ -659,7 +693,8 @@ Need to see how close a point is to an object, for hit detection
           className: "heading row"
         }, "Parameters"), editor.params.map(function(param) {
           return ParamView({
-            param: param
+            param: param,
+            key: param.id
           });
         }), d.div({
           className: "heading row"
