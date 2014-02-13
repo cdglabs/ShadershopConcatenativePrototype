@@ -13,6 +13,7 @@ html, body {
   height: 100%;
   overflow: hidden;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: 16px;
   color: #333;
 }
 [contenteditable="true"]:active, [contenteditable="true"]:focus{
@@ -48,15 +49,25 @@ canvas {
   padding: 6px;
   border-bottom: 1px solid #ccc;
 }
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 
+.param {
+}
 .paramTitle, .paramValue {
-  padding: 4px;
-  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.8em;
+  display: inline-block;
 }
 .paramTitle {
+  border-radius: 4px 0px 0px 4px;
   background-color: #ccc;
 }
 .paramValue {
+  border-radius: 0px 4px 4px 0px;
   background-color: #eee;
 }
 

@@ -1,7 +1,7 @@
 class Param
   constructor: (@value = 0) ->
     @id = _.uniqueId("p")
-    @title = @id
+    @title = ""
 
   evaluate: (env) ->
     env.lookup(this) ? @value
@@ -115,7 +115,7 @@ class Editor
           if link == @selectedLink
             color = "#009"
           else
-            color = "rgba(0,0,0,0.4)"
+            color = "rgba(0,0,0,0.2)"
           graphFn = (xValue) =>
             env = @makeEnv(xValue)
             apply.evaluate(env)

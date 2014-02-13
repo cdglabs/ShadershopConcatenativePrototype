@@ -290,7 +290,7 @@ Need to see how close a point is to an object, for hit detection
     function Param(value) {
       this.value = value != null ? value : 0;
       this.id = _.uniqueId("p");
-      this.title = this.id;
+      this.title = "";
     }
 
     Param.prototype.evaluate = function(env) {
@@ -464,7 +464,7 @@ Need to see how close a point is to an object, for hit detection
               if (link === this.selectedLink) {
                 color = "#009";
               } else {
-                color = "rgba(0,0,0,0.4)";
+                color = "rgba(0,0,0,0.2)";
               }
               graphFn = function(xValue) {
                 var env;
@@ -646,18 +646,12 @@ Need to see how close a point is to an object, for hit detection
     });
     ParamView = React.createClass({
       render: function() {
-        var param;
-        param = this.props.param;
         return d.div({
-          className: "param row"
-        }, d.div({
-          style: {
-            float: "right"
-          }
-        }, ParamValueView({
-          param: param
-        })), ParamTitleView({
-          param: param
+          className: "param"
+        }, ParamTitleView({
+          param: this.props.param
+        }), ParamValueView({
+          param: this.props.param
         }));
       }
     });
@@ -681,7 +675,7 @@ Need to see how close a point is to an object, for hit detection
           className: "chain"
         }, d.div({
           className: "startParam row"
-        }, ParamTitleView({
+        }, ParamView({
           param: chain.startParam
         })), d.div({
           className: "links"
@@ -723,17 +717,10 @@ Need to see how close a point is to an object, for hit detection
             float: "right"
           }
         }, link.additionalParams.map(function(param, i) {
-          if (_.contains(editor.params, param)) {
-            return ParamTitleView({
-              param: param,
-              key: i
-            });
-          } else {
-            return ParamValueView({
-              param: param,
-              key: i
-            });
-          }
+          return ParamView({
+            param: param,
+            key: i
+          });
         })), d.div({
           className: "linkTitle"
         }, link.fn.title));
@@ -746,10 +733,12 @@ Need to see how close a point is to an object, for hit detection
         }, d.div({
           className: "heading row"
         }, "Parameters"), editor.params.map(function(param) {
-          return ParamView({
-            param: param,
+          return d.div({
+            className: "row",
             key: param.id
-          });
+          }, ParamView({
+            param: param
+          }));
         }), d.div({
           className: "heading row"
         }, "Chain"), editor.chains.map(function(chain) {

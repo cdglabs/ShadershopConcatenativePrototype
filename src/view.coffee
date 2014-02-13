@@ -37,11 +37,9 @@ refreshView = do ->
 
   ParamView = React.createClass
     render: ->
-      param = @props.param
-      d.div {className: "param row"},
-        d.div {style: {float: "right"}},
-          ParamValueView {param: param}
-        ParamTitleView {param: param}
+      d.div {className: "param"},
+        ParamTitleView {param: @props.param}
+        ParamValueView {param: @props.param}
 
 
   ChainView = React.createClass
@@ -58,7 +56,7 @@ refreshView = do ->
       chain = @props.chain
       d.div {className: "chain"},
         d.div {className: "startParam row"},
-          ParamTitleView {param: chain.startParam}
+          ParamView {param: chain.startParam}
         d.div {className: "links"},
           chain.links.map (link) ->
             LinkView {link: link, key: link.id}
@@ -82,10 +80,7 @@ refreshView = do ->
       d.div {className: classNames, onMouseDown: @handleMouseDown},
         d.div {className: "additionalParams", style: {float: "right"}},
           link.additionalParams.map (param, i) ->
-            if _.contains editor.params, param
-              ParamTitleView {param: param, key: i}
-            else
-              ParamValueView {param: param, key: i}
+            ParamView {param: param, key: i}
         d.div {className: "linkTitle"},
           link.fn.title
 
@@ -94,7 +89,8 @@ refreshView = do ->
       d.div {className: "editor"},
         d.div {className: "heading row"}, "Parameters"
         editor.params.map (param) ->
-          ParamView {param: param, key: param.id}
+          d.div {className: "row", key: param.id},
+            ParamView {param: param}
         d.div {className: "heading row"}, "Chain" # We'll assume just one chain for now
         editor.chains.map (chain) ->
           ChainView {chain: chain}
