@@ -111,11 +111,11 @@ refreshView = do ->
   EditorView = React.createClass
     render: ->
       d.div {className: "editor"},
-        d.div {className: "heading row"}, "Parameters"
-        editor.params.map (param) ->
-          d.div {className: "row", key: param.id},
-            ParamView {param: param}
-        d.div {className: "heading row"}, "Chain" # We'll assume just one chain for now
+        # d.div {className: "heading row"}, "Parameters"
+        # editor.params.map (param) ->
+        #   d.div {className: "row", key: param.id},
+        #     ParamView {param: param}
+        # d.div {className: "heading row"}, "Chain" # We'll assume just one chain for now
         editor.chains.map (chain) ->
           ChainView {chain: chain}
 

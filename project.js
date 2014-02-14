@@ -848,18 +848,7 @@ Need to see how close a point is to an object, for hit detection
       render: function() {
         return d.div({
           className: "editor"
-        }, d.div({
-          className: "heading row"
-        }, "Parameters"), editor.params.map(function(param) {
-          return d.div({
-            className: "row",
-            key: param.id
-          }, ParamView({
-            param: param
-          }));
-        }), d.div({
-          className: "heading row"
-        }, "Chain"), editor.chains.map(function(chain) {
+        }, editor.chains.map(function(chain) {
           return ChainView({
             chain: chain
           });
