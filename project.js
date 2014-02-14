@@ -824,22 +824,24 @@ Need to see how close a point is to an object, for hit detection
           onMouseEnter: this.handleMouseEnter,
           onMouseLeave: this.handleMouseLeave
         }, d.div({
-          className: "additionalParams",
+          className: "tinyGraph",
           style: {
-            float: "right"
+            float: "right",
+            margin: -7
           }
-        }, link.additionalParams.map(function(param, i) {
+        }, d.canvas({
+          ref: "canvas"
+        })), d.span({
+          className: "linkTitle",
+          style: {
+            marginRight: 6
+          }
+        }, link.fn.title), link.additionalParams.map(function(param, i) {
           return ParamView({
             param: param,
             key: i
           });
-        })), d.div({
-          className: "tinyGraph"
-        }, d.canvas({
-          ref: "canvas"
-        })), d.span({
-          className: "linkTitle"
-        }, link.fn.title));
+        }));
       }
     });
     EditorView = React.createClass({

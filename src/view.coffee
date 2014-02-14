@@ -101,13 +101,12 @@ refreshView = do ->
         "hoveredLink": link == editor.hoveredLink
       }
       d.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
-        d.div {className: "additionalParams", style: {float: "right"}},
-          link.additionalParams.map (param, i) ->
-            ParamView {param: param, key: i}
-        d.div {className: "tinyGraph"},
+        d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
           d.canvas {ref: "canvas"}
-        d.span {className: "linkTitle"},
+        d.span {className: "linkTitle", style: {marginRight: 6}},
           link.fn.title
+        link.additionalParams.map (param, i) ->
+          ParamView {param: param, key: i}
 
   EditorView = React.createClass
     render: ->
