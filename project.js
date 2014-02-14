@@ -421,6 +421,21 @@ Need to see how close a point is to an object, for hit detection
       return link;
     };
 
+    Chain.prototype.appendLinkAfter = function(fn, refLink) {
+      var additionalParams, i, link, _i, _ref, _results;
+      additionalParams = (function() {
+        _results = [];
+        for (var _i = 0, _ref = fn.numParams - 1; 0 <= _ref ? _i < _ref : _i > _ref; 0 <= _ref ? _i++ : _i--){ _results.push(_i); }
+        return _results;
+      }).apply(this).map(function() {
+        return new Param();
+      });
+      link = new Link(fn, additionalParams);
+      i = this.links.indexOf(refLink);
+      this.links.splice(i + 1, 0, link);
+      return link;
+    };
+
     return Chain;
 
   })();
@@ -430,6 +445,7 @@ Need to see how close a point is to an object, for hit detection
       this.fn = fn;
       this.additionalParams = additionalParams;
       this.visible = true;
+      this.addLinkVisible = false;
       this.id = _.uniqueId("l");
     }
 
@@ -480,22 +496,17 @@ Need to see how close a point is to an object, for hit detection
     };
 
     Editor.prototype.draw = function(graph) {
-      var chain, link, param, _i, _j, _len, _len1, _ref, _ref1, _results;
-      _ref = this.visibleParams();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        param = _ref[_i];
-        this.drawParam(graph, param);
-      }
-      _ref1 = this.chains;
+      var chain, link, _i, _len, _ref, _results;
+      _ref = this.chains;
       _results = [];
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        chain = _ref1[_j];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        chain = _ref[_i];
         _results.push((function() {
-          var _k, _len2, _ref2, _results1;
-          _ref2 = chain.links;
+          var _j, _len1, _ref1, _results1;
+          _ref1 = chain.links;
           _results1 = [];
-          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-            link = _ref2[_k];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            link = _ref1[_j];
             _results1.push(this.drawChainLink(graph, chain, link));
           }
           return _results1;
@@ -683,7 +694,7 @@ Need to see how close a point is to an object, for hit detection
   };
 
   refreshView = (function() {
-    var ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, cx, d, truncate;
+    var AddLinkView, ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, cx, d, truncate;
     d = React.DOM;
     cx = React.addons.classSet;
     truncate = function(value) {
@@ -771,8 +782,7 @@ Need to see how close a point is to an object, for hit detection
         return refresh();
       },
       render: function() {
-        var chain,
-          _this = this;
+        var chain;
         chain = this.props.chain;
         return d.div({
           className: "chain"
@@ -784,28 +794,46 @@ Need to see how close a point is to an object, for hit detection
             chain: chain,
             key: link.id
           });
-        })), d.div({
-          className: "addFns row"
-        }, d.select({
-          onChange: this.handleChange
-        }, d.option({
-          value: "select"
-        }, "Add..."), fnsToAdd.map(function(fn) {
-          return d.option({}, fn.title);
-        }))));
+        })));
+      }
+    });
+    AddLinkView = React.createClass({
+      handleClickOn: function(fn) {
+        var _this = this;
+        return function() {
+          var chain, link, _ref2;
+          _ref2 = _this.props, chain = _ref2.chain, link = _ref2.link;
+          chain.appendLinkAfter(fn, link);
+          link.addLinkVisible = false;
+          return refresh();
+        };
+      },
+      render: function() {
+        var _this = this;
+        return d.div({
+          className: "addLink"
+        }, fnsToAdd.map(function(fn) {
+          return d.div({
+            className: "row",
+            onClick: _this.handleClickOn(fn)
+          }, fn.title);
+        }));
       }
     });
     LinkView = React.createClass({
-      handleMouseDown: function() {
-        editor.selectedLink = this.props.link;
-        return refresh();
-      },
+      handleMouseDown: function() {},
       handleMouseEnter: function() {
         editor.hoveredLink = this.props.link;
         return refresh();
       },
       handleMouseLeave: function() {
         editor.hoveredLink = null;
+        return refresh();
+      },
+      toggleAddLink: function() {
+        var chain, link, _ref2;
+        _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
+        link.addLinkVisible = !link.addLinkVisible;
         return refresh();
       },
       componentDidMount: function() {
@@ -819,15 +847,15 @@ Need to see how close a point is to an object, for hit detection
         return refreshTinyGraphs();
       },
       render: function() {
-        var classNames, link;
-        link = this.props.link;
+        var chain, classNames, link, _ref2;
+        _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
         classNames = cx({
           "link": true,
           "row": true,
           "selectedLink": link === editor.selectedLink,
           "hoveredLink": link === editor.hoveredLink
         });
-        return d.div({
+        return d.div({}, d.div({
           className: classNames,
           onMouseDown: this.handleMouseDown,
           onMouseEnter: this.handleMouseEnter,
@@ -852,7 +880,13 @@ Need to see how close a point is to an object, for hit detection
             param: param,
             key: i
           });
-        })));
+        })), d.button({
+          className: "addLinkButton",
+          onClick: this.toggleAddLink
+        }, "+")), link.addLinkVisible ? AddLinkView({
+          chain: chain,
+          link: link
+        }) : void 0);
       }
     });
     EditorView = React.createClass({

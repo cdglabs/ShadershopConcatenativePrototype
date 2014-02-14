@@ -34,7 +34,7 @@ canvas {
 
 #manager {
   position: absolute;
-  bottom: 30px;
+  top: 30px;
   right: 30px;
   width: 240px;
   background: white;
@@ -54,6 +54,33 @@ canvas {
   display: table;
   clear: both;
 }
+
+.link {
+  position: relative;
+}
+.addLinkButton {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  margin-left: -8px;
+  width: 16px;
+  height: 16px;
+  padding: 0px;
+  z-index: 10;
+  opacity: 0;
+}
+.link:hover .addLinkButton {
+  opacity: 1;
+}
+
+.addLink {
+  background-color: #eee;
+  box-shadow: 0px 1px 5px rgba(0,0,0,0.5) inset;
+  overflow: auto;
+  height: 200px;
+}
+
+
 
 .param {
   display: inline-block;

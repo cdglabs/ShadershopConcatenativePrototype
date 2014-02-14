@@ -55,9 +55,17 @@ class Chain
     @links.push(link)
     return link
 
+  appendLinkAfter: (fn, refLink) ->
+    additionalParams = [0...fn.numParams-1].map -> new Param()
+    link = new Link(fn, additionalParams)
+    i = @links.indexOf(refLink)
+    @links.splice(i+1, 0, link)
+    return link
+
 class Link
   constructor: (@fn, @additionalParams) ->
     @visible = true
+    @addLinkVisible = false
     @id = _.uniqueId("l")
 
 class StartLink
@@ -107,8 +115,8 @@ class Editor
     return env
 
   draw: (graph) ->
-    for param in @visibleParams()
-      @drawParam(graph, param)
+    # for param in @visibleParams()
+    #   @drawParam(graph, param)
 
     for chain in @chains
       for link in chain.links

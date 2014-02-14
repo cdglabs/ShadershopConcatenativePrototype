@@ -68,21 +68,38 @@ refreshView = do ->
         d.div {className: "links"},
           chain.links.map (link) ->
             LinkView {link: link, chain: chain, key: link.id}
-        d.div {className: "addFns row"},
-          d.select {onChange: @handleChange},
-            d.option {value: "select"}, "Add..."
-            fnsToAdd.map (fn) =>
-              d.option {}, fn.title
+        # d.div {className: "addFns row"},
+        #   d.select {onChange: @handleChange},
+        #     d.option {value: "select"}, "Add..."
+        #     fnsToAdd.map (fn) =>
+        #       d.option {}, fn.title
+
+  AddLinkView = React.createClass
+    handleClickOn: (fn) ->
+      =>
+        {chain, link} = @props
+        chain.appendLinkAfter(fn, link)
+        link.addLinkVisible = false
+        refresh()
+    render: ->
+      d.div {className: "addLink"},
+        fnsToAdd.map (fn) =>
+          d.div {className: "row", onClick: @handleClickOn(fn)},
+            fn.title
 
   LinkView = React.createClass
     handleMouseDown: ->
-      editor.selectedLink = @props.link
-      refresh()
+      # editor.selectedLink = @props.link
+      # refresh()
     handleMouseEnter: ->
       editor.hoveredLink = @props.link
       refresh()
     handleMouseLeave: ->
       editor.hoveredLink = null
+      refresh()
+    toggleAddLink: ->
+      {chain, link} = @props
+      link.addLinkVisible = !link.addLinkVisible
       refresh()
     componentDidMount: ->
       {chain, link} = @props
@@ -91,24 +108,28 @@ refreshView = do ->
       refreshTinyGraphs()
 
     render: ->
-      link = @props.link
+      {chain, link} = @props
       classNames = cx {
         "link": true
         "row": true
         "selectedLink": link == editor.selectedLink
         "hoveredLink": link == editor.hoveredLink
       }
-      d.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
-        d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
-          d.canvas {ref: "canvas"}
-        if link instanceof StartLink
-          ParamView {param: link.startParam}
-        else
-          d.span {},
-            d.span {className: "linkTitle", style: {marginRight: 6}},
-              link.fn.title
-            link.additionalParams.map (param, i) ->
-              ParamView {param: param, key: i}
+      d.div {},
+        d.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
+          d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
+            d.canvas {ref: "canvas"}
+          if link instanceof StartLink
+            ParamView {param: link.startParam}
+          else
+            d.span {},
+              d.span {className: "linkTitle", style: {marginRight: 6}},
+                link.fn.title
+              link.additionalParams.map (param, i) ->
+                ParamView {param: param, key: i}
+          d.button {className: "addLinkButton", onClick: @toggleAddLink}, "+"
+        if link.addLinkVisible
+          AddLinkView {chain, link}
 
   EditorView = React.createClass
     render: ->
