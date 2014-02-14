@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, capturePointer, compose, config, drawLine, editor, fnsToAdd, graph, lerp, pointerdown, refresh, refreshView, resize, ticks, _base, _ref, _ref1;
+  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, capturePointer, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerdown, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, _base, _ref, _ref1;
 
   config = {
     minGridSpacing: 70,
@@ -232,7 +232,7 @@ Need to see how close a point is to an object, for hit detection
       this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
       this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
       this.ctx.beginPath();
-      resolution = 0.25;
+      resolution = 1;
       for (i = _i = 0, _ref3 = this.width() / resolution; 0 <= _ref3 ? _i <= _ref3 : _i >= _ref3; i = 0 <= _ref3 ? ++_i : --_i) {
         cx = i * resolution;
         x = lerp(cx, cxMin, cxMax, this.xMin, this.xMax);
@@ -248,12 +248,12 @@ Need to see how close a point is to an object, for hit detection
 
   })();
 
-  graph = null;
+  mainGraph = null;
 
   window.init = function() {
     var canvas;
     canvas = document.querySelector("#c");
-    graph = new Graph(canvas, -10, 10, -10, 10);
+    mainGraph = new Graph(canvas, -10, 10, -10, 10);
     window.addEventListener("resize", resize);
     canvas.addEventListener("pointerdown", pointerdown);
     return resize();
@@ -269,16 +269,55 @@ Need to see how close a point is to an object, for hit detection
   };
 
   refresh = function() {
-    graph.clear();
-    graph.drawGrid();
-    editor.draw(graph);
-    return refreshView();
+    refreshView();
+    refreshTinyGraphs();
+    mainGraph.clear();
+    mainGraph.drawGrid();
+    return editor.draw(mainGraph);
   };
+
+  refreshTinyGraphs = function() {
+    var canvas, drawData, graph, rect, _i, _len, _ref, _results;
+    _ref = document.querySelectorAll("canvas");
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      canvas = _ref[_i];
+      if (!(drawData = canvas.drawData)) {
+        continue;
+      }
+      rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
+      graph.clear();
+      if ((drawData.chain != null) && (drawData.link != null)) {
+        _results.push(editor.drawChainLink(graph, drawData.chain, drawData.link));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  refreshOnNextTick = (function() {
+    var willRefreshOnNextTick;
+    willRefreshOnNextTick = false;
+    return function() {
+      if (willRefreshOnNextTick) {
+        return;
+      }
+      willRefreshOnNextTick;
+      return setTimeout(function() {
+        willRefreshOnNextTick = false;
+        return refresh();
+      }, 1);
+    };
+  })();
 
   pointerdown = function(e) {
     e.preventDefault();
     document.activeElement.blur();
-    return editor.pointerdown(e, graph);
+    return editor.pointerdown(e, mainGraph);
   };
 
   Param = (function() {
@@ -402,6 +441,7 @@ Need to see how close a point is to an object, for hit detection
       this.params = [];
       this.chains = [];
       this.xParam = null;
+      this.hoveredLink = null;
       this.selectedLink = null;
       this.hoveredParam = null;
     }
@@ -430,58 +470,82 @@ Need to see how close a point is to an object, for hit detection
     };
 
     Editor.prototype.draw = function(graph) {
-      var apply, chain, graphFn, link, param, params, styleOpts, _i, _j, _len, _len1, _ref, _ref1, _results,
-        _this = this;
+      var chain, link, param, _i, _j, _len, _len1, _ref, _ref1, _results;
       _ref = this.visibleParams();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         param = _ref[_i];
-        graphFn = function(xValue) {
-          var env;
-          env = _this.makeEnv(xValue);
-          return param.evaluate(env);
-        };
-        graph.drawGraph(graphFn, {
-          color: "green"
-        });
+        this.drawParam(graph, param);
       }
       _ref1 = this.chains;
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         chain = _ref1[_j];
-        apply = chain.startParam;
         _results.push((function() {
-          var _k, _len2, _ref2, _results1,
-            _this = this;
+          var _k, _len2, _ref2, _results1;
           _ref2 = chain.links;
           _results1 = [];
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
             link = _ref2[_k];
-            params = [apply].concat(link.additionalParams);
-            apply = new Apply(link.fn, params);
-            if (link.visible) {
-              if (link === this.selectedLink) {
-                styleOpts = {
-                  color: "#009"
-                };
-              } else {
-                styleOpts = {
-                  color: "#ddd"
-                };
-              }
-              graphFn = function(xValue) {
-                var env;
-                env = _this.makeEnv(xValue);
-                return apply.evaluate(env);
-              };
-              _results1.push(graph.drawGraph(graphFn, styleOpts));
-            } else {
-              _results1.push(void 0);
-            }
+            _results1.push(this.drawChainLink(graph, chain, link));
           }
           return _results1;
         }).call(this));
       }
       return _results;
+    };
+
+    Editor.prototype.drawParam = function(graph, param) {
+      var graphFn,
+        _this = this;
+      graphFn = function(xValue) {
+        var env;
+        env = _this.makeEnv(xValue);
+        return param.evaluate(env);
+      };
+      return graph.drawGraph(graphFn, {
+        color: "green"
+      });
+    };
+
+    Editor.prototype.drawChainLink = function(graph, chain, link) {
+      var apply, graphFn, styleOpts,
+        _this = this;
+      apply = this.applyForChainLink(chain, link);
+      if (link === this.selectedLink) {
+        styleOpts = {
+          color: "#009"
+        };
+      } else if (link === this.hoveredLink) {
+        styleOpts = {
+          color: "#bbf"
+        };
+      } else {
+        styleOpts = {
+          color: "#000",
+          opacity: 0.2
+        };
+      }
+      graphFn = function(xValue) {
+        var env;
+        env = _this.makeEnv(xValue);
+        return apply.evaluate(env);
+      };
+      return graph.drawGraph(graphFn, styleOpts);
+    };
+
+    Editor.prototype.applyForChainLink = function(chain, link) {
+      var apply, l, params, _i, _len, _ref;
+      apply = chain.startParam;
+      _ref = chain.links;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        l = _ref[_i];
+        params = [apply].concat(l.additionalParams);
+        apply = new Apply(l.fn, params);
+        if (l === link) {
+          break;
+        }
+      }
+      return apply;
     };
 
     Editor.prototype.visibleParams = function() {
@@ -708,6 +772,7 @@ Need to see how close a point is to an object, for hit detection
         }, chain.links.map(function(link) {
           return LinkView({
             link: link,
+            chain: chain,
             key: link.id
           });
         })), d.div({
@@ -726,17 +791,38 @@ Need to see how close a point is to an object, for hit detection
         editor.selectedLink = this.props.link;
         return refresh();
       },
+      handleMouseEnter: function() {
+        editor.hoveredLink = this.props.link;
+        return refresh();
+      },
+      handleMouseLeave: function() {
+        editor.hoveredLink = null;
+        return refresh();
+      },
+      componentDidMount: function() {
+        var canvasEl, chain, link, _ref2;
+        _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
+        canvasEl = this.refs.canvas.getDOMNode();
+        canvasEl.drawData = {
+          chain: chain,
+          link: link
+        };
+        return refreshTinyGraphs();
+      },
       render: function() {
         var classNames, link;
         link = this.props.link;
         classNames = cx({
           "link": true,
           "row": true,
-          "selectedLink": link === editor.selectedLink
+          "selectedLink": link === editor.selectedLink,
+          "hoveredLink": link === editor.hoveredLink
         });
         return d.div({
           className: classNames,
-          onMouseDown: this.handleMouseDown
+          onMouseDown: this.handleMouseDown,
+          onMouseEnter: this.handleMouseEnter,
+          onMouseLeave: this.handleMouseLeave
         }, d.div({
           className: "additionalParams",
           style: {
@@ -748,6 +834,10 @@ Need to see how close a point is to an object, for hit detection
             key: i
           });
         })), d.div({
+          className: "tinyGraph"
+        }, d.canvas({
+          ref: "canvas"
+        })), d.span({
           className: "linkTitle"
         }, link.fn.title));
       }

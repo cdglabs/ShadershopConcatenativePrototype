@@ -69,7 +69,7 @@ refreshView = do ->
           ParamView {param: chain.startParam}
         d.div {className: "links"},
           chain.links.map (link) ->
-            LinkView {link: link, key: link.id}
+            LinkView {link: link, chain: chain, key: link.id}
         d.div {className: "addFns row"},
           d.select {onChange: @handleChange},
             d.option {value: "select"}, "Add..."
@@ -80,18 +80,33 @@ refreshView = do ->
     handleMouseDown: ->
       editor.selectedLink = @props.link
       refresh()
+    handleMouseEnter: ->
+      editor.hoveredLink = @props.link
+      refresh()
+    handleMouseLeave: ->
+      editor.hoveredLink = null
+      refresh()
+    componentDidMount: ->
+      {chain, link} = @props
+      canvasEl = @refs.canvas.getDOMNode()
+      canvasEl.drawData = {chain, link}
+      refreshTinyGraphs()
+
     render: ->
       link = @props.link
       classNames = cx {
         "link": true
         "row": true
         "selectedLink": link == editor.selectedLink
+        "hoveredLink": link == editor.hoveredLink
       }
-      d.div {className: classNames, onMouseDown: @handleMouseDown},
+      d.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
         d.div {className: "additionalParams", style: {float: "right"}},
           link.additionalParams.map (param, i) ->
             ParamView {param: param, key: i}
-        d.div {className: "linkTitle"},
+        d.div {className: "tinyGraph"},
+          d.canvas {ref: "canvas"}
+        d.span {className: "linkTitle"},
           link.fn.title
 
   EditorView = React.createClass

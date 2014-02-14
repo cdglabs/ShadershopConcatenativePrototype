@@ -72,6 +72,7 @@ class Editor
     @chains = []
     @xParam = null
 
+    @hoveredLink = null
     @selectedLink = null
     @hoveredParam = null
 
@@ -103,25 +104,38 @@ class Editor
 
   draw: (graph) ->
     for param in @visibleParams()
-      graphFn = (xValue) =>
-        env = @makeEnv(xValue)
-        param.evaluate(env)
-      graph.drawGraph(graphFn, {color: "green"})
+      @drawParam(graph, param)
 
     for chain in @chains
-      apply = chain.startParam
       for link in chain.links
-        params = [apply].concat(link.additionalParams)
-        apply = new Apply(link.fn, params)
-        if link.visible
-          if link == @selectedLink
-            styleOpts = {color: "#009"}
-          else
-            styleOpts = {color: "#ddd"}
-          graphFn = (xValue) =>
-            env = @makeEnv(xValue)
-            apply.evaluate(env)
-          graph.drawGraph(graphFn, styleOpts)
+        @drawChainLink(graph, chain, link)
+
+  drawParam: (graph, param) ->
+    graphFn = (xValue) =>
+      env = @makeEnv(xValue)
+      param.evaluate(env)
+    graph.drawGraph(graphFn, {color: "green"})
+
+  drawChainLink: (graph, chain, link) ->
+    apply = @applyForChainLink(chain, link)
+    if link == @selectedLink
+      styleOpts = {color: "#009"}
+    else if link == @hoveredLink
+      styleOpts = {color: "#bbf"}
+    else
+      styleOpts = {color: "#000", opacity: 0.2}
+    graphFn = (xValue) =>
+      env = @makeEnv(xValue)
+      apply.evaluate(env)
+    graph.drawGraph(graphFn, styleOpts)
+
+  applyForChainLink: (chain, link) ->
+    apply = chain.startParam
+    for l in chain.links
+      params = [apply].concat(l.additionalParams)
+      apply = new Apply(l.fn, params)
+      break if l == link
+    return apply
 
 
   # ===========================================================================
