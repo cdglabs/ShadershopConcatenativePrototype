@@ -206,7 +206,7 @@ class Graph
 
     @ctx.beginPath()
 
-    resolution = 0.25
+    resolution = 1
     for i in [0..(@width()/resolution)]
       cx = i * resolution
       x = lerp(cx, cxMin, cxMax, @xMin, @xMax)
