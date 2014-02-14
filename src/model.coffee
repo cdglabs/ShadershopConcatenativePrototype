@@ -45,8 +45,9 @@ class Apply
 
 
 class Chain
-  constructor: (@startParam) ->
-    @links = []
+  constructor: (startParam) ->
+    startLink = new StartLink(startParam)
+    @links = [startLink]
 
   appendLink: (fn) ->
     additionalParams = [0...fn.numParams-1].map -> new Param()
@@ -58,6 +59,9 @@ class Link
   constructor: (@fn, @additionalParams) ->
     @visible = true
     @id = _.uniqueId("l")
+
+class StartLink
+  constructor: (@startParam) ->
 
 
 
@@ -130,10 +134,12 @@ class Editor
     graph.drawGraph(graphFn, styleOpts)
 
   applyForChainLink: (chain, link) ->
-    apply = chain.startParam
     for l in chain.links
-      params = [apply].concat(l.additionalParams)
-      apply = new Apply(l.fn, params)
+      if l instanceof StartLink
+        apply = l.startParam
+      else
+        params = [apply].concat(l.additionalParams)
+        apply = new Apply(l.fn, params)
       break if l == link
     return apply
 
@@ -188,7 +194,7 @@ class Editor
 editor = new Editor()
 
 do ->
-  a = editor.addParam()
+  a = new Param()
   editor.xParam = a
 
   # b = editor.addParam()

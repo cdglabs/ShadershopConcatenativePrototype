@@ -65,8 +65,6 @@ refreshView = do ->
     render: ->
       chain = @props.chain
       d.div {className: "chain"},
-        d.div {className: "startParam row"},
-          ParamView {param: chain.startParam}
         d.div {className: "links"},
           chain.links.map (link) ->
             LinkView {link: link, chain: chain, key: link.id}
@@ -103,10 +101,14 @@ refreshView = do ->
       d.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
         d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
           d.canvas {ref: "canvas"}
-        d.span {className: "linkTitle", style: {marginRight: 6}},
-          link.fn.title
-        link.additionalParams.map (param, i) ->
-          ParamView {param: param, key: i}
+        if link instanceof StartLink
+          ParamView {param: link.startParam}
+        else
+          d.span {},
+            d.span {className: "linkTitle", style: {marginRight: 6}},
+              link.fn.title
+            link.additionalParams.map (param, i) ->
+              ParamView {param: param, key: i}
 
   EditorView = React.createClass
     render: ->

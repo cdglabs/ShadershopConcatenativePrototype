@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, capturePointer, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerdown, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, _base, _ref, _ref1;
+  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, StartLink, capturePointer, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerdown, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, _base, _ref, _ref1;
 
   config = {
     minGridSpacing: 70,
@@ -402,8 +402,9 @@ Need to see how close a point is to an object, for hit detection
 
   Chain = (function() {
     function Chain(startParam) {
-      this.startParam = startParam;
-      this.links = [];
+      var startLink;
+      startLink = new StartLink(startParam);
+      this.links = [startLink];
     }
 
     Chain.prototype.appendLink = function(fn) {
@@ -433,6 +434,15 @@ Need to see how close a point is to an object, for hit detection
     }
 
     return Link;
+
+  })();
+
+  StartLink = (function() {
+    function StartLink(startParam) {
+      this.startParam = startParam;
+    }
+
+    return StartLink;
 
   })();
 
@@ -535,12 +545,15 @@ Need to see how close a point is to an object, for hit detection
 
     Editor.prototype.applyForChainLink = function(chain, link) {
       var apply, l, params, _i, _len, _ref;
-      apply = chain.startParam;
       _ref = chain.links;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         l = _ref[_i];
-        params = [apply].concat(l.additionalParams);
-        apply = new Apply(l.fn, params);
+        if (l instanceof StartLink) {
+          apply = l.startParam;
+        } else {
+          params = [apply].concat(l.additionalParams);
+          apply = new Apply(l.fn, params);
+        }
         if (l === link) {
           break;
         }
@@ -608,7 +621,7 @@ Need to see how close a point is to an object, for hit detection
 
   (function() {
     var a, chain;
-    a = editor.addParam();
+    a = new Param();
     editor.xParam = a;
     return chain = editor.addChain(a);
   })();
@@ -764,10 +777,6 @@ Need to see how close a point is to an object, for hit detection
         return d.div({
           className: "chain"
         }, d.div({
-          className: "startParam row"
-        }, ParamView({
-          param: chain.startParam
-        })), d.div({
           className: "links"
         }, chain.links.map(function(link) {
           return LinkView({
@@ -831,7 +840,9 @@ Need to see how close a point is to an object, for hit detection
           }
         }, d.canvas({
           ref: "canvas"
-        })), d.span({
+        })), link instanceof StartLink ? ParamView({
+          param: link.startParam
+        }) : d.span({}, d.span({
           className: "linkTitle",
           style: {
             marginRight: 6
@@ -841,7 +852,7 @@ Need to see how close a point is to an object, for hit detection
             param: param,
             key: i
           });
-        }));
+        })));
       }
     });
     EditorView = React.createClass({
