@@ -67,7 +67,7 @@ refreshView = do ->
     render: ->
       classNames = cx {
         param: true
-        hovered: @props.param == editor.hoveredParam
+        hovered: _.contains editor.hoveredParams, @props.param
       }
       d.div {className: classNames},
         ParamTitleView {param: @props.param}
@@ -115,9 +115,9 @@ refreshView = do ->
     render: ->
       {chain, link} = @props
       classNames = cx {
-        "link": true
-        "row": true
-        # "hoveredLink": link == editor.hoveredLink
+        link: true
+        row: true
+        hovered: _.contains editor.hoveredLinks, link
       }
       d.div {},
         d.div {className: classNames, ref: "row"},

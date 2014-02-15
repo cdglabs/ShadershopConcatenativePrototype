@@ -823,7 +823,7 @@ Need to see how close a point is to an object, for hit detection
         var classNames;
         classNames = cx({
           param: true,
-          hovered: this.props.param === editor.hoveredParam
+          hovered: _.contains(editor.hoveredParams, this.props.param)
         });
         return d.div({
           className: classNames
@@ -897,8 +897,9 @@ Need to see how close a point is to an object, for hit detection
         var chain, classNames, link, _ref2;
         _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
         classNames = cx({
-          "link": true,
-          "row": true
+          link: true,
+          row: true,
+          hovered: _.contains(editor.hoveredLinks, link)
         });
         return d.div({}, d.div({
           className: classNames,

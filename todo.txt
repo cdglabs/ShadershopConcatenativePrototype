@@ -1,10 +1,14 @@
-Figure out how to keep links "hovered" while scrubbing a parameter
-Deal with hover things appearing "under" the mouse
 
-Scrub parameters
+Toggle visible for links and parameters
+
+
 Transclude parameters
 Make tiny graphs for parameters
 
+
+Styling:
+  Cursor for scrubbing parameters
+  Make hover styles cleaner
 
 
 
