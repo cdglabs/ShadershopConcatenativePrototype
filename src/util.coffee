@@ -25,16 +25,3 @@ Element::closest = (selector) ->
     else
       return undefined
 
-
-
-capturePointer = (e, handleMove, handleUp) ->
-  pointerId = e.pointerId
-  move = (e) ->
-    if e.pointerId = pointerId
-      handleMove?(e)
-  up = (e) ->
-    handleUp?(e)
-    window.removeEventListener("pointermove", move)
-    window.removeEventListener("pointerup", up)
-  window.addEventListener("pointermove", move)
-  window.addEventListener("pointerup", up)

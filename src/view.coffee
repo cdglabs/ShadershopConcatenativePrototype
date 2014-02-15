@@ -26,9 +26,22 @@ refreshView = do ->
 
 
   ParamValueView = React.createClass
+    handleMouseDown: (e) ->
+      {param} = @props
+      e.preventDefault()
+      originalY = e.clientY
+      originalValue = param.value
+      pointerManager.capture e,
+        (e) ->
+          dy = e.clientY - originalY
+          multiplier = -(mainGraph.yMax - mainGraph.yMin) / mainGraph.height()
+          param.value = originalValue + dy * multiplier
+          refresh()
+          # console.log "dy", dy * multiplier
+
     render: ->
       param = @props.param
-      d.span {className: "paramValue"},
+      d.span {className: "paramValue", onMouseDown: @handleMouseDown},
         do =>
           if editor.xParam == param
             d.i {}, "x"

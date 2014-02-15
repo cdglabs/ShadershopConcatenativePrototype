@@ -64,7 +64,9 @@ refreshOnNextTick = do ->
 pointerdown = (e) ->
   e.preventDefault()
   document.activeElement.blur()
-  editor.pointerdown(e, mainGraph)
+
+  console.log e
+  # editor.pointerdown(e, mainGraph)
 
 
 

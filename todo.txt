@@ -1,4 +1,5 @@
-Make tiny graphs for links show (lightly) the parameters (including last link)
+Figure out how to keep links "hovered" while scrubbing a parameter
+Deal with hover things appearing "under" the mouse
 
 Scrub parameters
 Transclude parameters

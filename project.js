@@ -9,7 +9,8 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, StartLink, capturePointer, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerdown, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, _base, _ref, _ref1;
+  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, PointerManager, StartLink, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerManager, pointerdown, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, _base, _ref, _ref1,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   config = {
     minGridSpacing: 70,
@@ -317,7 +318,7 @@ Need to see how close a point is to an object, for hit detection
   pointerdown = function(e) {
     e.preventDefault();
     document.activeElement.blur();
-    return editor.pointerdown(e, mainGraph);
+    return console.log(e);
   };
 
   Param = (function() {
@@ -508,18 +509,18 @@ Need to see how close a point is to an object, for hit detection
           });
         }
       }
-      _ref2 = this.hoveredParams;
+      _ref2 = this.hoveredLinks;
       for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        param = _ref2[_k];
-        this.drawParam(graph, param, {
-          color: "green"
-        });
+        link = _ref2[_k];
+        this.drawChainLink(graph, chain, link);
       }
-      _ref3 = this.hoveredLinks;
+      _ref3 = this.hoveredParams;
       _results = [];
       for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-        link = _ref3[_l];
-        _results.push(this.drawChainLink(graph, chain, link));
+        param = _ref3[_l];
+        _results.push(this.drawParam(graph, param, {
+          color: "green"
+        }));
       }
       return _results;
     };
@@ -609,6 +610,64 @@ Need to see how close a point is to an object, for hit detection
     return chain = editor.addChain(a);
   })();
 
+  PointerManager = (function() {
+    function PointerManager() {
+      this.handleUp = __bind(this.handleUp, this);
+      this.handleMove = __bind(this.handleMove, this);
+      this.capturedPointers = {};
+      window.addEventListener("pointermove", this.handleMove);
+      window.addEventListener("pointerup", this.handleUp);
+    }
+
+    PointerManager.prototype.pointerId = function(e) {
+      var _ref;
+      return (_ref = e.pointerId) != null ? _ref : 1;
+    };
+
+    PointerManager.prototype.isPointerCaptured = function(e) {
+      var pointerId;
+      pointerId = this.pointerId(e);
+      return this.capturedPointers[pointerId];
+    };
+
+    PointerManager.prototype.capture = function(e, handleMove, handleUp) {
+      var pointerId;
+      pointerId = this.pointerId(e);
+      return this.capturedPointers[pointerId] = {
+        handleMove: handleMove,
+        handleUp: handleUp
+      };
+    };
+
+    PointerManager.prototype.uncapture = function(e) {
+      var pointerId;
+      pointerId = this.pointerId(e);
+      return delete this.capturedPointers[pointerId];
+    };
+
+    PointerManager.prototype.handleMove = function(e) {
+      var captured;
+      captured = this.isPointerCaptured(e);
+      if (captured) {
+        return typeof captured.handleMove === "function" ? captured.handleMove(e) : void 0;
+      }
+    };
+
+    PointerManager.prototype.handleUp = function(e) {
+      var captured;
+      captured = this.isPointerCaptured(e);
+      if (captured) {
+        this.uncapture(e);
+        return typeof captured.handleUp === "function" ? captured.handleUp(e) : void 0;
+      }
+    };
+
+    return PointerManager;
+
+  })();
+
+  pointerManager = new PointerManager();
+
   lerp = function(x, dMin, dMax, rMin, rMax) {
     var ratio;
     ratio = (x - dMin) / (dMax - dMin);
@@ -646,25 +705,6 @@ Need to see how close a point is to an object, for hit detection
     }
   };
 
-  capturePointer = function(e, handleMove, handleUp) {
-    var move, pointerId, up;
-    pointerId = e.pointerId;
-    move = function(e) {
-      if (e.pointerId = pointerId) {
-        return typeof handleMove === "function" ? handleMove(e) : void 0;
-      }
-    };
-    up = function(e) {
-      if (typeof handleUp === "function") {
-        handleUp(e);
-      }
-      window.removeEventListener("pointermove", move);
-      return window.removeEventListener("pointerup", up);
-    };
-    window.addEventListener("pointermove", move);
-    return window.addEventListener("pointerup", up);
-  };
-
   refreshView = (function() {
     var AddLinkView, ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, cx, d, setAdd, setRemove, truncate;
     d = React.DOM;
@@ -689,12 +729,27 @@ Need to see how close a point is to an object, for hit detection
       }
     };
     ParamValueView = React.createClass({
+      handleMouseDown: function(e) {
+        var originalValue, originalY, param;
+        param = this.props.param;
+        e.preventDefault();
+        originalY = e.clientY;
+        originalValue = param.value;
+        return pointerManager.capture(e, function(e) {
+          var dy, multiplier;
+          dy = e.clientY - originalY;
+          multiplier = -(mainGraph.yMax - mainGraph.yMin) / mainGraph.height();
+          param.value = originalValue + dy * multiplier;
+          return refresh();
+        });
+      },
       render: function() {
         var param,
           _this = this;
         param = this.props.param;
         return d.span({
-          className: "paramValue"
+          className: "paramValue",
+          onMouseDown: this.handleMouseDown
         }, (function() {
           if (editor.xParam === param) {
             return d.i({}, "x");

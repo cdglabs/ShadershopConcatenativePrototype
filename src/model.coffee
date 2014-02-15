@@ -118,11 +118,11 @@ class Editor
       for link in chain.links
         @drawChainLinkResult(graph, chain, link, {color: "#000", opacity: 0.02})
 
-    for param in @hoveredParams
-      @drawParam(graph, param, {color: "green"})
-
     for link in @hoveredLinks
       @drawChainLink(graph, chain, link)
+
+    for param in @hoveredParams
+      @drawParam(graph, param, {color: "green"})
 
   drawParam: (graph, param, styleOpts) ->
     graphFn = (xValue) =>
