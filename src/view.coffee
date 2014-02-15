@@ -10,6 +10,20 @@ refreshView = do ->
     if decimalPlace
       s.substr(0, decimalPlace + 4)
 
+  setAdd = (list, value) ->
+    if list.indexOf(value) == -1
+      list.push(value)
+
+  setRemove = (list, value) ->
+    if (i = list.indexOf(value)) != -1
+      list.splice(i, 1)
+
+
+
+
+
+
+
 
   ParamValueView = React.createClass
     render: ->
@@ -37,10 +51,10 @@ refreshView = do ->
 
   ParamView = React.createClass
     handleMouseEnter: ->
-      editor.hoveredParam = @props.param
+      setAdd(editor.hoveredParams, @props.param)
       refresh()
     handleMouseLeave: ->
-      editor.hoveredParam = null
+      setRemove(editor.hoveredParams, @props.param)
       refresh()
     render: ->
       classNames = cx {
@@ -53,26 +67,12 @@ refreshView = do ->
 
 
   ChainView = React.createClass
-    handleChange: (e) ->
-      i = e.target.selectedIndex
-      e.target.selectedIndex = 0
-      return if i == 0
-
-      fn = fnsToAdd[i-1]
-      @props.chain.appendLink(fn)
-      refresh()
-
     render: ->
       chain = @props.chain
       d.div {className: "chain"},
         d.div {className: "links"},
           chain.links.map (link) ->
             LinkView {link: link, chain: chain, key: link.id}
-        # d.div {className: "addFns row"},
-        #   d.select {onChange: @handleChange},
-        #     d.option {value: "select"}, "Add..."
-        #     fnsToAdd.map (fn) =>
-        #       d.option {}, fn.title
 
   AddLinkView = React.createClass
     handleClickOn: (fn) ->
@@ -92,10 +92,10 @@ refreshView = do ->
       # editor.selectedLink = @props.link
       # refresh()
     handleMouseEnter: ->
-      editor.hoveredLink = @props.link
+      setAdd(editor.hoveredLinks, @props.link)
       refresh()
     handleMouseLeave: ->
-      editor.hoveredLink = null
+      setRemove(editor.hoveredLinks, @props.link)
       refresh()
     toggleAddLink: ->
       {chain, link} = @props
@@ -112,8 +112,7 @@ refreshView = do ->
       classNames = cx {
         "link": true
         "row": true
-        "selectedLink": link == editor.selectedLink
-        "hoveredLink": link == editor.hoveredLink
+        # "hoveredLink": link == editor.hoveredLink
       }
       d.div {},
         d.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},

@@ -43,7 +43,7 @@ refreshTinyGraphs = ->
     graph.clear()
 
     if drawData.chain? and drawData.link?
-      editor.drawChainLink(graph, drawData.chain, drawData.link)
+      editor.drawChainLink(graph, drawData.chain, drawData.link, {})
 
 
 

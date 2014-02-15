@@ -1,3 +1,5 @@
+Make tiny graphs for links show (lightly) the parameters (including last link)
+
 Scrub parameters
 Transclude parameters
 Make tiny graphs for parameters
@@ -8,21 +10,12 @@ Make tiny graphs for parameters
 
 Get drawing order correct
 
-Hovered link
-
-Scrub parameter values
-
 Manipulations of the apply chain
   Reorder links
-
-Make popup-y thing
   Remove links
 
 Default values for functions
   (makes the architecture consistent)
-
-
-Drag parameters onto slots
 
 
 

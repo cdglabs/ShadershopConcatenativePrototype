@@ -84,9 +84,8 @@ class Editor
     @chains = []
     @xParam = null
 
-    @hoveredLink = null
-    @selectedLink = null
-    @hoveredParam = null
+    @hoveredParams = []
+    @hoveredLinks = []
 
 
   # ===========================================================================
@@ -115,31 +114,45 @@ class Editor
     return env
 
   draw: (graph) ->
-    # for param in @visibleParams()
-    #   @drawParam(graph, param)
-
     for chain in @chains
       for link in chain.links
-        @drawChainLink(graph, chain, link)
+        @drawChainLinkResult(graph, chain, link, {color: "#000", opacity: 0.02})
 
-  drawParam: (graph, param) ->
+    for param in @hoveredParams
+      @drawParam(graph, param, {color: "green"})
+
+    for link in @hoveredLinks
+      @drawChainLink(graph, chain, link)
+
+  drawParam: (graph, param, styleOpts) ->
     graphFn = (xValue) =>
       env = @makeEnv(xValue)
       param.evaluate(env)
-    graph.drawGraph(graphFn, {color: "green"})
+    graph.drawGraph(graphFn, styleOpts)
 
-  drawChainLink: (graph, chain, link) ->
+  drawChainLinkResult: (graph, chain, link, styleOpts) ->
     apply = @applyForChainLink(chain, link)
-    if link == @selectedLink
-      styleOpts = {color: "#009"}
-    else if link == @hoveredLink
-      styleOpts = {color: "#bbf"}
-    else
-      styleOpts = {color: "#000", opacity: 0.2}
     graphFn = (xValue) =>
       env = @makeEnv(xValue)
       apply.evaluate(env)
     graph.drawGraph(graphFn, styleOpts)
+
+  drawChainLink: (graph, chain, link) ->
+    apply = @applyForChainLink(chain, link)
+    if apply.params
+      for param in apply.params
+        graphFn = (xValue) =>
+          env = @makeEnv(xValue)
+          param.evaluate(env)
+        styleOpts = {color: "#000", opacity: 0.1}
+        graph.drawGraph(graphFn, styleOpts)
+
+    styleOpts = {color: "#009"}
+    graphFn = (xValue) =>
+      env = @makeEnv(xValue)
+      apply.evaluate(env)
+    graph.drawGraph(graphFn, styleOpts)
+
 
   applyForChainLink: (chain, link) ->
     for l in chain.links
@@ -156,40 +169,27 @@ class Editor
   # Direct Manipulating
   # ===========================================================================
 
-  visibleParams: ->
-    result = @params
-    if @selectedLink
-      result = _.union result, @selectedLink.additionalParams
-    if @hoveredParam
-      result = _.union result, @hoveredParam
-    return result
+  # hitDetect: (e, graph) ->
+  #   params = @manipulableParams()
+  #   paramValues = _.map params, (param) -> param.value
 
-  manipulableParams: ->
-    result = @visibleParams()
-    result = _.reject result, (param) => param == @xParam
-    return result
+  #   foundIndex = graph.hitDetect(e.clientY, paramValues)
 
-  hitDetect: (e, graph) ->
-    params = @manipulableParams()
-    paramValues = _.map params, (param) -> param.value
+  #   if foundIndex?
+  #     return params[foundIndex]
+  #   else
+  #     return null
 
-    foundIndex = graph.hitDetect(e.clientY, paramValues)
+  # pointerdown: (e, graph) ->
+  #   param = @hitDetect(e, graph)
+  #   return unless param
 
-    if foundIndex?
-      return params[foundIndex]
-    else
-      return null
-
-  pointerdown: (e, graph) ->
-    param = @hitDetect(e, graph)
-    return unless param
-
-    setParam = (e) ->
-      [x, y] = graph.getCoords([e.clientX, e.clientY])
-      param.value = y
-      refresh()
-    setParam(e)
-    capturePointer(e, setParam)
+  #   setParam = (e) ->
+  #     [x, y] = graph.getCoords([e.clientX, e.clientY])
+  #     param.value = y
+  #     refresh()
+  #   setParam(e)
+  #   capturePointer(e, setParam)
 
 
 
