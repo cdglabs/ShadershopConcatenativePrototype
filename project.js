@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, PointerManager, StartLink, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerManager, pointerdown, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, _base, _ref, _ref1,
+  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, PointerManager, StartLink, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, updateHover, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   config = {
@@ -256,6 +256,8 @@ Need to see how close a point is to an object, for hit detection
     canvas = document.querySelector("#c");
     mainGraph = new Graph(canvas, -10, 10, -10, 10);
     window.addEventListener("resize", resize);
+    window.addEventListener("pointermove", pointermove);
+    window.addEventListener("pointerup", pointerup);
     canvas.addEventListener("pointerdown", pointerdown);
     return resize();
   };
@@ -319,6 +321,38 @@ Need to see how close a point is to an object, for hit detection
     e.preventDefault();
     document.activeElement.blur();
     return console.log(e);
+  };
+
+  updateHover = function(e) {
+    var el, hoveredLinks, hoveredParams;
+    el = e.target;
+    hoveredLinks = [];
+    hoveredParams = [];
+    while (el.nodeType === Node.ELEMENT_NODE) {
+      if (el.ssLink) {
+        hoveredLinks.push(el.ssLink);
+      }
+      if (el.ssParam) {
+        hoveredParams.push(el.ssParam);
+      }
+      el = el.parentNode;
+    }
+    if (!(_.isEqual(editor.hoveredLinks, hoveredLinks) && _.isEqual(editor.hoveredParams, hoveredParams))) {
+      editor.hoveredLinks = hoveredLinks;
+      editor.hoveredParams = hoveredParams;
+      return refresh();
+    }
+  };
+
+  pointermove = function(e) {
+    if (pointerManager.isPointerCaptured(e)) {
+      return;
+    }
+    return updateHover(e);
+  };
+
+  pointerup = function(e) {
+    return updateHover(e);
   };
 
   Param = (function() {
@@ -782,13 +816,8 @@ Need to see how close a point is to an object, for hit detection
       }
     });
     ParamView = React.createClass({
-      handleMouseEnter: function() {
-        setAdd(editor.hoveredParams, this.props.param);
-        return refresh();
-      },
-      handleMouseLeave: function() {
-        setRemove(editor.hoveredParams, this.props.param);
-        return refresh();
+      componentDidMount: function() {
+        return this.getDOMNode().ssParam = this.props.param;
       },
       render: function() {
         var classNames;
@@ -797,9 +826,7 @@ Need to see how close a point is to an object, for hit detection
           hovered: this.props.param === editor.hoveredParam
         });
         return d.div({
-          className: classNames,
-          onMouseEnter: this.handleMouseEnter,
-          onMouseLeave: this.handleMouseLeave
+          className: classNames
         }, ParamTitleView({
           param: this.props.param
         }), ParamValueView({
@@ -848,15 +875,6 @@ Need to see how close a point is to an object, for hit detection
       }
     });
     LinkView = React.createClass({
-      handleMouseDown: function() {},
-      handleMouseEnter: function() {
-        setAdd(editor.hoveredLinks, this.props.link);
-        return refresh();
-      },
-      handleMouseLeave: function() {
-        setRemove(editor.hoveredLinks, this.props.link);
-        return refresh();
-      },
       toggleAddLink: function() {
         var chain, link, _ref2;
         _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
@@ -864,13 +882,15 @@ Need to see how close a point is to an object, for hit detection
         return refresh();
       },
       componentDidMount: function() {
-        var canvasEl, chain, link, _ref2;
+        var canvasEl, chain, link, rowEl, _ref2;
         _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
         canvasEl = this.refs.canvas.getDOMNode();
         canvasEl.drawData = {
           chain: chain,
           link: link
         };
+        rowEl = this.refs.row.getDOMNode();
+        rowEl.ssLink = link;
         return refreshTinyGraphs();
       },
       render: function() {
@@ -882,9 +902,7 @@ Need to see how close a point is to an object, for hit detection
         });
         return d.div({}, d.div({
           className: classNames,
-          onMouseDown: this.handleMouseDown,
-          onMouseEnter: this.handleMouseEnter,
-          onMouseLeave: this.handleMouseLeave
+          ref: "row"
         }, d.div({
           className: "tinyGraph",
           style: {

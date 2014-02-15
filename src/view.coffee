@@ -37,7 +37,6 @@ refreshView = do ->
           multiplier = -(mainGraph.yMax - mainGraph.yMin) / mainGraph.height()
           param.value = originalValue + dy * multiplier
           refresh()
-          # console.log "dy", dy * multiplier
 
     render: ->
       param = @props.param
@@ -63,18 +62,14 @@ refreshView = do ->
         param.title
 
   ParamView = React.createClass
-    handleMouseEnter: ->
-      setAdd(editor.hoveredParams, @props.param)
-      refresh()
-    handleMouseLeave: ->
-      setRemove(editor.hoveredParams, @props.param)
-      refresh()
+    componentDidMount: ->
+      @getDOMNode().ssParam = @props.param
     render: ->
       classNames = cx {
         param: true
         hovered: @props.param == editor.hoveredParam
       }
-      d.div {className: classNames, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
+      d.div {className: classNames},
         ParamTitleView {param: @props.param}
         ParamValueView {param: @props.param}
 
@@ -101,23 +96,20 @@ refreshView = do ->
             fn.title
 
   LinkView = React.createClass
-    handleMouseDown: ->
-      # editor.selectedLink = @props.link
-      # refresh()
-    handleMouseEnter: ->
-      setAdd(editor.hoveredLinks, @props.link)
-      refresh()
-    handleMouseLeave: ->
-      setRemove(editor.hoveredLinks, @props.link)
-      refresh()
     toggleAddLink: ->
       {chain, link} = @props
       link.addLinkVisible = !link.addLinkVisible
       refresh()
+
     componentDidMount: ->
       {chain, link} = @props
+
       canvasEl = @refs.canvas.getDOMNode()
       canvasEl.drawData = {chain, link}
+
+      rowEl = @refs.row.getDOMNode()
+      rowEl.ssLink = link
+
       refreshTinyGraphs()
 
     render: ->
@@ -128,7 +120,7 @@ refreshView = do ->
         # "hoveredLink": link == editor.hoveredLink
       }
       d.div {},
-        d.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
+        d.div {className: classNames, ref: "row"},
           d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
             d.canvas {ref: "canvas"}
           if link instanceof StartLink
