@@ -1,3 +1,12 @@
+Hacky things
+  transclusion uses a variable on editor
+  editor makes env, want a cleaner separation between editor and graphs
+
+
+
+
+
+
 
 Toggle visible for links and parameters
 

@@ -24,42 +24,10 @@ resize = ->
 
 refresh = ->
   refreshView()
-  refreshTinyGraphs()
 
   mainGraph.clear()
   mainGraph.drawGrid()
   editor.draw(mainGraph)
-
-
-
-
-refreshTinyGraphs = ->
-  for canvas in document.querySelectorAll("canvas")
-    continue unless drawData = canvas.ssDrawData
-
-    rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width
-    canvas.height = rect.height
-
-    graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
-    graph.clear()
-
-    if drawData.chain? and drawData.link?
-      editor.drawChainLink(graph, drawData.chain, drawData.link, {})
-
-
-
-
-refreshOnNextTick = do ->
-  willRefreshOnNextTick = false
-  return ->
-    return if willRefreshOnNextTick
-    willRefreshOnNextTick
-    setTimeout(->
-      willRefreshOnNextTick = false
-      refresh()
-    , 1)
-
 
 
 

@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, Editor, Env, Fn, Graph, Link, Param, PointerManager, StartLink, compose, config, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshOnNextTick, refreshTinyGraphs, refreshView, resize, ticks, updateHover, _base, _ref, _ref1,
+  var Apply, Chain, Editor, Env, Fn, Graph, GraphView, Link, Param, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshView, resize, ticks, updateHover, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   config = {
@@ -249,6 +249,39 @@ Need to see how close a point is to an object, for hit detection
 
   })();
 
+  GraphView = React.createClass({
+    refreshGraph: function() {
+      var canvas, data, graph, graphFn, rect, _i, _len, _ref, _results;
+      canvas = this.getDOMNode();
+      rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
+      graph.clear();
+      _ref = this.props.drawData;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        data = _ref[_i];
+        graphFn = function(xValue) {
+          var env;
+          env = editor.makeEnv(xValue);
+          return data.apply.evaluate(env);
+        };
+        _results.push(graph.drawGraph(graphFn, data.styleOpts));
+      }
+      return _results;
+    },
+    componentDidMount: function() {
+      return this.refreshGraph();
+    },
+    componentDidUpdate: function() {
+      return this.refreshGraph();
+    },
+    render: function() {
+      return d.canvas({});
+    }
+  });
+
   mainGraph = null;
 
   window.init = function() {
@@ -273,49 +306,10 @@ Need to see how close a point is to an object, for hit detection
 
   refresh = function() {
     refreshView();
-    refreshTinyGraphs();
     mainGraph.clear();
     mainGraph.drawGrid();
     return editor.draw(mainGraph);
   };
-
-  refreshTinyGraphs = function() {
-    var canvas, drawData, graph, rect, _i, _len, _ref, _results;
-    _ref = document.querySelectorAll("canvas");
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      canvas = _ref[_i];
-      if (!(drawData = canvas.ssDrawData)) {
-        continue;
-      }
-      rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
-      graph.clear();
-      if ((drawData.chain != null) && (drawData.link != null)) {
-        _results.push(editor.drawChainLink(graph, drawData.chain, drawData.link, {}));
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-  refreshOnNextTick = (function() {
-    var willRefreshOnNextTick;
-    willRefreshOnNextTick = false;
-    return function() {
-      if (willRefreshOnNextTick) {
-        return;
-      }
-      willRefreshOnNextTick;
-      return setTimeout(function() {
-        willRefreshOnNextTick = false;
-        return refresh();
-      }, 1);
-    };
-  })();
 
   pointerdown = function(e) {
     e.preventDefault();
@@ -749,10 +743,12 @@ Need to see how close a point is to an object, for hit detection
     }
   };
 
+  d = React.DOM;
+
+  cx = React.addons.classSet;
+
   refreshView = (function() {
-    var AddLinkView, ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, cx, d, setAdd, setRemove, truncate;
-    d = React.DOM;
-    cx = React.addons.classSet;
+    var AddLinkView, ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, setAdd, setRemove, truncate;
     truncate = function(value) {
       var decimalPlace, s;
       s = "" + value;
@@ -941,16 +937,45 @@ Need to see how close a point is to an object, for hit detection
         return refresh();
       },
       componentDidMount: function() {
-        var canvasEl, chain, link, rowEl, _ref2;
+        var chain, link, rowEl, _ref2;
         _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
-        canvasEl = this.refs.canvas.getDOMNode();
-        canvasEl.ssDrawData = {
-          chain: chain,
-          link: link
-        };
         rowEl = this.refs.row.getDOMNode();
-        rowEl.ssLink = link;
-        return refreshTinyGraphs();
+        return rowEl.ssLink = link;
+      },
+      renderThumbnail: function() {
+        var apply, drawData, param, styleOpts, _i, _len, _ref2;
+        drawData = [];
+        apply = editor.applyForChainLink(this.props.chain, this.props.link);
+        if (apply.params) {
+          _ref2 = apply.params;
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            param = _ref2[_i];
+            if (param instanceof Param && param !== editor.xParam) {
+              styleOpts = {
+                color: "green",
+                opacity: 0.4
+              };
+            } else {
+              styleOpts = {
+                color: "#000",
+                opacity: 0.1
+              };
+            }
+            drawData.push({
+              apply: param,
+              styleOpts: styleOpts
+            });
+          }
+        }
+        drawData.push({
+          apply: apply,
+          styleOpts: {
+            color: "#000"
+          }
+        });
+        return GraphView({
+          drawData: drawData
+        });
       },
       render: function() {
         var chain, classNames, link, _ref2;
@@ -969,9 +994,7 @@ Need to see how close a point is to an object, for hit detection
             float: "right",
             margin: -7
           }
-        }, d.canvas({
-          ref: "canvas"
-        })), link instanceof StartLink ? ParamView({
+        }, this.renderThumbnail()), link instanceof StartLink ? ParamView({
           param: link.startParam,
           replaceSelf: function(p) {
             link.startParam = p;

@@ -1,7 +1,9 @@
+d = React.DOM
+cx = React.addons.classSet
+
 refreshView = do ->
 
-  d = React.DOM
-  cx = React.addons.classSet
+
 
 
   truncate = (value) ->
@@ -151,13 +153,21 @@ refreshView = do ->
     componentDidMount: ->
       {chain, link} = @props
 
-      canvasEl = @refs.canvas.getDOMNode()
-      canvasEl.ssDrawData = {chain, link}
-
       rowEl = @refs.row.getDOMNode()
       rowEl.ssLink = link
 
-      refreshTinyGraphs()
+    renderThumbnail: ->
+      drawData = []
+      apply = editor.applyForChainLink(@props.chain, @props.link)
+      if apply.params
+        for param in apply.params
+          if param instanceof Param and param != editor.xParam
+            styleOpts = {color: "green", opacity: 0.4}
+          else
+            styleOpts = {color: "#000", opacity: 0.1}
+          drawData.push({apply: param, styleOpts})
+      drawData.push({apply, styleOpts: {color: "#000"}})
+      GraphView {drawData}
 
     render: ->
       {chain, link} = @props
@@ -169,7 +179,7 @@ refreshView = do ->
       d.div {},
         d.div {className: classNames, ref: "row"},
           d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
-            d.canvas {ref: "canvas"}
+            @renderThumbnail()
           if link instanceof StartLink
             ParamView {param: link.startParam, replaceSelf: (p) ->
               link.startParam = p
@@ -191,11 +201,6 @@ refreshView = do ->
   EditorView = React.createClass
     render: ->
       d.div {className: "editor"},
-        # d.div {className: "heading row"}, "Parameters"
-        # editor.params.map (param) ->
-        #   d.div {className: "row", key: param.id},
-        #     ParamView {param: param}
-        # d.div {className: "heading row"}, "Chain" # We'll assume just one chain for now
         editor.chains.map (chain) ->
           ChainView {chain: chain}
 
