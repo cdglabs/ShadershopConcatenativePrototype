@@ -12,12 +12,6 @@ Need to see how close a point is to an object, for hit detection
   var Apply, Chain, Editor, Env, Fn, Graph, GraphView, Link, Param, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshView, resize, ticks, updateHover, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  config = {
-    minGridSpacing: 70,
-    hitTolerance: 15,
-    snapTolerance: 5
-  };
-
   ticks = function(spacing, min, max) {
     var first, last, x, _i, _results;
     first = Math.ceil(min / spacing);
@@ -282,6 +276,32 @@ Need to see how close a point is to an object, for hit detection
     }
   });
 
+  config = {
+    minGridSpacing: 70,
+    hitTolerance: 15,
+    snapTolerance: 5,
+    styles: {
+      param: {
+        color: "green",
+        opacity: 0.4
+      },
+      hoveredParam: {
+        color: "green",
+        opacity: 1
+      },
+      apply: {
+        color: "#000",
+        opacity: 0.1
+      },
+      hoveredApply: {
+        color: "#900"
+      },
+      selectedApply: {
+        color: "#000"
+      }
+    }
+  };
+
   mainGraph = null;
 
   window.init = function() {
@@ -532,21 +552,13 @@ Need to see how close a point is to an object, for hit detection
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         chain = _ref[_i];
         link = _.last(chain.links);
-        this.drawChainLinkResult(graph, chain, link, {
-          color: "#000",
-          opacity: 1
-        });
+        this.drawChainLinkResult(graph, chain, link, config.styles.selectedApply);
       }
       if (link = this.hoveredLink) {
-        this.drawChainLink(graph, chain, link, {
-          color: "#900",
-          opacity: 0.5
-        });
+        this.drawChainLink(graph, chain, link);
       }
       if (param = this.hoveredParam) {
-        return this.drawParam(graph, param, {
-          color: "green"
-        });
+        return this.drawParam(graph, param, config.styles.hoveredParam);
       }
     };
 
@@ -587,22 +599,14 @@ Need to see how close a point is to an object, for hit detection
             return param.evaluate(env);
           };
           if (param instanceof Param && param !== this.xParam) {
-            styleOpts = {
-              color: "green",
-              opacity: 0.4
-            };
+            styleOpts = config.styles.param;
           } else {
-            styleOpts = {
-              color: "#000",
-              opacity: 0.1
-            };
+            styleOpts = config.styles.apply;
           }
           graph.drawGraph(graphFn, styleOpts);
         }
       }
-      styleOpts = {
-        color: "#900"
-      };
+      styleOpts = config.styles.hoveredApply;
       graphFn = function(xValue) {
         var env;
         env = _this.makeEnv(xValue);
@@ -945,15 +949,9 @@ Need to see how close a point is to an object, for hit detection
           for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
             param = _ref2[_i];
             if (param instanceof Param && param !== editor.xParam) {
-              styleOpts = {
-                color: "green",
-                opacity: 0.4
-              };
+              styleOpts = config.styles.param;
             } else {
-              styleOpts = {
-                color: "#000",
-                opacity: 0.1
-              };
+              styleOpts = config.styles.apply;
             }
             drawData.push({
               apply: param,
@@ -963,9 +961,7 @@ Need to see how close a point is to an object, for hit detection
         }
         drawData.push({
           apply: apply,
-          styleOpts: {
-            color: "#000"
-          }
+          styleOpts: config.styles.selectedApply
         });
         return GraphView({
           drawData: drawData

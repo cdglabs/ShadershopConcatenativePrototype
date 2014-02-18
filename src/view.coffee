@@ -162,11 +162,11 @@ refreshView = do ->
       if apply.params
         for param in apply.params
           if param instanceof Param and param != editor.xParam
-            styleOpts = {color: "green", opacity: 0.4}
+            styleOpts = config.styles.param
           else
-            styleOpts = {color: "#000", opacity: 0.1}
+            styleOpts = config.styles.apply
           drawData.push({apply: param, styleOpts})
-      drawData.push({apply, styleOpts: {color: "#000"}})
+      drawData.push({apply, styleOpts: config.styles.selectedApply})
       GraphView {drawData}
 
     render: ->

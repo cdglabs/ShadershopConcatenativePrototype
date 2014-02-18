@@ -10,12 +10,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 
-config = {
-  # In pixels:
-  minGridSpacing: 70
-  hitTolerance: 15
-  snapTolerance: 5
-}
+
 
 
 

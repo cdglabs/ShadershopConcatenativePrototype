@@ -38,6 +38,14 @@ class Apply
     paramValues = @params.map (param) ->
       param.evaluate(env)
     @fn.compute(paramValues...)
+  # isEqualTo: (otherApply) ->
+  #   return false unless otherApply instanceof Apply
+  #   return false if @fn != otherApply.fn
+  #   for param, i in @params
+  #     otherParam = otherApply.params[i]
+  #     return false if param instanceof Param and param != otherParam
+  #     return false if !param.isEqualTo(otherParam)
+  #   return true
 
 
 
@@ -118,13 +126,13 @@ class Editor
     # Draw the result for each chain.
     for chain in @chains
       link = _.last(chain.links)
-      @drawChainLinkResult(graph, chain, link, {color: "#000", opacity: 1})
+      @drawChainLinkResult(graph, chain, link, config.styles.selectedApply)
 
     if link = @hoveredLink
-      @drawChainLink(graph, chain, link, {color: "#900", opacity: 0.5})
+      @drawChainLink(graph, chain, link)
 
     if param = @hoveredParam
-      @drawParam(graph, param, {color: "green"})
+      @drawParam(graph, param, config.styles.hoveredParam)
 
   drawParam: (graph, param, styleOpts) ->
     graphFn = (xValue) =>
@@ -147,12 +155,12 @@ class Editor
           env = @makeEnv(xValue)
           param.evaluate(env)
         if param instanceof Param and param != @xParam
-          styleOpts = {color: "green", opacity: 0.4}
+          styleOpts = config.styles.param
         else
-          styleOpts = {color: "#000", opacity: 0.1}
+          styleOpts = config.styles.apply
         graph.drawGraph(graphFn, styleOpts)
 
-    styleOpts = {color: "#900"}
+    styleOpts = config.styles.hoveredApply
     graphFn = (xValue) =>
       env = @makeEnv(xValue)
       apply.evaluate(env)
