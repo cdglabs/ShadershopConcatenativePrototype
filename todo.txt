@@ -1,17 +1,35 @@
 Hacky things
-  transclusion uses a variable on editor
+  transclusion drag-drop UI uses a variable on editor
+    param replacer prop - should be a param slot?
+  hover implementation
   editor makes env, want a cleaner separation between editor and graphs
+  separate the idea of a parameter (or result) and a view of the parameter
 
 
 
 
 
 
+Exercises
+  Go through a shader and figure out the best visualization for each step
 
-Toggle visible for links and parameters
 
 
-Transclude parameters
+
+Manipulations of the apply chain
+  Reorder links
+  Remove links
+
+
+Preview added links in the add menu (create by reacting)
+
+
+Animate
+  Hovered link
+  Every graph when you add a new link
+
+
+
 Make tiny graphs for parameters
 
 
@@ -25,14 +43,16 @@ Styling:
 
 Get drawing order correct
 
-Manipulations of the apply chain
-  Reorder links
-  Remove links
+
 
 Default values for functions
   (makes the architecture consistent)
 
 
+Snapping to grid for scrubbing
+
+
+Pan and zoom the main graph
 
 
 

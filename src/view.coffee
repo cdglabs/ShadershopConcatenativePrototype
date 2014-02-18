@@ -153,8 +153,8 @@ refreshView = do ->
     componentDidMount: ->
       {chain, link} = @props
 
-      rowEl = @refs.row.getDOMNode()
-      rowEl.ssLink = link
+      thumbEl = @refs.thumb.getDOMNode()
+      thumbEl.ssLink = link
 
     renderThumbnail: ->
       drawData = []
@@ -177,8 +177,8 @@ refreshView = do ->
         hovered: _.contains editor.hoveredLinks, link
       }
       d.div {},
-        d.div {className: classNames, ref: "row"},
-          d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
+        d.div {className: classNames},
+          d.div {className: "tinyGraph", style: {float: "right", margin: -7}, ref: "thumb"},
             @renderThumbnail()
           if link instanceof StartLink
             ParamView {param: link.startParam, replaceSelf: (p) ->

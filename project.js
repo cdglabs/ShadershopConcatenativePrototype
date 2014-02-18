@@ -937,10 +937,10 @@ Need to see how close a point is to an object, for hit detection
         return refresh();
       },
       componentDidMount: function() {
-        var chain, link, rowEl, _ref2;
+        var chain, link, thumbEl, _ref2;
         _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
-        rowEl = this.refs.row.getDOMNode();
-        return rowEl.ssLink = link;
+        thumbEl = this.refs.thumb.getDOMNode();
+        return thumbEl.ssLink = link;
       },
       renderThumbnail: function() {
         var apply, drawData, param, styleOpts, _i, _len, _ref2;
@@ -986,14 +986,14 @@ Need to see how close a point is to an object, for hit detection
           hovered: _.contains(editor.hoveredLinks, link)
         });
         return d.div({}, d.div({
-          className: classNames,
-          ref: "row"
+          className: classNames
         }, d.div({
           className: "tinyGraph",
           style: {
             float: "right",
             margin: -7
-          }
+          },
+          ref: "thumb"
         }, this.renderThumbnail()), link instanceof StartLink ? ParamView({
           param: link.startParam,
           replaceSelf: function(p) {
