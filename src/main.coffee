@@ -44,18 +44,18 @@ pointerdown = (e) ->
 
 updateHover = (e) ->
   el = e.target
-  hoveredLinks = []
-  hoveredParams = []
+  hoveredLink = null
+  hoveredParam = null
   while el.nodeType == Node.ELEMENT_NODE
     if el.ssLink
-      hoveredLinks.push(el.ssLink)
+      hoveredLink = el.ssLink
     if el.ssParam
-      hoveredParams.push(el.ssParam)
+      hoveredParam = el.ssParam
     el = el.parentNode
 
-  unless _.isEqual(editor.hoveredLinks, hoveredLinks) and _.isEqual(editor.hoveredParams, hoveredParams)
-    editor.hoveredLinks = hoveredLinks
-    editor.hoveredParams = hoveredParams
+  unless editor.hoveredLink == hoveredLink && editor.hoveredParam == hoveredParam
+    editor.hoveredLink = hoveredLink
+    editor.hoveredParam = hoveredParam
     refresh()
 
 pointermove = (e) ->

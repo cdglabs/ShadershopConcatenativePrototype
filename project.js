@@ -318,22 +318,22 @@ Need to see how close a point is to an object, for hit detection
   };
 
   updateHover = function(e) {
-    var el, hoveredLinks, hoveredParams;
+    var el, hoveredLink, hoveredParam;
     el = e.target;
-    hoveredLinks = [];
-    hoveredParams = [];
+    hoveredLink = null;
+    hoveredParam = null;
     while (el.nodeType === Node.ELEMENT_NODE) {
       if (el.ssLink) {
-        hoveredLinks.push(el.ssLink);
+        hoveredLink = el.ssLink;
       }
       if (el.ssParam) {
-        hoveredParams.push(el.ssParam);
+        hoveredParam = el.ssParam;
       }
       el = el.parentNode;
     }
-    if (!(_.isEqual(editor.hoveredLinks, hoveredLinks) && _.isEqual(editor.hoveredParams, hoveredParams))) {
-      editor.hoveredLinks = hoveredLinks;
-      editor.hoveredParams = hoveredParams;
+    if (!(editor.hoveredLink === hoveredLink && editor.hoveredParam === hoveredParam)) {
+      editor.hoveredLink = hoveredLink;
+      editor.hoveredParam = hoveredParam;
       return refresh();
     }
   };
@@ -499,8 +499,8 @@ Need to see how close a point is to an object, for hit detection
       this.params = [];
       this.chains = [];
       this.xParam = null;
-      this.hoveredParams = [];
-      this.hoveredLinks = [];
+      this.hoveredParam = null;
+      this.hoveredLink = null;
     }
 
     Editor.prototype.addParam = function() {
@@ -527,7 +527,7 @@ Need to see how close a point is to an object, for hit detection
     };
 
     Editor.prototype.draw = function(graph) {
-      var chain, link, param, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      var chain, link, param, _i, _len, _ref;
       _ref = this.chains;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         chain = _ref[_i];
@@ -537,23 +537,17 @@ Need to see how close a point is to an object, for hit detection
           opacity: 1
         });
       }
-      _ref1 = this.hoveredLinks;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        link = _ref1[_j];
+      if (link = this.hoveredLink) {
         this.drawChainLink(graph, chain, link, {
           color: "#900",
           opacity: 0.5
         });
       }
-      _ref2 = this.hoveredParams;
-      _results = [];
-      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        param = _ref2[_k];
-        _results.push(this.drawParam(graph, param, {
+      if (param = this.hoveredParam) {
+        return this.drawParam(graph, param, {
           color: "green"
-        }));
+        });
       }
-      return _results;
     };
 
     Editor.prototype.drawParam = function(graph, param, styleOpts) {
@@ -877,7 +871,7 @@ Need to see how close a point is to an object, for hit detection
         var classNames;
         classNames = cx({
           param: true,
-          hovered: _.contains(editor.hoveredParams, this.props.param)
+          hovered: editor.hoveredParam === this.props.param
         });
         return d.div({
           className: classNames,
@@ -983,7 +977,7 @@ Need to see how close a point is to an object, for hit detection
         classNames = cx({
           link: true,
           row: true,
-          hovered: _.contains(editor.hoveredLinks, link)
+          hovered: editor.hoveredLink === link
         });
         return d.div({}, d.div({
           className: classNames

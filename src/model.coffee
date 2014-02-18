@@ -85,8 +85,8 @@ class Editor
     @chains = []
     @xParam = null
 
-    @hoveredParams = []
-    @hoveredLinks = []
+    @hoveredParam = null
+    @hoveredLink = null
 
 
   # ===========================================================================
@@ -120,10 +120,10 @@ class Editor
       link = _.last(chain.links)
       @drawChainLinkResult(graph, chain, link, {color: "#000", opacity: 1})
 
-    for link in @hoveredLinks
+    if link = @hoveredLink
       @drawChainLink(graph, chain, link, {color: "#900", opacity: 0.5})
 
-    for param in @hoveredParams
+    if param = @hoveredParam
       @drawParam(graph, param, {color: "green"})
 
   drawParam: (graph, param, styleOpts) ->
