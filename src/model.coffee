@@ -2,9 +2,11 @@ class Param
   constructor: (@value = 0) ->
     @id = _.uniqueId("p")
     @title = ""
+    @axis = "result"
+    @reach = "single"
 
   evaluate: (env) ->
-    env.lookup(this) ? @value
+    env?.lookup(this) ? @value
 
 
 class Env
@@ -133,36 +135,6 @@ class Editor
     return apply
 
 
-  # ===========================================================================
-  # Direct Manipulating
-  # ===========================================================================
-
-  # hitDetect: (e, graph) ->
-  #   params = @manipulableParams()
-  #   paramValues = _.map params, (param) -> param.value
-
-  #   foundIndex = graph.hitDetect(e.clientY, paramValues)
-
-  #   if foundIndex?
-  #     return params[foundIndex]
-  #   else
-  #     return null
-
-  # pointerdown: (e, graph) ->
-  #   param = @hitDetect(e, graph)
-  #   return unless param
-
-  #   setParam = (e) ->
-  #     [x, y] = graph.getCoords([e.clientX, e.clientY])
-  #     param.value = y
-  #     refresh()
-  #   setParam(e)
-  #   capturePointer(e, setParam)
-
-
-
-
-
 
 
 
@@ -173,15 +145,10 @@ do ->
   a = new Param()
   editor.xParam = a
 
-  # b = editor.addParam()
-  # b.value = 2
+  a.axis = "x"
+  a.reach = "span"
 
   chain = editor.addChain(a)
-
-  # abs = chain.appendLink(fnsToAdd[4])
-  # plu = chain.appendLink(fnsToAdd[0])
-  # # plu.additionalParams[0] = b
-  # sin = chain.appendLink(fnsToAdd[5])
 
 
 

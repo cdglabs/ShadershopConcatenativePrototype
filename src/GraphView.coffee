@@ -19,10 +19,13 @@ GraphView = React.createClass
       graph.drawGrid()
 
     for data in @props.drawData
-      graphFn = (xValue) ->
-        env = editor.makeEnv(xValue)
-        data.apply.evaluate(env)
-      graph.drawGraph(graphFn, data.styleOpts)
+      if data.apply instanceof Param && data.apply != editor.xParam
+        graph.drawVerticalLine(data.apply.evaluate(), data.styleOpts)
+      else
+        graphFn = (xValue) ->
+          env = editor.makeEnv(xValue)
+          data.apply.evaluate(env)
+        graph.drawGraph(graphFn, data.styleOpts)
 
   componentDidMount: ->
     @sizeCanvas()

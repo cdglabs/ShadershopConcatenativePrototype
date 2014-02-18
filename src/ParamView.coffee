@@ -43,15 +43,25 @@ ParamValueView = React.createClass
 
     {param} = @props
     e.preventDefault()
+    originalX = e.clientX
     originalY = e.clientY
+    scrubbing = false
     originalValue = param.value
     pointerManager.capture e,
       (e) ->
-        dy = e.clientY - originalY
-        # multiplier = -(mainGraph.yMax - mainGraph.yMin) / mainGraph.height()
-        multiplier = -0.1
-        param.value = originalValue + dy * multiplier
-        refresh()
+        dx = e.clientX - originalX
+        dy = -(e.clientY - originalY)
+        if scrubbing
+          change = if scrubbing == "x" then dx else dy
+          multiplier = 0.1
+          param.value = originalValue + change * multiplier
+          refresh()
+        else
+          if Math.abs(dx) > 4
+            scrubbing = "x"
+          if Math.abs(dy) > 4
+            scrubbing = "y"
+
 
   handleInput: (e) ->
     @props.param.value = +@cleanAndGetValue()

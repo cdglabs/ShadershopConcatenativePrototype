@@ -212,3 +212,51 @@ class Graph
     @ctx.stroke()
     @ctx.restore()
 
+
+  drawHorizontalLine: (y, styleOpts) ->
+    @ctx.save()
+
+    cxMin = 0
+    cxMax = @width()
+    cyMin = @height()
+    cyMax = 0
+
+    cy = lerp(y, @yMin, @yMax, cyMin, cyMax)
+
+    @ctx.lineWidth = styleOpts.lineWidth ? 2
+    @ctx.strokeStyle = styleOpts.color ? "#006"
+    @ctx.globalAlpha = styleOpts.opacity ? 1
+
+    @ctx.beginPath()
+
+    @ctx.moveTo(cxMin, cy)
+    @ctx.lineTo(cxMax, cy)
+
+    @ctx.stroke()
+    @ctx.restore()
+
+
+  drawVerticalLine: (x, styleOpts) ->
+    @ctx.save()
+
+    cxMin = 0
+    cxMax = @width()
+    cyMin = @height()
+    cyMax = 0
+
+    cx = lerp(x, @xMin, @xMax, cxMin, cxMax)
+
+    @ctx.lineWidth = styleOpts.lineWidth ? 2
+    @ctx.strokeStyle = styleOpts.color ? "#006"
+    @ctx.globalAlpha = styleOpts.opacity ? 1
+
+    @ctx.beginPath()
+
+    @ctx.moveTo(cx, cyMin)
+    @ctx.lineTo(cx, cyMax)
+
+    @ctx.stroke()
+    @ctx.restore()
+
+
+

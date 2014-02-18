@@ -239,6 +239,42 @@ Need to see how close a point is to an object, for hit detection
       return this.ctx.restore();
     };
 
+    Graph.prototype.drawHorizontalLine = function(y, styleOpts) {
+      var cxMax, cxMin, cy, cyMax, cyMin, _ref, _ref1, _ref2;
+      this.ctx.save();
+      cxMin = 0;
+      cxMax = this.width();
+      cyMin = this.height();
+      cyMax = 0;
+      cy = lerp(y, this.yMin, this.yMax, cyMin, cyMax);
+      this.ctx.lineWidth = (_ref = styleOpts.lineWidth) != null ? _ref : 2;
+      this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
+      this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
+      this.ctx.beginPath();
+      this.ctx.moveTo(cxMin, cy);
+      this.ctx.lineTo(cxMax, cy);
+      this.ctx.stroke();
+      return this.ctx.restore();
+    };
+
+    Graph.prototype.drawVerticalLine = function(x, styleOpts) {
+      var cx, cxMax, cxMin, cyMax, cyMin, _ref, _ref1, _ref2;
+      this.ctx.save();
+      cxMin = 0;
+      cxMax = this.width();
+      cyMin = this.height();
+      cyMax = 0;
+      cx = lerp(x, this.xMin, this.xMax, cxMin, cxMax);
+      this.ctx.lineWidth = (_ref = styleOpts.lineWidth) != null ? _ref : 2;
+      this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
+      this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
+      this.ctx.beginPath();
+      this.ctx.moveTo(cx, cyMin);
+      this.ctx.lineTo(cx, cyMax);
+      this.ctx.stroke();
+      return this.ctx.restore();
+    };
+
     return Graph;
 
   })();
@@ -267,12 +303,16 @@ Need to see how close a point is to an object, for hit detection
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         data = _ref[_i];
-        graphFn = function(xValue) {
-          var env;
-          env = editor.makeEnv(xValue);
-          return data.apply.evaluate(env);
-        };
-        _results.push(graph.drawGraph(graphFn, data.styleOpts));
+        if (data.apply instanceof Param && data.apply !== editor.xParam) {
+          _results.push(graph.drawVerticalLine(data.apply.evaluate(), data.styleOpts));
+        } else {
+          graphFn = function(xValue) {
+            var env;
+            env = editor.makeEnv(xValue);
+            return data.apply.evaluate(env);
+          };
+          _results.push(graph.drawGraph(graphFn, data.styleOpts));
+        }
       }
       return _results;
     },
@@ -378,21 +418,34 @@ Need to see how close a point is to an object, for hit detection
       return !this.isFocused();
     },
     handleMouseDown: function(e) {
-      var originalValue, originalY, param;
+      var originalValue, originalX, originalY, param, scrubbing;
       if (this.isFocused()) {
         return;
       }
       e.preventDefault();
       param = this.props.param;
       e.preventDefault();
+      originalX = e.clientX;
       originalY = e.clientY;
+      scrubbing = false;
       originalValue = param.value;
       return pointerManager.capture(e, function(e) {
-        var dy, multiplier;
-        dy = e.clientY - originalY;
-        multiplier = -0.1;
-        param.value = originalValue + dy * multiplier;
-        return refresh();
+        var change, dx, dy, multiplier;
+        dx = e.clientX - originalX;
+        dy = -(e.clientY - originalY);
+        if (scrubbing) {
+          change = scrubbing === "x" ? dx : dy;
+          multiplier = 0.1;
+          param.value = originalValue + change * multiplier;
+          return refresh();
+        } else {
+          if (Math.abs(dx) > 4) {
+            scrubbing = "x";
+          }
+          if (Math.abs(dy) > 4) {
+            return scrubbing = "y";
+          }
+        }
       });
     },
     handleInput: function(e) {
@@ -575,11 +628,13 @@ Need to see how close a point is to an object, for hit detection
       this.value = value != null ? value : 0;
       this.id = _.uniqueId("p");
       this.title = "";
+      this.axis = "result";
+      this.reach = "single";
     }
 
     Param.prototype.evaluate = function(env) {
       var _ref;
-      return (_ref = env.lookup(this)) != null ? _ref : this.value;
+      return (_ref = env != null ? env.lookup(this) : void 0) != null ? _ref : this.value;
     };
 
     return Param;
@@ -775,6 +830,8 @@ Need to see how close a point is to an object, for hit detection
     var a, chain;
     a = new Param();
     editor.xParam = a;
+    a.axis = "x";
+    a.reach = "span";
     return chain = editor.addChain(a);
   })();
 
