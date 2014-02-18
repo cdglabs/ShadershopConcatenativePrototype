@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, Editor, Env, Fn, Graph, GraphView, Link, MainGraphView, Param, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, pointerManager, pointermove, pointerup, refresh, refreshView, ticks, updateHover, _base, _ref, _ref1,
+  var Apply, Chain, ContentEditableMixin, Editor, Env, Fn, Graph, GraphView, Link, MainGraphView, Param, ParamTitleView, ParamValueView, ParamView, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, pointerManager, pointermove, pointerup, refresh, refreshView, ticks, truncate, updateHover, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   ticks = function(spacing, min, max) {
@@ -338,6 +338,167 @@ Need to see how close a point is to an object, for hit detection
         drawData: drawData,
         grid: true
       });
+    }
+  });
+
+  truncate = function(value) {
+    var decimalPlace, s;
+    s = "" + value;
+    decimalPlace = s.indexOf(".");
+    if (decimalPlace) {
+      return s.substr(0, decimalPlace + 4);
+    }
+  };
+
+  ContentEditableMixin = {
+    isFocused: function() {
+      return this.getDOMNode() === document.activeElement;
+    },
+    cleanAndGetValue: function() {
+      var el, text;
+      el = this.getDOMNode();
+      text = el.textContent;
+      if (el.innerHTML !== text) {
+        el.innerHTML = text;
+      }
+      return text;
+    },
+    focus: function() {
+      return this.getDOMNode().focus();
+    },
+    focusAndSelect: function() {
+      this.focus();
+      return document.execCommand("selectAll", false, null);
+    }
+  };
+
+  ParamValueView = React.createClass({
+    mixins: [ContentEditableMixin],
+    shouldComponentUpdate: function() {
+      return !this.isFocused();
+    },
+    handleMouseDown: function(e) {
+      var originalValue, originalY, param;
+      if (this.isFocused()) {
+        return;
+      }
+      e.preventDefault();
+      param = this.props.param;
+      e.preventDefault();
+      originalY = e.clientY;
+      originalValue = param.value;
+      return pointerManager.capture(e, function(e) {
+        var dy, multiplier;
+        dy = e.clientY - originalY;
+        multiplier = -0.1;
+        param.value = originalValue + dy * multiplier;
+        return refresh();
+      });
+    },
+    handleInput: function(e) {
+      this.props.param.value = +this.cleanAndGetValue();
+      return refresh();
+    },
+    render: function() {
+      var param,
+        _this = this;
+      param = this.props.param;
+      return d.span({
+        className: "paramValue",
+        contentEditable: true,
+        onMouseDown: this.handleMouseDown,
+        onDoubleClick: this.focusAndSelect,
+        onInput: this.handleInput,
+        onBlur: refresh
+      }, (function() {
+        if (editor.xParam === param) {
+          return d.i({}, "x");
+        } else {
+          return truncate(param.value);
+        }
+      })());
+    }
+  });
+
+  ParamTitleView = React.createClass({
+    mixins: [ContentEditableMixin],
+    handleMouseDown: function(e) {
+      var el, ghost, moveGhost, originalGhostX, originalGhostY, originalX, originalY, rect;
+      if (this.isFocused()) {
+        return;
+      }
+      e.preventDefault();
+      el = this.getDOMNode();
+      el = el.closest(".param");
+      originalX = e.clientX;
+      originalY = e.clientY;
+      rect = el.getBoundingClientRect();
+      originalGhostX = rect.left;
+      originalGhostY = rect.top;
+      ghost = el.cloneNode(true);
+      ghost.style.position = "absolute";
+      ghost.style.opacity = "0.5";
+      ghost.style.pointerEvents = "none";
+      document.body.appendChild(ghost);
+      moveGhost = function(x, y) {
+        ghost.style.top = y + "px";
+        return ghost.style.left = x + "px";
+      };
+      moveGhost(originalGhostX, originalGhostY);
+      editor.movingParam = this.props.param;
+      return pointerManager.capture(e, function(e) {
+        var dx, dy;
+        dx = e.clientX - originalX;
+        dy = e.clientY - originalY;
+        return moveGhost(originalGhostX + dx, originalGhostY + dy);
+      }, function(e) {
+        document.body.removeChild(ghost);
+        return setTimeout((function() {
+          return editor.movingParam = null;
+        }), 1);
+      });
+    },
+    handleInput: function() {
+      this.props.param.title = this.cleanAndGetValue();
+      return refresh();
+    },
+    render: function() {
+      var param;
+      param = this.props.param;
+      return d.span({
+        className: "paramTitle",
+        contentEditable: true,
+        onMouseDown: this.handleMouseDown,
+        onDoubleClick: this.focusAndSelect,
+        onInput: this.handleInput
+      }, param.title);
+    }
+  });
+
+  ParamView = React.createClass({
+    componentDidMount: function() {
+      return this.getDOMNode().ssParam = this.props.param;
+    },
+    handleMouseUp: function(e) {
+      if (!editor.movingParam) {
+        return;
+      }
+      return this.props.replaceSelf(editor.movingParam);
+    },
+    render: function() {
+      var classNames;
+      classNames = cx({
+        param: true,
+        hovered: editor.hoveredParam === this.props.param
+      });
+      return d.div({
+        className: classNames,
+        onMouseUp: this.handleMouseUp
+      }, ParamTitleView({
+        param: this.props.param
+      }), ParamValueView({
+        param: this.props.param
+      }));
     }
   });
 
@@ -717,136 +878,7 @@ Need to see how close a point is to an object, for hit detection
   cx = React.addons.classSet;
 
   refreshView = (function() {
-    var AddLinkView, ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, truncate;
-    truncate = function(value) {
-      var decimalPlace, s;
-      s = "" + value;
-      decimalPlace = s.indexOf(".");
-      if (decimalPlace) {
-        return s.substr(0, decimalPlace + 4);
-      }
-    };
-    ParamValueView = React.createClass({
-      handleMouseDown: function(e) {
-        var originalValue, originalY, param;
-        param = this.props.param;
-        e.preventDefault();
-        originalY = e.clientY;
-        originalValue = param.value;
-        return pointerManager.capture(e, function(e) {
-          var dy, multiplier;
-          dy = e.clientY - originalY;
-          multiplier = -0.1;
-          param.value = originalValue + dy * multiplier;
-          return refresh();
-        });
-      },
-      render: function() {
-        var param,
-          _this = this;
-        param = this.props.param;
-        return d.span({
-          className: "paramValue",
-          onMouseDown: this.handleMouseDown
-        }, (function() {
-          if (editor.xParam === param) {
-            return d.i({}, "x");
-          } else {
-            return truncate(param.value);
-          }
-        })());
-      }
-    });
-    ParamTitleView = React.createClass({
-      handleMouseDown: function(e) {
-        var el, ghost, moveGhost, originalGhostX, originalGhostY, originalX, originalY, rect;
-        el = this.getDOMNode();
-        if (el === document.activeElement) {
-          return;
-        }
-        e.preventDefault();
-        el = el.closest(".param");
-        originalX = e.clientX;
-        originalY = e.clientY;
-        rect = el.getBoundingClientRect();
-        originalGhostX = rect.left;
-        originalGhostY = rect.top;
-        ghost = el.cloneNode(true);
-        ghost.style.position = "absolute";
-        ghost.style.opacity = "0.5";
-        ghost.style.pointerEvents = "none";
-        document.body.appendChild(ghost);
-        moveGhost = function(x, y) {
-          ghost.style.top = y + "px";
-          return ghost.style.left = x + "px";
-        };
-        moveGhost(originalGhostX, originalGhostY);
-        editor.movingParam = this.props.param;
-        return pointerManager.capture(e, function(e) {
-          var dx, dy;
-          dx = e.clientX - originalX;
-          dy = e.clientY - originalY;
-          return moveGhost(originalGhostX + dx, originalGhostY + dy);
-        }, function(e) {
-          document.body.removeChild(ghost);
-          return setTimeout((function() {
-            return editor.movingParam = null;
-          }), 1);
-        });
-      },
-      handleInput: function() {
-        var el, newTitle;
-        el = this.getDOMNode();
-        newTitle = el.textContent;
-        if (el.innerHTML !== newTitle) {
-          el.innerHTML = newTitle;
-        }
-        this.props.param.title = newTitle;
-        return refresh();
-      },
-      handleDoubleClick: function() {
-        var el;
-        el = this.getDOMNode();
-        return el.focus();
-      },
-      render: function() {
-        var param;
-        param = this.props.param;
-        return d.span({
-          className: "paramTitle",
-          contentEditable: true,
-          onMouseDown: this.handleMouseDown,
-          onDoubleClick: this.handleDoubleClick,
-          onInput: this.handleInput
-        }, param.title);
-      }
-    });
-    ParamView = React.createClass({
-      componentDidMount: function() {
-        return this.getDOMNode().ssParam = this.props.param;
-      },
-      handleMouseUp: function(e) {
-        if (!editor.movingParam) {
-          return;
-        }
-        return this.props.replaceSelf(editor.movingParam);
-      },
-      render: function() {
-        var classNames;
-        classNames = cx({
-          param: true,
-          hovered: editor.hoveredParam === this.props.param
-        });
-        return d.div({
-          className: classNames,
-          onMouseUp: this.handleMouseUp
-        }, ParamTitleView({
-          param: this.props.param
-        }), ParamValueView({
-          param: this.props.param
-        }));
-      }
-    });
+    var AddLinkView, ChainView, EditorView, LinkView;
     ChainView = React.createClass({
       render: function() {
         var chain;
