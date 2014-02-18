@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, Editor, Env, Fn, Graph, GraphView, Link, Param, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, mainGraph, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshView, resize, ticks, updateHover, _base, _ref, _ref1,
+  var Apply, Chain, Editor, Env, Fn, Graph, GraphView, Link, MainGraphView, Param, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, pointerManager, pointermove, pointerup, refresh, refreshView, ticks, updateHover, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   ticks = function(spacing, min, max) {
@@ -244,14 +244,25 @@ Need to see how close a point is to an object, for hit detection
   })();
 
   GraphView = React.createClass({
-    refreshGraph: function() {
-      var canvas, data, graph, graphFn, rect, _i, _len, _ref, _results;
+    sizeCanvas: function() {
+      var canvas, rect;
       canvas = this.getDOMNode();
       rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
-      canvas.height = rect.height;
+      return canvas.height = rect.height;
+    },
+    handleResize: function() {
+      this.sizeCanvas();
+      return this.refreshGraph();
+    },
+    refreshGraph: function() {
+      var canvas, data, graph, graphFn, _i, _len, _ref, _results;
+      canvas = this.getDOMNode();
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
       graph.clear();
+      if (this.props.grid) {
+        graph.drawGrid();
+      }
       _ref = this.props.drawData;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -266,13 +277,67 @@ Need to see how close a point is to an object, for hit detection
       return _results;
     },
     componentDidMount: function() {
-      return this.refreshGraph();
+      this.sizeCanvas();
+      this.refreshGraph();
+      return window.addEventListener("resize", this.handleResize);
     },
     componentDidUpdate: function() {
       return this.refreshGraph();
     },
+    componentWillUnmount: function() {
+      return window.removeEventListener("resize", this.handleResize);
+    },
     render: function() {
       return d.canvas({});
+    }
+  });
+
+  MainGraphView = React.createClass({
+    render: function() {
+      var apply, chain, drawData, link, param, styleOpts, _i, _j, _len, _len1, _ref, _ref1;
+      drawData = [];
+      _ref = editor.chains;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        chain = _ref[_i];
+        link = _.last(chain.links);
+        apply = editor.applyForChainLink(chain, link);
+        drawData.push({
+          apply: apply,
+          styleOpts: config.styles.selectedApply
+        });
+      }
+      if (link = editor.hoveredLink) {
+        apply = editor.applyForChainLink(chain, link);
+        if (apply.params) {
+          _ref1 = apply.params;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            param = _ref1[_j];
+            if (param instanceof Param && param !== editor.xParam) {
+              styleOpts = config.styles.param;
+            } else {
+              styleOpts = config.styles.apply;
+            }
+            drawData.push({
+              apply: param,
+              styleOpts: styleOpts
+            });
+          }
+        }
+        drawData.push({
+          apply: apply,
+          styleOpts: config.styles.hoveredApply
+        });
+      }
+      if (param = editor.hoveredParam) {
+        drawData.push({
+          apply: param,
+          styleOpts: config.styles.hoveredParam
+        });
+      }
+      return GraphView({
+        drawData: drawData,
+        grid: true
+      });
     }
   });
 
@@ -302,39 +367,14 @@ Need to see how close a point is to an object, for hit detection
     }
   };
 
-  mainGraph = null;
-
   window.init = function() {
-    var canvas;
-    canvas = document.querySelector("#c");
-    mainGraph = new Graph(canvas, -10, 10, -10, 10);
-    window.addEventListener("resize", resize);
     window.addEventListener("pointermove", pointermove);
     window.addEventListener("pointerup", pointerup);
-    canvas.addEventListener("pointerdown", pointerdown);
-    return resize();
-  };
-
-  resize = function() {
-    var canvas, rect;
-    canvas = document.querySelector("#c");
-    rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
     return refresh();
   };
 
   refresh = function() {
-    refreshView();
-    mainGraph.clear();
-    mainGraph.drawGrid();
-    return editor.draw(mainGraph);
-  };
-
-  pointerdown = function(e) {
-    e.preventDefault();
-    document.activeElement.blur();
-    return console.log(e);
+    return refreshView();
   };
 
   updateHover = function(e) {
@@ -546,75 +586,6 @@ Need to see how close a point is to an object, for hit detection
       return env;
     };
 
-    Editor.prototype.draw = function(graph) {
-      var chain, link, param, _i, _len, _ref;
-      _ref = this.chains;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        chain = _ref[_i];
-        link = _.last(chain.links);
-        this.drawChainLinkResult(graph, chain, link, config.styles.selectedApply);
-      }
-      if (link = this.hoveredLink) {
-        this.drawChainLink(graph, chain, link);
-      }
-      if (param = this.hoveredParam) {
-        return this.drawParam(graph, param, config.styles.hoveredParam);
-      }
-    };
-
-    Editor.prototype.drawParam = function(graph, param, styleOpts) {
-      var graphFn,
-        _this = this;
-      graphFn = function(xValue) {
-        var env;
-        env = _this.makeEnv(xValue);
-        return param.evaluate(env);
-      };
-      return graph.drawGraph(graphFn, styleOpts);
-    };
-
-    Editor.prototype.drawChainLinkResult = function(graph, chain, link, styleOpts) {
-      var apply, graphFn,
-        _this = this;
-      apply = this.applyForChainLink(chain, link);
-      graphFn = function(xValue) {
-        var env;
-        env = _this.makeEnv(xValue);
-        return apply.evaluate(env);
-      };
-      return graph.drawGraph(graphFn, styleOpts);
-    };
-
-    Editor.prototype.drawChainLink = function(graph, chain, link) {
-      var apply, graphFn, param, styleOpts, _i, _len, _ref,
-        _this = this;
-      apply = this.applyForChainLink(chain, link);
-      if (apply.params) {
-        _ref = apply.params;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          param = _ref[_i];
-          graphFn = function(xValue) {
-            var env;
-            env = _this.makeEnv(xValue);
-            return param.evaluate(env);
-          };
-          if (param instanceof Param && param !== this.xParam) {
-            styleOpts = config.styles.param;
-          } else {
-            styleOpts = config.styles.apply;
-          }
-          graph.drawGraph(graphFn, styleOpts);
-        }
-      }
-      styleOpts = config.styles.hoveredApply;
-      graphFn = function(xValue) {
-        var env;
-        env = _this.makeEnv(xValue);
-        return apply.evaluate(env);
-      };
-      return graph.drawGraph(graphFn, styleOpts);
-    };
-
     Editor.prototype.applyForChainLink = function(chain, link) {
       var apply, l, params, _i, _len, _ref;
       _ref = chain.links;
@@ -765,7 +736,7 @@ Need to see how close a point is to an object, for hit detection
         return pointerManager.capture(e, function(e) {
           var dy, multiplier;
           dy = e.clientY - originalY;
-          multiplier = -(mainGraph.yMax - mainGraph.yMin) / mainGraph.height();
+          multiplier = -0.1;
           param.value = originalValue + dy * multiplier;
           return refresh();
         });
@@ -1013,17 +984,21 @@ Need to see how close a point is to an object, for hit detection
       render: function() {
         return d.div({
           className: "editor"
+        }, d.div({
+          className: "main"
+        }, MainGraphView({})), d.div({
+          className: "manager"
         }, editor.chains.map(function(chain) {
           return ChainView({
             chain: chain
           });
-        }));
+        })));
       }
     });
     return function() {
-      var manager;
-      manager = document.querySelector("#manager");
-      return React.renderComponent(EditorView(), manager);
+      var editorEl;
+      editorEl = document.querySelector("#editor");
+      return React.renderComponent(EditorView(), editorEl);
     };
   })();
 

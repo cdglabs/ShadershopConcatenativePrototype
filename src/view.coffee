@@ -25,7 +25,8 @@ refreshView = do ->
       pointerManager.capture e,
         (e) ->
           dy = e.clientY - originalY
-          multiplier = -(mainGraph.yMax - mainGraph.yMin) / mainGraph.height()
+          # multiplier = -(mainGraph.yMax - mainGraph.yMin) / mainGraph.height()
+          multiplier = -0.1
           param.value = originalValue + dy * multiplier
           refresh()
 
@@ -193,9 +194,12 @@ refreshView = do ->
   EditorView = React.createClass
     render: ->
       d.div {className: "editor"},
-        editor.chains.map (chain) ->
-          ChainView {chain: chain}
+        d.div {className: "main"},
+          MainGraphView {}
+        d.div {className: "manager"},
+          editor.chains.map (chain) ->
+            ChainView {chain: chain}
 
   return ->
-    manager = document.querySelector("#manager")
-    React.renderComponent(EditorView(), manager)
+    editorEl = document.querySelector("#editor")
+    React.renderComponent(EditorView(), editorEl)

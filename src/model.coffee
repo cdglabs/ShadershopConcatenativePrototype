@@ -122,51 +122,6 @@ class Editor
       env.set(@xParam, xValue)
     return env
 
-  draw: (graph) ->
-    # Draw the result for each chain.
-    for chain in @chains
-      link = _.last(chain.links)
-      @drawChainLinkResult(graph, chain, link, config.styles.selectedApply)
-
-    if link = @hoveredLink
-      @drawChainLink(graph, chain, link)
-
-    if param = @hoveredParam
-      @drawParam(graph, param, config.styles.hoveredParam)
-
-  drawParam: (graph, param, styleOpts) ->
-    graphFn = (xValue) =>
-      env = @makeEnv(xValue)
-      param.evaluate(env)
-    graph.drawGraph(graphFn, styleOpts)
-
-  drawChainLinkResult: (graph, chain, link, styleOpts) ->
-    apply = @applyForChainLink(chain, link)
-    graphFn = (xValue) =>
-      env = @makeEnv(xValue)
-      apply.evaluate(env)
-    graph.drawGraph(graphFn, styleOpts)
-
-  drawChainLink: (graph, chain, link) ->
-    apply = @applyForChainLink(chain, link)
-    if apply.params
-      for param in apply.params
-        graphFn = (xValue) =>
-          env = @makeEnv(xValue)
-          param.evaluate(env)
-        if param instanceof Param and param != @xParam
-          styleOpts = config.styles.param
-        else
-          styleOpts = config.styles.apply
-        graph.drawGraph(graphFn, styleOpts)
-
-    styleOpts = config.styles.hoveredApply
-    graphFn = (xValue) =>
-      env = @makeEnv(xValue)
-      apply.evaluate(env)
-    graph.drawGraph(graphFn, styleOpts)
-
-
   applyForChainLink: (chain, link) ->
     for l in chain.links
       if l instanceof StartLink

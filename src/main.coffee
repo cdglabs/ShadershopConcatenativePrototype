@@ -1,42 +1,12 @@
 
-
-mainGraph = null
-
-
 window.init = ->
-  canvas = document.querySelector("#c")
-  mainGraph = new Graph(canvas, -10, 10, -10, 10)
-  window.addEventListener("resize", resize)
   window.addEventListener("pointermove", pointermove)
   window.addEventListener("pointerup", pointerup)
-  canvas.addEventListener("pointerdown", pointerdown)
-  resize()
-
-
-resize = ->
-  canvas = document.querySelector("#c")
-  rect = canvas.getBoundingClientRect()
-  canvas.width = rect.width
-  canvas.height = rect.height
-
   refresh()
 
 
 refresh = ->
   refreshView()
-
-  mainGraph.clear()
-  mainGraph.drawGrid()
-  editor.draw(mainGraph)
-
-
-
-pointerdown = (e) ->
-  e.preventDefault()
-  document.activeElement.blur()
-
-  console.log e
-  # editor.pointerdown(e, mainGraph)
 
 
 
@@ -64,10 +34,4 @@ pointermove = (e) ->
 
 pointerup = (e) ->
   updateHover(e)
-
-
-
-
-
-
 
