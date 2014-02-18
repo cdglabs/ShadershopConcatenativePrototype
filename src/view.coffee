@@ -48,28 +48,75 @@ refreshView = do ->
             truncate(param.value)
 
   ParamTitleView = React.createClass
+    handleMouseDown: (e) ->
+      el = @getDOMNode()
+      return if el == document.activeElement # editing text
+
+      e.preventDefault()
+
+      el = el.closest(".param")
+
+      originalX = e.clientX
+      originalY = e.clientY
+
+      rect = el.getBoundingClientRect()
+      originalGhostX = rect.left
+      originalGhostY = rect.top
+
+      ghost = el.cloneNode(true)
+
+      ghost.style.position = "absolute"
+      ghost.style.opacity = "0.5"
+      ghost.style.pointerEvents = "none"
+      document.body.appendChild(ghost)
+
+      moveGhost = (x, y) ->
+        ghost.style.top = y + "px"
+        ghost.style.left = x + "px"
+
+      moveGhost(originalGhostX, originalGhostY)
+
+      editor.movingParam = @props.param
+
+      pointerManager.capture e,
+        (e) ->
+          dx = e.clientX - originalX
+          dy = e.clientY - originalY
+          moveGhost(originalGhostX + dx, originalGhostY + dy)
+        (e) ->
+          document.body.removeChild(ghost)
+          setTimeout((-> editor.movingParam = null), 1)
+
+
     handleInput: ->
-      el = @refs.span.getDOMNode()
+      el = @getDOMNode()
       newTitle = el.textContent
       if el.innerHTML != newTitle
         el.innerHTML = newTitle
 
       @props.param.title = newTitle
       refresh()
+    handleDoubleClick: ->
+      el = @getDOMNode()
+      el.focus()
+
     render: ->
       param = @props.param
-      d.span {className: "paramTitle", contentEditable: "true", onInput: @handleInput, ref: "span"},
+      d.span {className: "paramTitle", contentEditable: true, onMouseDown: @handleMouseDown, onDoubleClick: @handleDoubleClick, onInput: @handleInput},
         param.title
 
   ParamView = React.createClass
     componentDidMount: ->
       @getDOMNode().ssParam = @props.param
+    handleMouseUp: (e) ->
+      return unless editor.movingParam
+      @props.replaceSelf(editor.movingParam)
     render: ->
       classNames = cx {
         param: true
         hovered: _.contains editor.hoveredParams, @props.param
       }
-      d.div {className: classNames},
+      d.div {className: classNames, onMouseUp: @handleMouseUp},
         ParamTitleView {param: @props.param}
         ParamValueView {param: @props.param}
 
@@ -124,13 +171,19 @@ refreshView = do ->
           d.div {className: "tinyGraph", style: {float: "right", margin: -7}},
             d.canvas {ref: "canvas"}
           if link instanceof StartLink
-            ParamView {param: link.startParam}
+            ParamView {param: link.startParam, replaceSelf: (p) ->
+              link.startParam = p
+              refresh()
+            }
           else
             d.span {},
               d.span {className: "linkTitle", style: {marginRight: 6}},
                 link.fn.title
               link.additionalParams.map (param, i) ->
-                ParamView {param: param, key: i}
+                ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
+                  link.additionalParams[i] = p
+                  refresh()
+                }
           d.button {className: "addLinkButton", onClick: @toggleAddLink}, "+"
         if link.addLinkVisible
           AddLinkView {chain, link}

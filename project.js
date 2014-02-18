@@ -804,9 +804,45 @@ Need to see how close a point is to an object, for hit detection
       }
     });
     ParamTitleView = React.createClass({
+      handleMouseDown: function(e) {
+        var el, ghost, moveGhost, originalGhostX, originalGhostY, originalX, originalY, rect;
+        el = this.getDOMNode();
+        if (el === document.activeElement) {
+          return;
+        }
+        e.preventDefault();
+        el = el.closest(".param");
+        originalX = e.clientX;
+        originalY = e.clientY;
+        rect = el.getBoundingClientRect();
+        originalGhostX = rect.left;
+        originalGhostY = rect.top;
+        ghost = el.cloneNode(true);
+        ghost.style.position = "absolute";
+        ghost.style.opacity = "0.5";
+        ghost.style.pointerEvents = "none";
+        document.body.appendChild(ghost);
+        moveGhost = function(x, y) {
+          ghost.style.top = y + "px";
+          return ghost.style.left = x + "px";
+        };
+        moveGhost(originalGhostX, originalGhostY);
+        editor.movingParam = this.props.param;
+        return pointerManager.capture(e, function(e) {
+          var dx, dy;
+          dx = e.clientX - originalX;
+          dy = e.clientY - originalY;
+          return moveGhost(originalGhostX + dx, originalGhostY + dy);
+        }, function(e) {
+          document.body.removeChild(ghost);
+          return setTimeout((function() {
+            return editor.movingParam = null;
+          }), 1);
+        });
+      },
       handleInput: function() {
         var el, newTitle;
-        el = this.refs.span.getDOMNode();
+        el = this.getDOMNode();
         newTitle = el.textContent;
         if (el.innerHTML !== newTitle) {
           el.innerHTML = newTitle;
@@ -814,20 +850,32 @@ Need to see how close a point is to an object, for hit detection
         this.props.param.title = newTitle;
         return refresh();
       },
+      handleDoubleClick: function() {
+        var el;
+        el = this.getDOMNode();
+        return el.focus();
+      },
       render: function() {
         var param;
         param = this.props.param;
         return d.span({
           className: "paramTitle",
-          contentEditable: "true",
-          onInput: this.handleInput,
-          ref: "span"
+          contentEditable: true,
+          onMouseDown: this.handleMouseDown,
+          onDoubleClick: this.handleDoubleClick,
+          onInput: this.handleInput
         }, param.title);
       }
     });
     ParamView = React.createClass({
       componentDidMount: function() {
         return this.getDOMNode().ssParam = this.props.param;
+      },
+      handleMouseUp: function(e) {
+        if (!editor.movingParam) {
+          return;
+        }
+        return this.props.replaceSelf(editor.movingParam);
       },
       render: function() {
         var classNames;
@@ -836,7 +884,8 @@ Need to see how close a point is to an object, for hit detection
           hovered: _.contains(editor.hoveredParams, this.props.param)
         });
         return d.div({
-          className: classNames
+          className: classNames,
+          onMouseUp: this.handleMouseUp
         }, ParamTitleView({
           param: this.props.param
         }), ParamValueView({
@@ -923,7 +972,11 @@ Need to see how close a point is to an object, for hit detection
         }, d.canvas({
           ref: "canvas"
         })), link instanceof StartLink ? ParamView({
-          param: link.startParam
+          param: link.startParam,
+          replaceSelf: function(p) {
+            link.startParam = p;
+            return refresh();
+          }
         }) : d.span({}, d.span({
           className: "linkTitle",
           style: {
@@ -932,7 +985,11 @@ Need to see how close a point is to an object, for hit detection
         }, link.fn.title), link.additionalParams.map(function(param, i) {
           return ParamView({
             param: param,
-            key: i
+            key: "" + i + "/" + param.id,
+            replaceSelf: function(p) {
+              link.additionalParams[i] = p;
+              return refresh();
+            }
           });
         })), d.button({
           className: "addLinkButton",
