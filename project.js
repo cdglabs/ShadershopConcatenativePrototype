@@ -285,7 +285,7 @@ Need to see how close a point is to an object, for hit detection
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       canvas = _ref[_i];
-      if (!(drawData = canvas.drawData)) {
+      if (!(drawData = canvas.ssDrawData)) {
         continue;
       }
       rect = canvas.getBoundingClientRect();
@@ -414,6 +414,10 @@ Need to see how close a point is to an object, for hit detection
       return Math.sin(a);
     }), new Fn("cos", 1, function(a) {
       return Math.cos(a);
+    }), new Fn("fract", 1, function(a) {
+      return a - Math.floor(a);
+    }), new Fn("floor", 1, function(a) {
+      return Math.floor(a);
     })
   ];
 
@@ -479,7 +483,6 @@ Need to see how close a point is to an object, for hit detection
     function Link(fn, additionalParams) {
       this.fn = fn;
       this.additionalParams = additionalParams;
-      this.visible = true;
       this.addLinkVisible = false;
       this.id = _.uniqueId("l");
     }
@@ -530,28 +533,28 @@ Need to see how close a point is to an object, for hit detection
     };
 
     Editor.prototype.draw = function(graph) {
-      var chain, link, param, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _results;
+      var chain, link, param, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       _ref = this.chains;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         chain = _ref[_i];
-        _ref1 = chain.links;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          link = _ref1[_j];
-          this.drawChainLinkResult(graph, chain, link, {
-            color: "#000",
-            opacity: 0.02
-          });
-        }
+        link = _.last(chain.links);
+        this.drawChainLinkResult(graph, chain, link, {
+          color: "#000",
+          opacity: 1
+        });
       }
-      _ref2 = this.hoveredLinks;
-      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        link = _ref2[_k];
-        this.drawChainLink(graph, chain, link);
+      _ref1 = this.hoveredLinks;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        link = _ref1[_j];
+        this.drawChainLink(graph, chain, link, {
+          color: "#900",
+          opacity: 0.5
+        });
       }
-      _ref3 = this.hoveredParams;
+      _ref2 = this.hoveredParams;
       _results = [];
-      for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-        param = _ref3[_l];
+      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+        param = _ref2[_k];
         _results.push(this.drawParam(graph, param, {
           color: "green"
         }));
@@ -595,15 +598,22 @@ Need to see how close a point is to an object, for hit detection
             env = _this.makeEnv(xValue);
             return param.evaluate(env);
           };
-          styleOpts = {
-            color: "#000",
-            opacity: 0.1
-          };
+          if (param instanceof Param && param !== this.xParam) {
+            styleOpts = {
+              color: "green",
+              opacity: 0.4
+            };
+          } else {
+            styleOpts = {
+              color: "#000",
+              opacity: 0.1
+            };
+          }
           graph.drawGraph(graphFn, styleOpts);
         }
       }
       styleOpts = {
-        color: "#009"
+        color: "#900"
       };
       graphFn = function(xValue) {
         var env;
@@ -855,9 +865,9 @@ Need to see how close a point is to an object, for hit detection
       handleClickOn: function(fn) {
         var _this = this;
         return function() {
-          var chain, link, _ref2;
+          var chain, link, newLink, _ref2;
           _ref2 = _this.props, chain = _ref2.chain, link = _ref2.link;
-          chain.appendLinkAfter(fn, link);
+          newLink = chain.appendLinkAfter(fn, link);
           link.addLinkVisible = false;
           return refresh();
         };
@@ -885,7 +895,7 @@ Need to see how close a point is to an object, for hit detection
         var canvasEl, chain, link, rowEl, _ref2;
         _ref2 = this.props, chain = _ref2.chain, link = _ref2.link;
         canvasEl = this.refs.canvas.getDOMNode();
-        canvasEl.drawData = {
+        canvasEl.ssDrawData = {
           chain: chain,
           link: link
         };

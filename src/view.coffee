@@ -86,7 +86,7 @@ refreshView = do ->
     handleClickOn: (fn) ->
       =>
         {chain, link} = @props
-        chain.appendLinkAfter(fn, link)
+        newLink = chain.appendLinkAfter(fn, link)
         link.addLinkVisible = false
         refresh()
     render: ->
@@ -105,7 +105,7 @@ refreshView = do ->
       {chain, link} = @props
 
       canvasEl = @refs.canvas.getDOMNode()
-      canvasEl.drawData = {chain, link}
+      canvasEl.ssDrawData = {chain, link}
 
       rowEl = @refs.row.getDOMNode()
       rowEl.ssLink = link

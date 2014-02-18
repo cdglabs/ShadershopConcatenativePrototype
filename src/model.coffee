@@ -27,6 +27,8 @@ fnsToAdd = [
   new Fn "abs", 1, (a) -> Math.abs(a)
   new Fn "sin", 1, (a) -> Math.sin(a)
   new Fn "cos", 1, (a) -> Math.cos(a)
+  new Fn "fract", 1, (a) -> a - Math.floor(a)
+  new Fn "floor", 1, (a) -> Math.floor(a)
 ]
 
 
@@ -64,7 +66,6 @@ class Chain
 
 class Link
   constructor: (@fn, @additionalParams) ->
-    @visible = true
     @addLinkVisible = false
     @id = _.uniqueId("l")
 
@@ -114,12 +115,13 @@ class Editor
     return env
 
   draw: (graph) ->
+    # Draw the result for each chain.
     for chain in @chains
-      for link in chain.links
-        @drawChainLinkResult(graph, chain, link, {color: "#000", opacity: 0.02})
+      link = _.last(chain.links)
+      @drawChainLinkResult(graph, chain, link, {color: "#000", opacity: 1})
 
     for link in @hoveredLinks
-      @drawChainLink(graph, chain, link)
+      @drawChainLink(graph, chain, link, {color: "#900", opacity: 0.5})
 
     for param in @hoveredParams
       @drawParam(graph, param, {color: "green"})
@@ -144,10 +146,13 @@ class Editor
         graphFn = (xValue) =>
           env = @makeEnv(xValue)
           param.evaluate(env)
-        styleOpts = {color: "#000", opacity: 0.1}
+        if param instanceof Param and param != @xParam
+          styleOpts = {color: "green", opacity: 0.4}
+        else
+          styleOpts = {color: "#000", opacity: 0.1}
         graph.drawGraph(graphFn, styleOpts)
 
-    styleOpts = {color: "#009"}
+    styleOpts = {color: "#900"}
     graphFn = (xValue) =>
       env = @makeEnv(xValue)
       apply.evaluate(env)

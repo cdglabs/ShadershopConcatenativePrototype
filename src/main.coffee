@@ -35,7 +35,7 @@ refresh = ->
 
 refreshTinyGraphs = ->
   for canvas in document.querySelectorAll("canvas")
-    continue unless drawData = canvas.drawData
+    continue unless drawData = canvas.ssDrawData
 
     rect = canvas.getBoundingClientRect()
     canvas.width = rect.width

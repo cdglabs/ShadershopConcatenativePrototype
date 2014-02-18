@@ -7,6 +7,7 @@ Make tiny graphs for parameters
 
 
 Styling:
+  Maybe switch to stylus?
   Cursor for scrubbing parameters
   Make hover styles cleaner
 
