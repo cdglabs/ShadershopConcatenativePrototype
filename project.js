@@ -948,10 +948,17 @@ Need to see how close a point is to an object, for hit detection
             });
           }
         }
-        drawData.push({
-          apply: apply,
-          styleOpts: config.styles.selectedApply
-        });
+        if (this.props.link === editor.hoveredLink) {
+          drawData.push({
+            apply: apply,
+            styleOpts: config.styles.hoveredApply
+          });
+        } else {
+          drawData.push({
+            apply: apply,
+            styleOpts: config.styles.selectedApply
+          });
+        }
         return GraphView({
           drawData: drawData
         });

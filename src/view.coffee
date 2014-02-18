@@ -155,7 +155,10 @@ refreshView = do ->
           else
             styleOpts = config.styles.apply
           drawData.push({apply: param, styleOpts})
-      drawData.push({apply, styleOpts: config.styles.selectedApply})
+      if @props.link == editor.hoveredLink
+        drawData.push({apply, styleOpts: config.styles.hoveredApply})
+      else
+        drawData.push({apply, styleOpts: config.styles.selectedApply})
       GraphView {drawData}
 
     render: ->
