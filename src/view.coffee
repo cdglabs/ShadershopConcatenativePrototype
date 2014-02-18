@@ -12,17 +12,6 @@ refreshView = do ->
     if decimalPlace
       s.substr(0, decimalPlace + 4)
 
-  setAdd = (list, value) ->
-    if list.indexOf(value) == -1
-      list.push(value)
-
-  setRemove = (list, value) ->
-    if (i = list.indexOf(value)) != -1
-      list.splice(i, 1)
-
-
-
-
 
 
 

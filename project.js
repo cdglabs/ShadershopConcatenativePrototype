@@ -746,24 +746,13 @@ Need to see how close a point is to an object, for hit detection
   cx = React.addons.classSet;
 
   refreshView = (function() {
-    var AddLinkView, ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, setAdd, setRemove, truncate;
+    var AddLinkView, ChainView, EditorView, LinkView, ParamTitleView, ParamValueView, ParamView, truncate;
     truncate = function(value) {
       var decimalPlace, s;
       s = "" + value;
       decimalPlace = s.indexOf(".");
       if (decimalPlace) {
         return s.substr(0, decimalPlace + 4);
-      }
-    };
-    setAdd = function(list, value) {
-      if (list.indexOf(value) === -1) {
-        return list.push(value);
-      }
-    };
-    setRemove = function(list, value) {
-      var i;
-      if ((i = list.indexOf(value)) !== -1) {
-        return list.splice(i, 1);
       }
     };
     ParamValueView = React.createClass({
