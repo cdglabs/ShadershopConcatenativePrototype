@@ -33,7 +33,8 @@ updateHover = (e) ->
 
 pointermove = (e) ->
   editor.mousePosition = {x: e.clientX, y: e.clientY}
-  unless pointerManager.isPointerCaptured(e) or editor.dragging
+  editor.dragging?.onMove?(e)
+  unless editor.dragging
     updateHover(e)
 
 pointerup = (e) ->

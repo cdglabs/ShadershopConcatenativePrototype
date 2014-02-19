@@ -1,6 +1,6 @@
 DraggingView = React.createClass
   render: ->
-    if editor.dragging
+    if editor.dragging?.render
       R.div {
         className: "draggingObject"
         style: {

@@ -47,13 +47,16 @@ ParamValueView = React.createClass
     originalX = e.clientX
     originalY = e.clientY
     originalValue = param.value
-    pointerManager.capture e,
-      (e) ->
+
+    editor.dragging = {
+      onMove: (e) ->
         dx = e.clientX - originalX
         dy = -(e.clientY - originalY)
         d = if param.axis == "x" then dx else dy
         multiplier = 0.1
         param.value = originalValue + d * multiplier
+    }
+
 
   handleInput: (e) ->
     @props.param.value = +@cleanAndGetValue()
