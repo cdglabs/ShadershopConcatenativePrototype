@@ -33,7 +33,10 @@ ContentEditableMixin = {
 
 
 ParamValueView = React.createClass
-  mixins: [ContentEditableMixin]
+  mixins: [ContentEditableMixin, AnnotateMixin]
+  annotations: {
+    self: -> {cursor: @cursor()}
+  }
 
   shouldComponentUpdate: ->
     return !@isFocused()
@@ -90,7 +93,10 @@ ParamValueView = React.createClass
 
 
 ParamTitleView = React.createClass
-  mixins: [ContentEditableMixin]
+  mixins: [ContentEditableMixin, AnnotateMixin]
+  annotations: {
+    self: -> {cursor: @cursor()}
+  }
 
   cursor: ->
     if @isFocused()
@@ -135,8 +141,10 @@ ParamTitleView = React.createClass
 
 
 ParamView = React.createClass
-  componentDidMount: ->
-    @getDOMNode().ssParam = @props.param
+  mixins: [AnnotateMixin]
+  annotations: {
+    self: -> {hoverParam: @props.param}
+  }
   handleClick: (e) ->
     {param} = @props
     if key.command

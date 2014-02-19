@@ -1,9 +1,21 @@
-LinkView = React.createClass
-  componentDidMount: ->
-    {chain, link} = @props
+AnnotateMixin = {
+  componentDidMount: -> @updateAnnotations()
+  componentDidUpdate: -> @updateAnnotations()
+  updateAnnotations: ->
+    return unless @annotations
+    for own refName, annotateFn of @annotations
+      if refName == "self"
+        el = @getDOMNode()
+      else
+        el = @refs[refName].getDOMNode()
+      el.annotation = annotateFn.call(this)
+}
 
-    thumbEl = @refs.thumb.getDOMNode()
-    thumbEl.ssLink = link
+LinkView = React.createClass
+  mixins: [AnnotateMixin]
+  annotations: {
+    thumb: -> {hoverLink: @props.link}
+  }
 
   handleMouseDown: (e) ->
     return if e.target.closest(".param")?

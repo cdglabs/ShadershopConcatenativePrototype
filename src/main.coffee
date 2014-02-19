@@ -17,21 +17,17 @@ refresh = ->
 updateHover = ->
   return if editor.dragging
   el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y)
-  hoveredLink = null
-  hoveredParam = null
-  cursor = null
-  while el.nodeType == Node.ELEMENT_NODE
-    if el.ssLink
-      hoveredLink = el.ssLink
-    if el.ssParam
-      hoveredParam = el.ssParam
-    if el.hasAttribute("data-cursor")
-      cursor = el.getAttribute("data-cursor")
-    el = el.parentNode
 
-  editor.hoveredLink = hoveredLink
-  editor.hoveredParam = hoveredParam
-  editor.cursor = cursor
+  editor.hoveredLink = null
+  editor.hoveredParam = null
+  editor.cursor = null
+
+  while el.nodeType == Node.ELEMENT_NODE
+    editor.hoveredLink  ?= el.annotation?.hoverLink
+    editor.hoveredParam ?= el.annotation?.hoverParam
+    editor.cursor       ?= el.annotation?.cursor
+
+    el = el.parentNode
 
 pointermove = (e) ->
   editor.mousePosition = {x: e.clientX, y: e.clientY}
