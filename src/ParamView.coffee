@@ -37,6 +37,7 @@ ParamValueView = React.createClass
     return !@isFocused()
 
   handleMouseDown: (e) ->
+    e.stopPropagation()
     return if @isFocused()
 
     e.preventDefault()
@@ -80,6 +81,7 @@ ParamTitleView = React.createClass
   mixins: [ContentEditableMixin]
 
   handleMouseDown: (e) ->
+    e.stopPropagation()
     return if @isFocused()
 
     e.preventDefault()

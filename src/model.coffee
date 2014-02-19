@@ -74,6 +74,10 @@ class Chain
     @links.splice(i+1, 0, link)
     return link
 
+  removeLink: (refLink) ->
+    i = @links.indexOf(refLink)
+    @links.splice(i, 1)
+
 class Link
   constructor: (@fn, @additionalParams) ->
     @addLinkVisible = false

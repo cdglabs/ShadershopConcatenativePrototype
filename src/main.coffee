@@ -3,13 +3,15 @@ window.init = ->
   window.addEventListener("pointerdown", pointerdown)
   window.addEventListener("pointermove", pointermove)
   window.addEventListener("pointerup", pointerup)
-  animLoop()
+
+  for eventName in ["mousedown", "mousemove", "mouseup", "keydown"]
+    window.addEventListener(eventName, refresh)
+  refresh()
 
 
-
-animLoop = ->
-  refreshView()
-  requestAnimationFrame(animLoop)
+refresh = ->
+  requestAnimationFrame ->
+    refreshView()
 
 
 
@@ -35,7 +37,10 @@ pointermove = (e) ->
     updateHover(e)
 
 pointerup = (e) ->
-  setTimeout((-> editor.dragging = null), 1) # Can remove setTimeout once I get event order right
+  setTimeout(->
+    editor.dragging = null
+    setDirty()
+  , 1) # Can remove setTimeout once I get event order right
   updateHover(e)
   document.body.style.cursor = ""
 
