@@ -50,9 +50,9 @@ ParamValueView = React.createClass
       (e) ->
         dx = e.clientX - originalX
         dy = -(e.clientY - originalY)
-        change = if param.axis == "x" then dx else dy
+        d = if param.axis == "x" then dx else dy
         multiplier = 0.1
-        param.value = originalValue + change * multiplier
+        param.value = originalValue + d * multiplier
         refresh()
 
   handleInput: (e) ->
@@ -62,7 +62,7 @@ ParamValueView = React.createClass
   render: ->
     param = @props.param
     cursor = if param.axis == "x" then "ew-resize" else "ns-resize"
-    d.span {
+    R.span {
       className: "paramValue"
       contentEditable:true
       onMouseDown: @handleMouseDown
@@ -73,7 +73,7 @@ ParamValueView = React.createClass
     },
       do =>
         if editor.xParam == param
-          d.i {}, "x"
+          R.i {}, "x"
         else
           truncate(param.value)
 
@@ -129,7 +129,7 @@ ParamTitleView = React.createClass
 
   render: ->
     param = @props.param
-    d.span {
+    R.span {
       className: "paramTitle"
       contentEditable: true
       onMouseDown: @handleMouseDown
@@ -158,6 +158,6 @@ ParamView = React.createClass
       param: true
       hovered: editor.hoveredParam == @props.param
     }
-    d.div {className: classNames, onClick: @handleClick, onMouseUp: @handleMouseUp},
+    R.div {className: classNames, onClick: @handleClick, onMouseUp: @handleMouseUp},
       ParamTitleView {param: @props.param}
       ParamValueView {param: @props.param}

@@ -43,4 +43,4 @@ GraphView = React.createClass
     window.removeEventListener("resize", @handleResize)
 
   render: ->
-    d.canvas {}
+    R.canvas {}

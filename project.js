@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, ContentEditableMixin, Editor, Env, Fn, Graph, GraphView, Link, MainGraphView, Param, ParamTitleView, ParamValueView, ParamView, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshView, ticks, truncate, updateHover, _base, _ref, _ref1,
+  var Apply, Chain, ContentEditableMixin, Editor, Env, Fn, Graph, GraphView, Link, MainGraphView, Param, ParamTitleView, ParamValueView, ParamView, PointerManager, R, StartLink, compose, config, cx, drawLine, editor, fnsToAdd, lerp, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshView, ticks, truncate, updateHover, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   ticks = function(spacing, min, max) {
@@ -334,7 +334,7 @@ Need to see how close a point is to an object, for hit detection
       return window.removeEventListener("resize", this.handleResize);
     },
     render: function() {
-      return d.canvas({});
+      return R.canvas({});
     }
   });
 
@@ -435,12 +435,12 @@ Need to see how close a point is to an object, for hit detection
       originalY = e.clientY;
       originalValue = param.value;
       return pointerManager.capture(e, function(e) {
-        var change, dx, dy, multiplier;
+        var d, dx, dy, multiplier;
         dx = e.clientX - originalX;
         dy = -(e.clientY - originalY);
-        change = param.axis === "x" ? dx : dy;
+        d = param.axis === "x" ? dx : dy;
         multiplier = 0.1;
-        param.value = originalValue + change * multiplier;
+        param.value = originalValue + d * multiplier;
         return refresh();
       });
     },
@@ -453,7 +453,7 @@ Need to see how close a point is to an object, for hit detection
         _this = this;
       param = this.props.param;
       cursor = param.axis === "x" ? "ew-resize" : "ns-resize";
-      return d.span({
+      return R.span({
         className: "paramValue",
         contentEditable: true,
         onMouseDown: this.handleMouseDown,
@@ -465,7 +465,7 @@ Need to see how close a point is to an object, for hit detection
         }
       }, (function() {
         if (editor.xParam === param) {
-          return d.i({}, "x");
+          return R.i({}, "x");
         } else {
           return truncate(param.value);
         }
@@ -518,7 +518,7 @@ Need to see how close a point is to an object, for hit detection
     render: function() {
       var param;
       param = this.props.param;
-      return d.span({
+      return R.span({
         className: "paramTitle",
         contentEditable: true,
         onMouseDown: this.handleMouseDown,
@@ -556,7 +556,7 @@ Need to see how close a point is to an object, for hit detection
         param: true,
         hovered: editor.hoveredParam === this.props.param
       });
-      return d.div({
+      return R.div({
         className: classNames,
         onClick: this.handleClick,
         onMouseUp: this.handleMouseUp
@@ -948,7 +948,7 @@ Need to see how close a point is to an object, for hit detection
     }
   };
 
-  d = React.DOM;
+  R = React.DOM;
 
   cx = React.addons.classSet;
 
@@ -958,9 +958,9 @@ Need to see how close a point is to an object, for hit detection
       render: function() {
         var chain;
         chain = this.props.chain;
-        return d.div({
+        return R.div({
           className: "chain"
-        }, d.div({
+        }, R.div({
           className: "links"
         }, chain.links.map(function(link) {
           return LinkView({
@@ -984,10 +984,10 @@ Need to see how close a point is to an object, for hit detection
       },
       render: function() {
         var _this = this;
-        return d.div({
+        return R.div({
           className: "addLink"
         }, fnsToAdd.map(function(fn) {
-          return d.div({
+          return R.div({
             className: "row",
             onClick: _this.handleClickOn(fn)
           }, fn.title);
@@ -1049,9 +1049,9 @@ Need to see how close a point is to an object, for hit detection
           row: true,
           hovered: editor.hoveredLink === link
         });
-        return d.div({}, d.div({
+        return R.div({}, R.div({
           className: classNames
-        }, d.div({
+        }, R.div({
           className: "tinyGraph",
           style: {
             float: "right",
@@ -1064,7 +1064,7 @@ Need to see how close a point is to an object, for hit detection
             link.startParam = p;
             return refresh();
           }
-        }) : d.span({}, d.span({
+        }) : R.span({}, R.span({
           className: "linkTitle",
           style: {
             marginRight: 6
@@ -1078,7 +1078,7 @@ Need to see how close a point is to an object, for hit detection
               return refresh();
             }
           });
-        })), d.button({
+        })), R.button({
           className: "addLinkButton",
           onClick: this.toggleAddLink
         }, "+")), link.addLinkVisible ? AddLinkView({
@@ -1089,11 +1089,11 @@ Need to see how close a point is to an object, for hit detection
     });
     EditorView = React.createClass({
       render: function() {
-        return d.div({
+        return R.div({
           className: "editor"
-        }, d.div({
+        }, R.div({
           className: "main"
-        }, MainGraphView({})), d.div({
+        }, MainGraphView({})), R.div({
           className: "manager"
         }, editor.chains.map(function(chain) {
           return ChainView({

@@ -1,4 +1,4 @@
-d = React.DOM
+R = React.DOM
 cx = React.addons.classSet
 
 refreshView = do ->
@@ -6,8 +6,8 @@ refreshView = do ->
   ChainView = React.createClass
     render: ->
       chain = @props.chain
-      d.div {className: "chain"},
-        d.div {className: "links"},
+      R.div {className: "chain"},
+        R.div {className: "links"},
           chain.links.map (link) ->
             LinkView {link: link, chain: chain, key: link.id}
 
@@ -19,9 +19,9 @@ refreshView = do ->
         link.addLinkVisible = false
         refresh()
     render: ->
-      d.div {className: "addLink"},
+      R.div {className: "addLink"},
         fnsToAdd.map (fn) =>
-          d.div {className: "row", onClick: @handleClickOn(fn)},
+          R.div {className: "row", onClick: @handleClickOn(fn)},
             fn.title
 
   LinkView = React.createClass
@@ -59,9 +59,9 @@ refreshView = do ->
         row: true
         hovered: editor.hoveredLink == link
       }
-      d.div {},
-        d.div {className: classNames},
-          d.div {className: "tinyGraph", style: {float: "right", margin: -7}, ref: "thumb"},
+      R.div {},
+        R.div {className: classNames},
+          R.div {className: "tinyGraph", style: {float: "right", margin: -7}, ref: "thumb"},
             @renderThumbnail()
           if link instanceof StartLink
             ParamView {param: link.startParam, replaceSelf: (p) ->
@@ -69,24 +69,24 @@ refreshView = do ->
               refresh()
             }
           else
-            d.span {},
-              d.span {className: "linkTitle", style: {marginRight: 6}},
+            R.span {},
+              R.span {className: "linkTitle", style: {marginRight: 6}},
                 link.fn.title
               link.additionalParams.map (param, i) ->
                 ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
                   link.additionalParams[i] = p
                   refresh()
                 }
-          d.button {className: "addLinkButton", onClick: @toggleAddLink}, "+"
+          R.button {className: "addLinkButton", onClick: @toggleAddLink}, "+"
         if link.addLinkVisible
           AddLinkView {chain, link}
 
   EditorView = React.createClass
     render: ->
-      d.div {className: "editor"},
-        d.div {className: "main"},
+      R.div {className: "editor"},
+        R.div {className: "main"},
           MainGraphView {}
-        d.div {className: "manager"},
+        R.div {className: "manager"},
           editor.chains.map (chain) ->
             ChainView {chain: chain}
 
