@@ -364,8 +364,10 @@
     handleMouseDown: function(e) {
       var chain, el, link, rect, _ref,
         _this = this;
+      if (e.target.closest(".param") != null) {
+        return;
+      }
       _ref = this.props, chain = _ref.chain, link = _ref.link;
-      e.stopPropagation();
       e.preventDefault();
       chain.removeLink(link);
       el = this.getDOMNode();
@@ -570,6 +572,9 @@
 
   ContentEditableMixin = {
     isFocused: function() {
+      if (!this.isMounted()) {
+        return false;
+      }
       return this.getDOMNode() === document.activeElement;
     },
     cleanAndGetValue: function() {
@@ -586,7 +591,8 @@
     },
     focusAndSelect: function() {
       this.focus();
-      return document.execCommand("selectAll", false, null);
+      document.execCommand("selectAll", false, null);
+      return this.forceUpdate();
     }
   };
 
@@ -596,7 +602,9 @@
       return !this.isFocused();
     },
     cursor: function() {
-      if (this.props.param.axis === "x") {
+      if (this.isFocused()) {
+        return "text";
+      } else if (this.props.param.axis === "x") {
         return "ew-resize";
       } else {
         return "ns-resize";
@@ -604,7 +612,6 @@
     },
     handleMouseDown: function(e) {
       var originalValue, originalX, originalY, param;
-      e.stopPropagation();
       if (this.isFocused()) {
         return;
       }
@@ -639,9 +646,7 @@
         onMouseDown: this.handleMouseDown,
         onDoubleClick: this.focusAndSelect,
         onInput: this.handleInput,
-        style: {
-          cursor: this.cursor()
-        }
+        "data-cursor": this.cursor()
       }, (function() {
         if (editor.xParam === param) {
           return R.i({}, "x");
@@ -654,10 +659,16 @@
 
   ParamTitleView = React.createClass({
     mixins: [ContentEditableMixin],
+    cursor: function() {
+      if (this.isFocused()) {
+        return "text";
+      } else {
+        return "-webkit-grab";
+      }
+    },
     handleMouseDown: function(e) {
       var el, rect,
         _this = this;
-      e.stopPropagation();
       if (this.isFocused()) {
         return;
       }
@@ -693,7 +704,8 @@
         contentEditable: true,
         onMouseDown: this.handleMouseDown,
         onDoubleClick: this.focusAndSelect,
-        onInput: this.handleInput
+        onInput: this.handleInput,
+        "data-cursor": this.cursor()
       }, param.title);
     }
   });
@@ -778,15 +790,20 @@
 
   refresh = function() {
     return requestAnimationFrame(function() {
+      updateHover();
       return refreshView();
     });
   };
 
-  updateHover = function(e) {
-    var el, hoveredLink, hoveredParam;
-    el = e.target;
+  updateHover = function() {
+    var cursor, el, hoveredLink, hoveredParam;
+    if (editor.dragging) {
+      return;
+    }
+    el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y);
     hoveredLink = null;
     hoveredParam = null;
+    cursor = null;
     while (el.nodeType === Node.ELEMENT_NODE) {
       if (el.ssLink) {
         hoveredLink = el.ssLink;
@@ -794,12 +811,14 @@
       if (el.ssParam) {
         hoveredParam = el.ssParam;
       }
+      if (el.hasAttribute("data-cursor")) {
+        cursor = el.getAttribute("data-cursor");
+      }
       el = el.parentNode;
     }
-    if (!(editor.hoveredLink === hoveredLink && editor.hoveredParam === hoveredParam)) {
-      editor.hoveredLink = hoveredLink;
-      return editor.hoveredParam = hoveredParam;
-    }
+    editor.hoveredLink = hoveredLink;
+    editor.hoveredParam = hoveredParam;
+    return editor.cursor = cursor;
   };
 
   pointermove = function(e) {
@@ -808,22 +827,14 @@
       x: e.clientX,
       y: e.clientY
     };
-    if ((_ref = editor.dragging) != null) {
-      if (typeof _ref.onMove === "function") {
-        _ref.onMove(e);
-      }
-    }
-    if (!editor.dragging) {
-      return updateHover(e);
-    }
+    return (_ref = editor.dragging) != null ? typeof _ref.onMove === "function" ? _ref.onMove(e) : void 0 : void 0;
   };
 
   pointerup = function(e) {
-    setTimeout(function() {
+    return setTimeout(function() {
       editor.dragging = null;
       return refresh();
     }, 1);
-    return updateHover(e);
   };
 
   Param = (function() {
@@ -986,6 +997,12 @@
       this.xParam = null;
       this.hoveredParam = null;
       this.hoveredLink = null;
+      this.cursor = null;
+      this.mousePosition = {
+        x: 0,
+        y: 0
+      };
+      this.dragging = null;
     }
 
     Editor.prototype.addParam = function() {
@@ -1097,8 +1114,8 @@
     });
     EditorView = React.createClass({
       cursor: function() {
-        var _ref2, _ref3;
-        return (_ref2 = (_ref3 = editor.dragging) != null ? _ref3.cursor : void 0) != null ? _ref2 : "";
+        var _ref2, _ref3, _ref4;
+        return (_ref2 = (_ref3 = (_ref4 = editor.dragging) != null ? _ref4.cursor : void 0) != null ? _ref3 : editor.cursor) != null ? _ref2 : "";
       },
       render: function() {
         return R.div({

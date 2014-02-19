@@ -13,7 +13,7 @@ refreshView = do ->
 
   EditorView = React.createClass
     cursor: ->
-      editor.dragging?.cursor ? ""
+      editor.dragging?.cursor ? editor.cursor ? ""
     render: ->
       R.div {className: "editor", style: {cursor: @cursor()}},
         R.div {className: "main"},

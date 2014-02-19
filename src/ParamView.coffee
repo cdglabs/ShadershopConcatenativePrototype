@@ -8,6 +8,7 @@ truncate = (value) ->
 
 ContentEditableMixin = {
   isFocused: ->
+    return false unless @isMounted()
     @getDOMNode() == document.activeElement
 
   cleanAndGetValue: ->
@@ -23,6 +24,7 @@ ContentEditableMixin = {
   focusAndSelect: ->
     @focus()
     document.execCommand("selectAll", false, null)
+    @forceUpdate() # Hack: So that cursor changes
 
 }
 
@@ -37,10 +39,14 @@ ParamValueView = React.createClass
     return !@isFocused()
 
   cursor: ->
-    if @props.param.axis == "x" then "ew-resize" else "ns-resize"
+    if @isFocused()
+      "text"
+    else if @props.param.axis == "x"
+      "ew-resize"
+    else
+      "ns-resize"
 
   handleMouseDown: (e) ->
-    e.stopPropagation()
     return if @isFocused()
 
     e.preventDefault()
@@ -73,7 +79,7 @@ ParamValueView = React.createClass
       onMouseDown: @handleMouseDown
       onDoubleClick: @focusAndSelect
       onInput: @handleInput
-      style: {cursor: @cursor()}
+      "data-cursor": @cursor()
     },
       do =>
         if editor.xParam == param
@@ -86,8 +92,13 @@ ParamValueView = React.createClass
 ParamTitleView = React.createClass
   mixins: [ContentEditableMixin]
 
+  cursor: ->
+    if @isFocused()
+      "text"
+    else
+      "-webkit-grab"
+
   handleMouseDown: (e) ->
-    e.stopPropagation()
     return if @isFocused()
 
     e.preventDefault()
@@ -118,6 +129,7 @@ ParamTitleView = React.createClass
       onMouseDown: @handleMouseDown
       onDoubleClick: @focusAndSelect
       onInput: @handleInput
+      "data-cursor": @cursor()
     }, param.title
 
 

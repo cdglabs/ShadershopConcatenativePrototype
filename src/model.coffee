@@ -101,6 +101,9 @@ class Editor
 
     @hoveredParam = null
     @hoveredLink = null
+    @cursor = null
+    @mousePosition = {x: 0, y: 0}
+    @dragging = null
 
 
   # ===========================================================================

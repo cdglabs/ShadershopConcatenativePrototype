@@ -6,8 +6,9 @@ LinkView = React.createClass
     thumbEl.ssLink = link
 
   handleMouseDown: (e) ->
+    return if e.target.closest(".param")?
+
     {chain, link} = @props
-    e.stopPropagation()
     e.preventDefault()
 
     chain.removeLink(link)
