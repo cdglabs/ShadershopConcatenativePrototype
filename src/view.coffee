@@ -12,8 +12,10 @@ refreshView = do ->
             LinkRowView {link: link, chain: chain, key: link.id}
 
   EditorView = React.createClass
+    cursor: ->
+      editor.dragging?.cursor ? ""
     render: ->
-      R.div {className: "editor"},
+      R.div {className: "editor", style: {cursor: @cursor()}},
         R.div {className: "main"},
           MainGraphView {}
         R.div {className: "manager"},

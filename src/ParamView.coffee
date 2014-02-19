@@ -36,6 +36,9 @@ ParamValueView = React.createClass
   shouldComponentUpdate: ->
     return !@isFocused()
 
+  cursor: ->
+    if @props.param.axis == "x" then "ew-resize" else "ns-resize"
+
   handleMouseDown: (e) ->
     e.stopPropagation()
     return if @isFocused()
@@ -49,6 +52,7 @@ ParamValueView = React.createClass
     originalValue = param.value
 
     editor.dragging = {
+      cursor: @cursor()
       onMove: (e) ->
         dx = e.clientX - originalX
         dy = -(e.clientY - originalY)
@@ -63,14 +67,13 @@ ParamValueView = React.createClass
 
   render: ->
     param = @props.param
-    cursor = if param.axis == "x" then "ew-resize" else "ns-resize"
     R.span {
       className: "paramValue"
       contentEditable:true
       onMouseDown: @handleMouseDown
       onDoubleClick: @focusAndSelect
       onInput: @handleInput
-      style: {cursor}
+      style: {cursor: @cursor()}
     },
       do =>
         if editor.xParam == param
@@ -93,6 +96,7 @@ ParamTitleView = React.createClass
     rect = el.getBoundingClientRect()
 
     editor.dragging = {
+      cursor: "-webkit-grabbing"
       offset: {
         x: e.clientX - rect.left
         y: e.clientY - rect.top

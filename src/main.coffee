@@ -1,6 +1,5 @@
 
 window.init = ->
-  window.addEventListener("pointerdown", pointerdown)
   window.addEventListener("pointermove", pointermove)
   window.addEventListener("pointerup", pointerup)
 
@@ -12,8 +11,6 @@ window.init = ->
 refresh = ->
   requestAnimationFrame ->
     refreshView()
-
-
 
 
 updateHover = (e) ->
@@ -40,16 +37,6 @@ pointermove = (e) ->
 pointerup = (e) ->
   setTimeout(->
     editor.dragging = null
-    setDirty()
+    refresh()
   , 1) # Can remove setTimeout once I get event order right
   updateHover(e)
-  document.body.style.cursor = ""
-
-pointerdown = (e) ->
-  el = e.target
-  while el.nodeType == Node.ELEMENT_NODE
-    if cursor = el.style.cursor
-      break
-    el = el.parentNode
-
-  document.body.style.cursor = cursor
