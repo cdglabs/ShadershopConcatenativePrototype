@@ -53,11 +53,9 @@ ParamValueView = React.createClass
         d = if param.axis == "x" then dx else dy
         multiplier = 0.1
         param.value = originalValue + d * multiplier
-        refresh()
 
   handleInput: (e) ->
     @props.param.value = +@cleanAndGetValue()
-    refresh()
 
   render: ->
     param = @props.param
@@ -68,7 +66,6 @@ ParamValueView = React.createClass
       onMouseDown: @handleMouseDown
       onDoubleClick: @focusAndSelect
       onInput: @handleInput
-      onBlur: refresh
       style: {cursor}
     },
       do =>
@@ -100,11 +97,9 @@ ParamTitleView = React.createClass
           ParamView {param: @props.param}
       param: @props.param
     }
-    refresh()
 
   handleInput: ->
     @props.param.title = @cleanAndGetValue()
-    refresh()
 
   render: ->
     param = @props.param
@@ -128,7 +123,6 @@ ParamView = React.createClass
         param.axis = "x"
       else
         param.axis = "result"
-      refresh()
   handleMouseUp: (e) ->
     return unless draggingParam = editor.dragging?.param
     @props.replaceSelf(draggingParam)

@@ -17,7 +17,6 @@ refreshView = do ->
         {chain, link} = @props
         newLink = chain.appendLinkAfter(fn, link)
         link.addLinkVisible = false
-        refresh()
     render: ->
       R.div {className: "addLink"},
         fnsToAdd.map (fn) =>
@@ -28,7 +27,6 @@ refreshView = do ->
     toggleAddLink: ->
       {chain, link} = @props
       link.addLinkVisible = !link.addLinkVisible
-      refresh()
 
     componentDidMount: ->
       {chain, link} = @props
@@ -66,7 +64,6 @@ refreshView = do ->
           if link instanceof StartLink
             ParamView {param: link.startParam, replaceSelf: (p) ->
               link.startParam = p
-              refresh()
             }
           else
             R.span {},
@@ -75,7 +72,6 @@ refreshView = do ->
               link.additionalParams.map (param, i) ->
                 ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
                   link.additionalParams[i] = p
-                  refresh()
                 }
           R.button {className: "addLinkButton", onClick: @toggleAddLink}, "+"
         if link.addLinkVisible

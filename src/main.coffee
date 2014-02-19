@@ -3,13 +3,13 @@ window.init = ->
   window.addEventListener("pointerdown", pointerdown)
   window.addEventListener("pointermove", pointermove)
   window.addEventListener("pointerup", pointerup)
-  refresh()
+  animLoop()
 
 
 
-refresh = ->
+animLoop = ->
   refreshView()
-
+  requestAnimationFrame(animLoop)
 
 
 
@@ -28,19 +28,16 @@ updateHover = (e) ->
   unless editor.hoveredLink == hoveredLink && editor.hoveredParam == hoveredParam
     editor.hoveredLink = hoveredLink
     editor.hoveredParam = hoveredParam
-    refresh()
 
 pointermove = (e) ->
   editor.mousePosition = {x: e.clientX, y: e.clientY}
   unless pointerManager.isPointerCaptured(e) or editor.dragging
     updateHover(e)
-  refresh()
 
 pointerup = (e) ->
   setTimeout((-> editor.dragging = null), 1) # Can remove setTimeout once I get event order right
   updateHover(e)
   document.body.style.cursor = ""
-  refresh()
 
 pointerdown = (e) ->
   el = e.target
