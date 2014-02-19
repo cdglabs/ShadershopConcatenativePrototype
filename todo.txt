@@ -2,6 +2,7 @@ Hacky things
   transclusion drag-drop UI uses a variable on editor
     param replacer prop - should be a param slot?
   hover implementation
+  too much calling "refresh()"
   separate the idea of a parameter (or result) and a view of the parameter
 
 

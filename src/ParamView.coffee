@@ -88,40 +88,19 @@ ParamTitleView = React.createClass
     e.preventDefault()
 
     el = @getDOMNode()
-
-    el = el.closest(".param")
-
-    originalX = e.clientX
-    originalY = e.clientY
-
     rect = el.getBoundingClientRect()
-    originalGhostX = rect.left
-    originalGhostY = rect.top
 
-    ghost = el.cloneNode(true)
-
-    ghost.style.position = "absolute"
-    ghost.style.opacity = "0.5"
-    ghost.style.pointerEvents = "none"
-    document.body.appendChild(ghost)
-
-    moveGhost = (x, y) ->
-      ghost.style.top = y + "px"
-      ghost.style.left = x + "px"
-
-    moveGhost(originalGhostX, originalGhostY)
-
-    editor.movingParam = @props.param
-
-    pointerManager.capture e,
-      (e) ->
-        dx = e.clientX - originalX
-        dy = e.clientY - originalY
-        moveGhost(originalGhostX + dx, originalGhostY + dy)
-      (e) ->
-        document.body.removeChild(ghost)
-        setTimeout((-> editor.movingParam = null), 1)
-
+    editor.dragging = {
+      offset: {
+        x: e.clientX - rect.left
+        y: e.clientY - rect.top
+      }
+      render: =>
+        R.div {style: {width: 400}},
+          ParamView {param: @props.param}
+      param: @props.param
+    }
+    refresh()
 
   handleInput: ->
     @props.param.title = @cleanAndGetValue()
@@ -151,8 +130,8 @@ ParamView = React.createClass
         param.axis = "result"
       refresh()
   handleMouseUp: (e) ->
-    return unless editor.movingParam
-    @props.replaceSelf(editor.movingParam)
+    return unless draggingParam = editor.dragging?.param
+    @props.replaceSelf(draggingParam)
   render: ->
     classNames = cx {
       param: true

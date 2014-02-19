@@ -6,6 +6,7 @@ window.init = ->
   refresh()
 
 
+
 refresh = ->
   refreshView()
 
@@ -30,12 +31,16 @@ updateHover = (e) ->
     refresh()
 
 pointermove = (e) ->
-  return if pointerManager.isPointerCaptured(e)
-  updateHover(e)
+  editor.mousePosition = {x: e.clientX, y: e.clientY}
+  unless pointerManager.isPointerCaptured(e) or editor.dragging
+    updateHover(e)
+  refresh()
 
 pointerup = (e) ->
+  setTimeout((-> editor.dragging = null), 1) # Can remove setTimeout once I get event order right
   updateHover(e)
   document.body.style.cursor = ""
+  refresh()
 
 pointerdown = (e) ->
   el = e.target

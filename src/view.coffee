@@ -89,6 +89,8 @@ refreshView = do ->
         R.div {className: "manager"},
           editor.chains.map (chain) ->
             ChainView {chain: chain}
+        R.div {className: "dragging"},
+          DraggingView {}
 
   return ->
     editorEl = document.querySelector("#editor")
