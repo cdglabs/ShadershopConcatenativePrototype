@@ -2,10 +2,7 @@ Hacky things
   transclusion drag-drop UI uses a variable on editor
     param replacer prop - should be a param slot?
   hover implementation
-  editor makes env, want a cleaner separation between editor and graphs
   separate the idea of a parameter (or result) and a view of the parameter
-
-
 
 
 
@@ -30,18 +27,10 @@ Animate
 
 
 
-Make tiny graphs for parameters
-
 
 Styling:
   Maybe switch to stylus?
-  Cursor for scrubbing parameters
-  Make hover styles cleaner
 
-
-
-
-Get drawing order correct
 
 
 
