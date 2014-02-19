@@ -25,8 +25,9 @@ GraphView = React.createClass
         else if data.apply.axis == "result"
           graph.drawHorizontalLine(data.apply.evaluate(), data.styleOpts)
       else
+        env = new Env()
         graphFn = (xValue) ->
-          env = editor.makeEnv(xValue)
+          env.set(editor.xParam, xValue)
           data.apply.evaluate(env)
         graph.drawGraph(graphFn, data.styleOpts)
 

@@ -292,7 +292,7 @@ Need to see how close a point is to an object, for hit detection
       return this.refreshGraph();
     },
     refreshGraph: function() {
-      var canvas, data, graph, graphFn, _i, _len, _ref, _results;
+      var canvas, data, env, graph, graphFn, _i, _len, _ref, _results;
       canvas = this.getDOMNode();
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
       graph.clear();
@@ -312,9 +312,9 @@ Need to see how close a point is to an object, for hit detection
             _results.push(void 0);
           }
         } else {
+          env = new Env();
           graphFn = function(xValue) {
-            var env;
-            env = editor.makeEnv(xValue);
+            env.set(editor.xParam, xValue);
             return data.apply.evaluate(env);
           };
           _results.push(graph.drawGraph(graphFn, data.styleOpts));
@@ -818,15 +818,6 @@ Need to see how close a point is to an object, for hit detection
       chain = new Chain(startParam);
       this.chains.push(chain);
       return chain;
-    };
-
-    Editor.prototype.makeEnv = function(xValue) {
-      var env;
-      env = new Env();
-      if (this.xParam) {
-        env.set(this.xParam, xValue);
-      }
-      return env;
     };
 
     Editor.prototype.applyForChainLink = function(chain, link) {

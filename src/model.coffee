@@ -118,12 +118,6 @@ class Editor
   # Rendering
   # ===========================================================================
 
-  makeEnv: (xValue) ->
-    env = new Env()
-    if @xParam
-      env.set(@xParam, xValue)
-    return env
-
   applyForChainLink: (chain, link) ->
     for l in chain.links
       if l instanceof StartLink
