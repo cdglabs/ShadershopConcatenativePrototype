@@ -304,7 +304,13 @@ Need to see how close a point is to an object, for hit detection
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         data = _ref[_i];
         if (data.apply instanceof Param && data.apply !== editor.xParam) {
-          _results.push(graph.drawVerticalLine(data.apply.evaluate(), data.styleOpts));
+          if (data.apply.axis === "x") {
+            _results.push(graph.drawVerticalLine(data.apply.evaluate(), data.styleOpts));
+          } else if (data.apply.axis === "result") {
+            _results.push(graph.drawHorizontalLine(data.apply.evaluate(), data.styleOpts));
+          } else {
+            _results.push(void 0);
+          }
         } else {
           graphFn = function(xValue) {
             var env;
@@ -532,6 +538,18 @@ Need to see how close a point is to an object, for hit detection
     componentDidMount: function() {
       return this.getDOMNode().ssParam = this.props.param;
     },
+    handleClick: function(e) {
+      var param;
+      param = this.props.param;
+      if (key.command) {
+        if (param.axis === "result") {
+          param.axis = "x";
+        } else {
+          param.axis = "result";
+        }
+        return refresh();
+      }
+    },
     handleMouseUp: function(e) {
       if (!editor.movingParam) {
         return;
@@ -546,6 +564,7 @@ Need to see how close a point is to an object, for hit detection
       });
       return d.div({
         className: classNames,
+        onClick: this.handleClick,
         onMouseUp: this.handleMouseUp
       }, ParamTitleView({
         param: this.props.param

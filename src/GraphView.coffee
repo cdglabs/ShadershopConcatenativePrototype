@@ -20,7 +20,10 @@ GraphView = React.createClass
 
     for data in @props.drawData
       if data.apply instanceof Param && data.apply != editor.xParam
-        graph.drawVerticalLine(data.apply.evaluate(), data.styleOpts)
+        if data.apply.axis == "x"
+          graph.drawVerticalLine(data.apply.evaluate(), data.styleOpts)
+        else if data.apply.axis == "result"
+          graph.drawHorizontalLine(data.apply.evaluate(), data.styleOpts)
       else
         graphFn = (xValue) ->
           env = editor.makeEnv(xValue)

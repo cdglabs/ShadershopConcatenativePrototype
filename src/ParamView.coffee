@@ -148,6 +148,14 @@ ParamTitleView = React.createClass
 ParamView = React.createClass
   componentDidMount: ->
     @getDOMNode().ssParam = @props.param
+  handleClick: (e) ->
+    {param} = @props
+    if key.command
+      if param.axis == "result"
+        param.axis = "x"
+      else
+        param.axis = "result"
+      refresh()
   handleMouseUp: (e) ->
     return unless editor.movingParam
     @props.replaceSelf(editor.movingParam)
@@ -156,6 +164,6 @@ ParamView = React.createClass
       param: true
       hovered: editor.hoveredParam == @props.param
     }
-    d.div {className: classNames, onMouseUp: @handleMouseUp},
+    d.div {className: classNames, onClick: @handleClick, onMouseUp: @handleMouseUp},
       ParamTitleView {param: @props.param}
       ParamValueView {param: @props.param}
