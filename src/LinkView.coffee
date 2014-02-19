@@ -11,6 +11,25 @@ AnnotateMixin = {
       el.annotation = annotateFn.call(this)
 }
 
+
+LinkThumbnailView = React.createClass
+  render: ->
+    drawData = []
+    apply = editor.applyForChainLink(@props.chain, @props.link)
+    if apply.params
+      for param in apply.params
+        if param instanceof Param and param != editor.xParam
+          styleOpts = config.styles.param
+        else
+          styleOpts = config.styles.apply
+        drawData.push({apply: param, styleOpts})
+    if @props.link == editor.hoveredLink
+      drawData.push({apply, styleOpts: config.styles.hoveredApply})
+    else
+      drawData.push({apply, styleOpts: config.styles.selectedApply})
+    GraphView {drawData}
+
+
 LinkView = React.createClass
   mixins: [AnnotateMixin]
   annotations: {
@@ -38,22 +57,6 @@ LinkView = React.createClass
           LinkView {chain, link, isDraggingCopy: true}
     }
 
-  renderThumbnail: ->
-    drawData = []
-    apply = editor.applyForChainLink(@props.chain, @props.link)
-    if apply.params
-      for param in apply.params
-        if param instanceof Param and param != editor.xParam
-          styleOpts = config.styles.param
-        else
-          styleOpts = config.styles.apply
-        drawData.push({apply: param, styleOpts})
-    if @props.link == editor.hoveredLink
-      drawData.push({apply, styleOpts: config.styles.hoveredApply})
-    else
-      drawData.push({apply, styleOpts: config.styles.selectedApply})
-    GraphView {drawData}
-
   render: ->
     {chain, link} = @props
     classNames = cx {
@@ -63,7 +66,7 @@ LinkView = React.createClass
     }
     R.div {className: classNames, onMouseDown: @handleMouseDown},
       R.div {className: "tinyGraph", style: {float: "right", margin: -7}, ref: "thumb"},
-        @renderThumbnail()
+        LinkThumbnailView {chain, link}
       if link instanceof StartLink
         ParamView {param: link.startParam, replaceSelf: (p) ->
           link.startParam = p
