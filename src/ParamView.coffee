@@ -45,23 +45,15 @@ ParamValueView = React.createClass
     e.preventDefault()
     originalX = e.clientX
     originalY = e.clientY
-    scrubbing = false
     originalValue = param.value
     pointerManager.capture e,
       (e) ->
         dx = e.clientX - originalX
         dy = -(e.clientY - originalY)
-        if scrubbing
-          change = if scrubbing == "x" then dx else dy
-          multiplier = 0.1
-          param.value = originalValue + change * multiplier
-          refresh()
-        else
-          if Math.abs(dx) > 4
-            scrubbing = "x"
-          if Math.abs(dy) > 4
-            scrubbing = "y"
-
+        change = if param.axis == "x" then dx else dy
+        multiplier = 0.1
+        param.value = originalValue + change * multiplier
+        refresh()
 
   handleInput: (e) ->
     @props.param.value = +@cleanAndGetValue()
@@ -69,6 +61,7 @@ ParamValueView = React.createClass
 
   render: ->
     param = @props.param
+    cursor = if param.axis == "x" then "ew-resize" else "ns-resize"
     d.span {
       className: "paramValue"
       contentEditable:true
@@ -76,6 +69,7 @@ ParamValueView = React.createClass
       onDoubleClick: @focusAndSelect
       onInput: @handleInput
       onBlur: refresh
+      style: {cursor}
     },
       do =>
         if editor.xParam == param

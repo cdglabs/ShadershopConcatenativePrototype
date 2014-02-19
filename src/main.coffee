@@ -1,5 +1,6 @@
 
 window.init = ->
+  window.addEventListener("pointerdown", pointerdown)
   window.addEventListener("pointermove", pointermove)
   window.addEventListener("pointerup", pointerup)
   refresh()
@@ -34,4 +35,13 @@ pointermove = (e) ->
 
 pointerup = (e) ->
   updateHover(e)
+  document.body.style.cursor = ""
 
+pointerdown = (e) ->
+  el = e.target
+  while el.nodeType == Node.ELEMENT_NODE
+    if cursor = el.style.cursor
+      break
+    el = el.parentNode
+
+  document.body.style.cursor = cursor

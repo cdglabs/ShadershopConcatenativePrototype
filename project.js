@@ -9,7 +9,7 @@ Need to see how close a point is to an object, for hit detection
 
 
 (function() {
-  var Apply, Chain, ContentEditableMixin, Editor, Env, Fn, Graph, GraphView, Link, MainGraphView, Param, ParamTitleView, ParamValueView, ParamView, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, pointerManager, pointermove, pointerup, refresh, refreshView, ticks, truncate, updateHover, _base, _ref, _ref1,
+  var Apply, Chain, ContentEditableMixin, Editor, Env, Fn, Graph, GraphView, Link, MainGraphView, Param, ParamTitleView, ParamValueView, ParamView, PointerManager, StartLink, compose, config, cx, d, drawLine, editor, fnsToAdd, lerp, pointerManager, pointerdown, pointermove, pointerup, refresh, refreshView, ticks, truncate, updateHover, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   ticks = function(spacing, min, max) {
@@ -424,7 +424,7 @@ Need to see how close a point is to an object, for hit detection
       return !this.isFocused();
     },
     handleMouseDown: function(e) {
-      var originalValue, originalX, originalY, param, scrubbing;
+      var originalValue, originalX, originalY, param;
       if (this.isFocused()) {
         return;
       }
@@ -433,25 +433,15 @@ Need to see how close a point is to an object, for hit detection
       e.preventDefault();
       originalX = e.clientX;
       originalY = e.clientY;
-      scrubbing = false;
       originalValue = param.value;
       return pointerManager.capture(e, function(e) {
         var change, dx, dy, multiplier;
         dx = e.clientX - originalX;
         dy = -(e.clientY - originalY);
-        if (scrubbing) {
-          change = scrubbing === "x" ? dx : dy;
-          multiplier = 0.1;
-          param.value = originalValue + change * multiplier;
-          return refresh();
-        } else {
-          if (Math.abs(dx) > 4) {
-            scrubbing = "x";
-          }
-          if (Math.abs(dy) > 4) {
-            return scrubbing = "y";
-          }
-        }
+        change = param.axis === "x" ? dx : dy;
+        multiplier = 0.1;
+        param.value = originalValue + change * multiplier;
+        return refresh();
       });
     },
     handleInput: function(e) {
@@ -459,16 +449,20 @@ Need to see how close a point is to an object, for hit detection
       return refresh();
     },
     render: function() {
-      var param,
+      var cursor, param,
         _this = this;
       param = this.props.param;
+      cursor = param.axis === "x" ? "ew-resize" : "ns-resize";
       return d.span({
         className: "paramValue",
         contentEditable: true,
         onMouseDown: this.handleMouseDown,
         onDoubleClick: this.focusAndSelect,
         onInput: this.handleInput,
-        onBlur: refresh
+        onBlur: refresh,
+        style: {
+          cursor: cursor
+        }
       }, (function() {
         if (editor.xParam === param) {
           return d.i({}, "x");
@@ -601,6 +595,7 @@ Need to see how close a point is to an object, for hit detection
   };
 
   window.init = function() {
+    window.addEventListener("pointerdown", pointerdown);
     window.addEventListener("pointermove", pointermove);
     window.addEventListener("pointerup", pointerup);
     return refresh();
@@ -639,7 +634,20 @@ Need to see how close a point is to an object, for hit detection
   };
 
   pointerup = function(e) {
-    return updateHover(e);
+    updateHover(e);
+    return document.body.style.cursor = "";
+  };
+
+  pointerdown = function(e) {
+    var cursor, el;
+    el = e.target;
+    while (el.nodeType === Node.ELEMENT_NODE) {
+      if (cursor = el.style.cursor) {
+        break;
+      }
+      el = el.parentNode;
+    }
+    return document.body.style.cursor = cursor;
   };
 
   Param = (function() {
