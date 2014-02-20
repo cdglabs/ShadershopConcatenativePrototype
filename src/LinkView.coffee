@@ -65,7 +65,7 @@ LinkView = React.createClass
         linkEls = document.querySelectorAll(".chain .link")
         for linkEl in linkEls
           rect = linkEl.getBoundingClientRect()
-          if e.clientY > rect.top
+          if rect.bottom + rect.height * 2 > e.clientY > rect.top + rect.height / 2 and rect.left < e.clientX < rect.right
             insertAfter = linkEl
 
         chain.removeLink(link)

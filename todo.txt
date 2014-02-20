@@ -1,5 +1,4 @@
 Easy things to do
-  Make reorder links reorder based on the center lines, make remove to the side work
   Make onceDragConsummated so drags take 3 pixels to start
   Vertically center the function string and parameter
   Clean up Chain API (insertLinkAfter and appendLinkAfter)

@@ -471,13 +471,13 @@
           }));
         },
         onMove: function(e) {
-          var insertAfter, linkEl, linkEls, refLink, _i, _len;
+          var insertAfter, linkEl, linkEls, refLink, _i, _len, _ref1, _ref2;
           insertAfter = null;
           linkEls = document.querySelectorAll(".chain .link");
           for (_i = 0, _len = linkEls.length; _i < _len; _i++) {
             linkEl = linkEls[_i];
             rect = linkEl.getBoundingClientRect();
-            if (e.clientY > rect.top) {
+            if ((rect.bottom + rect.height * 2 > (_ref1 = e.clientY) && _ref1 > rect.top + rect.height / 2) && (rect.left < (_ref2 = e.clientX) && _ref2 < rect.right)) {
               insertAfter = linkEl;
             }
           }
