@@ -60,15 +60,16 @@ ParamValueView = React.createClass
     originalY = e.clientY
     originalValue = param.value
 
-    editor.dragging = {
-      cursor: @cursor()
-      onMove: (e) ->
-        dx = e.clientX - originalX
-        dy = -(e.clientY - originalY)
-        d = if param.axis == "x" then dx else dy
-        multiplier = 0.1
-        param.value = originalValue + d * multiplier
-    }
+    onceDragConsummated e, =>
+      editor.dragging = {
+        cursor: @cursor()
+        onMove: (e) ->
+          dx = e.clientX - originalX
+          dy = -(e.clientY - originalY)
+          d = if param.axis == "x" then dx else dy
+          multiplier = 0.1
+          param.value = originalValue + d * multiplier
+      }
 
 
   handleInput: (e) ->
@@ -111,18 +112,24 @@ ParamTitleView = React.createClass
 
     el = @getDOMNode()
     rect = el.getBoundingClientRect()
+    offset = {
+      x: e.clientX - rect.left
+      y: e.clientY - rect.top
+    }
 
     editor.dragging = {
       cursor: "-webkit-grabbing"
-      offset: {
-        x: e.clientX - rect.left
-        y: e.clientY - rect.top
-      }
-      render: =>
-        R.div {style: {width: 400}},
-          ParamView {param: @props.param}
-      param: @props.param
     }
+
+    onceDragConsummated e, =>
+      editor.dragging = {
+        cursor: "-webkit-grabbing"
+        offset: offset
+        render: =>
+          R.div {style: {width: 400}},
+            ParamView {param: @props.param}
+        param: @props.param
+      }
 
   handleInput: ->
     @props.param.title = @cleanAndGetValue()

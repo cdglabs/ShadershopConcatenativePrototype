@@ -35,7 +35,10 @@ LinkThumbnailView = React.createClass
 LinkView = React.createClass
   mixins: [AnnotateMixin]
   annotations: {
-    self: -> {link: @props.link}
+    self: -> {
+      link: @props.link
+      cursor: "-webkit-grab"
+    }
     thumb: -> {hoverLink: @props.link}
   }
 
@@ -49,30 +52,37 @@ LinkView = React.createClass
 
     el = @getDOMNode()
     rect = el.getBoundingClientRect()
+    offset = {
+      x: e.clientX - rect.left
+      y: e.clientY - rect.top
+    }
 
     editor.dragging = {
-      offset: {
-        x: e.clientX - rect.left
-        y: e.clientY - rect.top
-      }
-      link: link
-      render: =>
-        R.div {style: {width: rect.width, height: rect.height}},
-          LinkView {chain, link, isDraggingCopy: true}
-      onMove: (e) =>
-        insertAfter = null
-
-        linkEls = document.querySelectorAll(".chain .link")
-        for linkEl in linkEls
-          rect = linkEl.getBoundingClientRect()
-          if rect.bottom + rect.height * 2 > e.clientY > rect.top + rect.height / 2 and rect.left < e.clientX < rect.right
-            insertAfter = linkEl
-
-        chain.removeLink(link)
-        if insertAfter
-          refLink = insertAfter.annotation.link
-          chain.insertLinkAfter(link, refLink)
+      cursor: "-webkit-grabbing"
     }
+
+    onceDragConsummated e, =>
+      editor.dragging = {
+        cursor: "-webkit-grabbing"
+        offset: offset
+        link: link
+        render: =>
+          R.div {style: {width: rect.width, height: rect.height}},
+            LinkView {chain, link, isDraggingCopy: true}
+        onMove: (e) =>
+          insertAfter = null
+
+          linkEls = document.querySelectorAll(".chain .link")
+          for linkEl in linkEls
+            rect = linkEl.getBoundingClientRect()
+            if rect.bottom + rect.height * 2 > e.clientY > rect.top + rect.height / 2 and rect.left < e.clientX < rect.right
+              insertAfter = linkEl
+
+          chain.removeLink(link)
+          if insertAfter
+            refLink = insertAfter.annotation.link
+            chain.insertLinkAfter(link, refLink)
+      }
 
   render: ->
     {chain, link} = @props

@@ -25,3 +25,24 @@ Element::closest = (selector) ->
     else
       return undefined
 
+
+onceDragConsummated = (downEvent, callback) ->
+  originalX = downEvent.clientX
+  originalY = downEvent.clientY
+
+  handleMove = (moveEvent) ->
+    dx = moveEvent.clientX - originalX
+    dy = moveEvent.clientY - originalY
+    d  = Math.max(Math.abs(dx), Math.abs(dy))
+    if d > 3
+      removeListeners()
+      callback(moveEvent)
+
+  removeListeners = ->
+    window.removeEventListener("mousemove", handleMove)
+    window.removeEventListener("mouseup", removeListeners)
+
+  window.addEventListener("mousemove", handleMove)
+  window.addEventListener("mouseup", removeListeners)
+
+
