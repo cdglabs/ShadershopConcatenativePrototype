@@ -74,9 +74,14 @@ class Chain
     @links.splice(i+1, 0, link)
     return link
 
+  insertLinkAfter: (link, refLink) ->
+    i = @links.indexOf(refLink)
+    @links.splice(i+1, 0, link)
+
   removeLink: (refLink) ->
     i = @links.indexOf(refLink)
-    @links.splice(i, 1)
+    if i != -1
+      @links.splice(i, 1)
 
 class Link
   constructor: (@fn, @additionalParams) ->

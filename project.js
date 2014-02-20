@@ -363,7 +363,7 @@
       return this.updateAnnotations();
     },
     updateAnnotations: function() {
-      var annotateFn, el, refName, _ref, _results;
+      var annotateFn, component, el, refName, _ref, _ref1, _results;
       if (!this.annotations) {
         return;
       }
@@ -373,11 +373,16 @@
         if (!__hasProp.call(_ref, refName)) continue;
         annotateFn = _ref[refName];
         if (refName === "self") {
-          el = this.getDOMNode();
+          component = this;
         } else {
-          el = this.refs[refName].getDOMNode();
+          component = (_ref1 = this.refs) != null ? _ref1[refName] : void 0;
         }
-        _results.push(el.annotation = annotateFn.call(this));
+        el = component != null ? component.getDOMNode() : void 0;
+        if (el) {
+          _results.push(el.annotation = annotateFn.call(this));
+        } else {
+          _results.push(void 0);
+        }
       }
       return _results;
     }
@@ -423,6 +428,11 @@
   LinkView = React.createClass({
     mixins: [AnnotateMixin],
     annotations: {
+      self: function() {
+        return {
+          link: this.props.link
+        };
+      },
       thumb: function() {
         return {
           hoverLink: this.props.link
@@ -437,7 +447,9 @@
       }
       _ref = this.props, chain = _ref.chain, link = _ref.link;
       e.preventDefault();
-      chain.removeLink(link);
+      if (link instanceof StartLink) {
+        return;
+      }
       el = this.getDOMNode();
       rect = el.getBoundingClientRect();
       return editor.dragging = {
@@ -445,6 +457,7 @@
           x: e.clientX - rect.left,
           y: e.clientY - rect.top
         },
+        link: link,
         render: function() {
           return R.div({
             style: {
@@ -456,16 +469,38 @@
             link: link,
             isDraggingCopy: true
           }));
+        },
+        onMove: function(e) {
+          var insertAfter, linkEl, linkEls, refLink, _i, _len;
+          insertAfter = null;
+          linkEls = document.querySelectorAll(".chain .link");
+          for (_i = 0, _len = linkEls.length; _i < _len; _i++) {
+            linkEl = linkEls[_i];
+            rect = linkEl.getBoundingClientRect();
+            if (e.clientY > rect.top) {
+              insertAfter = linkEl;
+            }
+          }
+          chain.removeLink(link);
+          if (insertAfter) {
+            refLink = insertAfter.annotation.link;
+            return chain.insertLinkAfter(link, refLink);
+          }
         }
       };
     },
     render: function() {
-      var chain, classNames, link, _ref;
+      var chain, classNames, link, _ref, _ref1;
       _ref = this.props, chain = _ref.chain, link = _ref.link;
+      if (!this.props.isDraggingCopy && link === ((_ref1 = editor.dragging) != null ? _ref1.link : void 0)) {
+        return R.div({
+          className: "row placeholder"
+        });
+      }
       classNames = cx({
         link: true,
         row: true,
-        hovered: editor.hoveredLink === link
+        hovered: link === editor.hoveredLink
       });
       return R.div({
         className: classNames,
@@ -1014,10 +1049,18 @@
       return link;
     };
 
+    Chain.prototype.insertLinkAfter = function(link, refLink) {
+      var i;
+      i = this.links.indexOf(refLink);
+      return this.links.splice(i + 1, 0, link);
+    };
+
     Chain.prototype.removeLink = function(refLink) {
       var i;
       i = this.links.indexOf(refLink);
-      return this.links.splice(i, 1);
+      if (i !== -1) {
+        return this.links.splice(i, 1);
+      }
     };
 
     return Chain;

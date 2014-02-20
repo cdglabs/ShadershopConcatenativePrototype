@@ -5,10 +5,12 @@ AnnotateMixin = {
     return unless @annotations
     for own refName, annotateFn of @annotations
       if refName == "self"
-        el = @getDOMNode()
+        component = this
       else
-        el = @refs[refName].getDOMNode()
-      el.annotation = annotateFn.call(this)
+        component = @refs?[refName]
+      el = component?.getDOMNode()
+      if el
+        el.annotation = annotateFn.call(this)
 }
 
 
@@ -33,6 +35,7 @@ LinkThumbnailView = React.createClass
 LinkView = React.createClass
   mixins: [AnnotateMixin]
   annotations: {
+    self: -> {link: @props.link}
     thumb: -> {hoverLink: @props.link}
   }
 
@@ -42,7 +45,7 @@ LinkView = React.createClass
     {chain, link} = @props
     e.preventDefault()
 
-    chain.removeLink(link)
+    return if link instanceof StartLink
 
     el = @getDOMNode()
     rect = el.getBoundingClientRect()
@@ -52,17 +55,34 @@ LinkView = React.createClass
         x: e.clientX - rect.left
         y: e.clientY - rect.top
       }
+      link: link
       render: =>
         R.div {style: {width: rect.width, height: rect.height}},
           LinkView {chain, link, isDraggingCopy: true}
+      onMove: (e) =>
+        insertAfter = null
+
+        linkEls = document.querySelectorAll(".chain .link")
+        for linkEl in linkEls
+          rect = linkEl.getBoundingClientRect()
+          if e.clientY > rect.top
+            insertAfter = linkEl
+
+        chain.removeLink(link)
+        if insertAfter
+          refLink = insertAfter.annotation.link
+          chain.insertLinkAfter(link, refLink)
     }
 
   render: ->
     {chain, link} = @props
+    if !@props.isDraggingCopy and link == editor.dragging?.link
+      return R.div {className: "row placeholder"}
+
     classNames = cx {
       link: true
       row: true
-      hovered: editor.hoveredLink == link
+      hovered: link == editor.hoveredLink
     }
     R.div {className: classNames, onMouseDown: @handleMouseDown},
       R.div {className: "tinyGraph", style: {float: "right", margin: -7}, ref: "thumb"},
