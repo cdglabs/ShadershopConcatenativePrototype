@@ -1,5 +1,17 @@
+Preview added links in the add menu (create by reacting)
+
+
+Add parameter inspector
+  axis (get rid of command click hack)
+  relative parameter to another parameter
+  sweep
+
+
+
+
 Easy things to do
   Clean up Chain API (insertLinkAfter and appendLinkAfter)
+  Fix number truncate problem
 
 
 
@@ -16,9 +28,6 @@ Hacky things
 Exercises
   Go through a shader and figure out the best visualization for each step
 
-
-
-Preview added links in the add menu (create by reacting)
 
 
 Animate
