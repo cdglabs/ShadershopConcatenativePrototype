@@ -1,5 +1,4 @@
 Easy things to do
-  Vertically center the function string and parameter
   Clean up Chain API (insertLinkAfter and appendLinkAfter)
 
 
@@ -9,7 +8,6 @@ Hacky things
   transclusion drag-drop UI uses a variable on editor
     param replacer prop - should be a param slot?
   hover implementation
-  too much calling "refresh()"
   separate the idea of a parameter (or result) and a view of the parameter
 
 
@@ -18,12 +16,6 @@ Hacky things
 Exercises
   Go through a shader and figure out the best visualization for each step
 
-
-
-
-Manipulations of the apply chain
-  Reorder links
-  Remove links
 
 
 Preview added links in the add menu (create by reacting)

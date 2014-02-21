@@ -126,8 +126,7 @@ ParamTitleView = React.createClass
         cursor: "-webkit-grabbing"
         offset: offset
         render: =>
-          R.div {style: {width: 400}},
-            ParamView {param: @props.param}
+          ParamView {param: @props.param}
         param: @props.param
       }
 

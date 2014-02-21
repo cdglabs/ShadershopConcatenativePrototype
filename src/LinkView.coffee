@@ -87,7 +87,7 @@ LinkView = React.createClass
   render: ->
     {chain, link} = @props
     if !@props.isDraggingCopy and link == editor.dragging?.link
-      return R.div {className: "row placeholder"}
+      return R.div {className: "linkPlaceholder"}
 
     classNames = cx {
       link: true
@@ -95,21 +95,21 @@ LinkView = React.createClass
       hovered: link == editor.hoveredLink
     }
     R.div {className: classNames, onMouseDown: @handleMouseDown},
-      R.div {className: "tinyGraph", style: {float: "right", margin: -7}, ref: "thumb"},
-        LinkThumbnailView {chain, link}
       if link instanceof StartLink
         ParamView {param: link.startParam, replaceSelf: (p) ->
           link.startParam = p
         }
       else
-        R.span {},
-          R.span {className: "linkTitle", style: {marginRight: 6}},
+        [
+          R.div {className: "linkTitle"},
             link.fn.title
           link.additionalParams.map (param, i) ->
             ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
               link.additionalParams[i] = p
             }
-
+        ]
+      R.div {className: "tinyGraph", ref: "thumb"},
+        LinkThumbnailView {chain, link}
 
 AddLinkView = React.createClass
   handleClickOn: (fn) ->

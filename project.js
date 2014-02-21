@@ -502,7 +502,7 @@
       _ref = this.props, chain = _ref.chain, link = _ref.link;
       if (!this.props.isDraggingCopy && link === ((_ref1 = editor.dragging) != null ? _ref1.link : void 0)) {
         return R.div({
-          className: "row placeholder"
+          className: "linkPlaceholder"
         });
       }
       classNames = cx({
@@ -513,34 +513,29 @@
       return R.div({
         className: classNames,
         onMouseDown: this.handleMouseDown
-      }, R.div({
-        className: "tinyGraph",
-        style: {
-          float: "right",
-          margin: -7
-        },
-        ref: "thumb"
-      }, LinkThumbnailView({
-        chain: chain,
-        link: link
-      })), link instanceof StartLink ? ParamView({
+      }, link instanceof StartLink ? ParamView({
         param: link.startParam,
         replaceSelf: function(p) {
           return link.startParam = p;
         }
-      }) : R.span({}, R.span({
-        className: "linkTitle",
-        style: {
-          marginRight: 6
-        }
-      }, link.fn.title), link.additionalParams.map(function(param, i) {
-        return ParamView({
-          param: param,
-          key: "" + i + "/" + param.id,
-          replaceSelf: function(p) {
-            return link.additionalParams[i] = p;
-          }
-        });
+      }) : [
+        R.div({
+          className: "linkTitle"
+        }, link.fn.title), link.additionalParams.map(function(param, i) {
+          return ParamView({
+            param: param,
+            key: "" + i + "/" + param.id,
+            replaceSelf: function(p) {
+              return link.additionalParams[i] = p;
+            }
+          });
+        })
+      ], R.div({
+        className: "tinyGraph",
+        ref: "thumb"
+      }, LinkThumbnailView({
+        chain: chain,
+        link: link
       })));
     }
   });
@@ -784,13 +779,9 @@
           cursor: "-webkit-grabbing",
           offset: offset,
           render: function() {
-            return R.div({
-              style: {
-                width: 400
-              }
-            }, ParamView({
+            return ParamView({
               param: _this.props.param
-            }));
+            });
           },
           param: _this.props.param
         };
