@@ -309,7 +309,7 @@
       return this.refreshGraph();
     },
     refreshGraph: function() {
-      var canvas, data, env, graph, graphFn, _i, _len, _ref, _results;
+      var canvas, data, env, graph, graphFn, i, neg, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1, _results;
       canvas = this.getDOMNode();
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
       graph.clear();
@@ -329,6 +329,26 @@
             _results.push(void 0);
           }
         } else {
+          if (editor.spreadParam) {
+            env = new Env();
+            spreadDistance = 0.5;
+            spreadNum = 5;
+            styleOpts = _.clone(data.styleOpts);
+            styleOpts.opacity = 0.2;
+            for (i = _j = 0; 0 <= spreadNum ? _j < spreadNum : _j > spreadNum; i = 0 <= spreadNum ? ++_j : --_j) {
+              _ref1 = [-1, 1];
+              for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
+                neg = _ref1[_k];
+                spreadOffset = spreadDistance * i * neg;
+                env.set(editor.spreadParam, editor.spreadParam.value + spreadOffset);
+                graphFn = function(xValue) {
+                  env.set(editor.xParam, xValue);
+                  return data.apply.evaluate(env);
+                };
+                graph.drawGraph(graphFn, styleOpts);
+              }
+            }
+          }
           env = new Env();
           graphFn = function(xValue) {
             env.set(editor.xParam, xValue);
@@ -822,6 +842,12 @@
         } else {
           return param.axis = "result";
         }
+      } else if (key.shift) {
+        if (param === editor.spreadParam) {
+          return editor.spreadParam = null;
+        } else {
+          return editor.spreadParam = param;
+        }
       }
     },
     handleMouseUp: function(e) {
@@ -1101,6 +1127,7 @@
       this.params = [];
       this.chains = [];
       this.xParam = null;
+      this.spreadParam = null;
       this.hoveredParam = null;
       this.hoveredLink = null;
       this.cursor = null;

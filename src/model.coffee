@@ -103,6 +103,7 @@ class Editor
     @params = []
     @chains = []
     @xParam = null
+    @spreadParam = null
 
     @hoveredParam = null
     @hoveredLink = null

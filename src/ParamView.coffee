@@ -158,6 +158,11 @@ ParamView = React.createClass
         param.axis = "x"
       else
         param.axis = "result"
+    else if key.shift
+      if param == editor.spreadParam
+        editor.spreadParam = null
+      else
+        editor.spreadParam = param
   handleMouseUp: (e) ->
     return unless draggingParam = editor.dragging?.param
     @props.replaceSelf(draggingParam)
