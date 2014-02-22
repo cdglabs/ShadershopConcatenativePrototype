@@ -8,6 +8,14 @@ class Param
   evaluate: (env) ->
     env?.lookup(this) ? @value
 
+  compileString: ->
+    if this == editor.xParam
+      "x"
+    else if this == editor.spreadParam
+      "(#{@value} + spreadOffset)"
+    else
+      ""+@value
+
 
 class Env
   constructor: ->
@@ -19,18 +27,36 @@ class Env
 
 
 class Fn
-  constructor: (@title, @numParams, @compute) ->
+  constructor: (@title, @numParams, @compute, @compileString) ->
 
 fnsToAdd = [
-  new Fn "+", 2, (a, b) -> a + b
-  new Fn "-", 2, (a, b) -> a - b
-  new Fn "*", 2, (a, b) -> a * b
-  new Fn "/", 2, (a, b) -> a / b
-  new Fn "abs", 1, (a) -> Math.abs(a)
-  new Fn "sin", 1, (a) -> Math.sin(a)
-  new Fn "cos", 1, (a) -> Math.cos(a)
-  new Fn "fract", 1, (a) -> a - Math.floor(a)
-  new Fn "floor", 1, (a) -> Math.floor(a)
+  new Fn "+", 2,
+    (a, b) -> a + b
+    (a, b) -> "(#{a} + #{b})"
+  new Fn "-", 2,
+    (a, b) -> a - b
+    (a, b) -> "(#{a} - #{b})"
+  new Fn "*", 2,
+    (a, b) -> a * b
+    (a, b) -> "(#{a} * #{b})"
+  new Fn "/", 2,
+    (a, b) -> a / b
+    (a, b) -> "(#{a} / #{b})"
+  new Fn "abs", 1,
+    (a) -> Math.abs(a)
+    (a) -> "Math.abs(#{a})"
+  new Fn "sin", 1,
+    (a) -> Math.sin(a)
+    (a) -> "Math.sin(#{a})"
+  new Fn "cos", 1,
+    (a) -> Math.cos(a)
+    (a) -> "Math.cos(#{a})"
+  new Fn "fract", 1,
+    (a) -> a - Math.floor(a)
+    (a) -> "(#{a} - Math.floor(#{a}))"
+  new Fn "floor", 1,
+    (a) -> Math.floor(a)
+    (a) -> "Math.floor(#{a})"
 ]
 
 
@@ -40,6 +66,10 @@ class Apply
     paramValues = @params.map (param) ->
       param.evaluate(env)
     @fn.compute(paramValues...)
+  compileString: ->
+    paramCompileStrings = @params.map (param) ->
+      param.compileString()
+    @fn.compileString(paramCompileStrings...)
   # isEqualTo: (otherApply) ->
   #   return false unless otherApply instanceof Apply
   #   return false if @fn != otherApply.fn

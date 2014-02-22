@@ -309,7 +309,7 @@
       return this.refreshGraph();
     },
     refreshGraph: function() {
-      var canvas, data, env, graph, graphFn, i, neg, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1, _results;
+      var canvas, data, graph, graphFn, i, neg, s, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1, _results;
       canvas = this.getDOMNode();
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
       graph.clear();
@@ -329,31 +329,23 @@
             _results.push(void 0);
           }
         } else {
-          if (editor.spreadParam) {
-            env = new Env();
+          s = data.apply.compileString();
+          if (editor.spreadParam && editor.spreadParam !== editor.xParam && this.props.grid) {
             spreadDistance = 0.5;
             spreadNum = 5;
             styleOpts = _.clone(data.styleOpts);
-            styleOpts.opacity = 0.2;
+            styleOpts.opacity = 0.1;
             for (i = _j = 0; 0 <= spreadNum ? _j < spreadNum : _j > spreadNum; i = 0 <= spreadNum ? ++_j : --_j) {
               _ref1 = [-1, 1];
               for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
                 neg = _ref1[_k];
                 spreadOffset = spreadDistance * i * neg;
-                env.set(editor.spreadParam, editor.spreadParam.value + spreadOffset);
-                graphFn = function(xValue) {
-                  env.set(editor.xParam, xValue);
-                  return data.apply.evaluate(env);
-                };
+                graphFn = eval("(function (x) { var spreadOffset = " + spreadOffset + "; return " + s + "; })");
                 graph.drawGraph(graphFn, styleOpts);
               }
             }
           }
-          env = new Env();
-          graphFn = function(xValue) {
-            env.set(editor.xParam, xValue);
-            return data.apply.evaluate(env);
-          };
+          graphFn = eval("(function (x) { var spreadOffset = 0; return " + s + "; })");
           _results.push(graph.drawGraph(graphFn, data.styleOpts));
         }
       }
@@ -921,15 +913,15 @@
   };
 
   updateHover = function() {
-    var el, _ref, _ref1, _ref2, _results;
+    var el, _ref, _ref1, _ref2;
     if (editor.dragging) {
+      editor.spreadParam = null;
       return;
     }
     el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y);
     editor.hoveredLink = null;
     editor.hoveredParam = null;
     editor.cursor = null;
-    _results = [];
     while (el.nodeType === Node.ELEMENT_NODE) {
       if (editor.hoveredLink == null) {
         editor.hoveredLink = (_ref = el.annotation) != null ? _ref.hoverLink : void 0;
@@ -940,9 +932,9 @@
       if (editor.cursor == null) {
         editor.cursor = (_ref2 = el.annotation) != null ? _ref2.cursor : void 0;
       }
-      _results.push(el = el.parentNode);
+      el = el.parentNode;
     }
-    return _results;
+    return editor.spreadParam = editor.hoveredParam;
   };
 
   pointermove = function(e) {
@@ -975,6 +967,16 @@
       return (_ref = env != null ? env.lookup(this) : void 0) != null ? _ref : this.value;
     };
 
+    Param.prototype.compileString = function() {
+      if (this === editor.xParam) {
+        return "x";
+      } else if (this === editor.spreadParam) {
+        return "(" + this.value + " + spreadOffset)";
+      } else {
+        return "" + this.value;
+      }
+    };
+
     return Param;
 
   })();
@@ -997,10 +999,11 @@
   })();
 
   Fn = (function() {
-    function Fn(title, numParams, compute) {
+    function Fn(title, numParams, compute, compileString) {
       this.title = title;
       this.numParams = numParams;
       this.compute = compute;
+      this.compileString = compileString;
     }
 
     return Fn;
@@ -1010,22 +1013,40 @@
   fnsToAdd = [
     new Fn("+", 2, function(a, b) {
       return a + b;
+    }, function(a, b) {
+      return "(" + a + " + " + b + ")";
     }), new Fn("-", 2, function(a, b) {
       return a - b;
+    }, function(a, b) {
+      return "(" + a + " - " + b + ")";
     }), new Fn("*", 2, function(a, b) {
       return a * b;
+    }, function(a, b) {
+      return "(" + a + " * " + b + ")";
     }), new Fn("/", 2, function(a, b) {
       return a / b;
+    }, function(a, b) {
+      return "(" + a + " / " + b + ")";
     }), new Fn("abs", 1, function(a) {
       return Math.abs(a);
+    }, function(a) {
+      return "Math.abs(" + a + ")";
     }), new Fn("sin", 1, function(a) {
       return Math.sin(a);
+    }, function(a) {
+      return "Math.sin(" + a + ")";
     }), new Fn("cos", 1, function(a) {
       return Math.cos(a);
+    }, function(a) {
+      return "Math.cos(" + a + ")";
     }), new Fn("fract", 1, function(a) {
       return a - Math.floor(a);
+    }, function(a) {
+      return "(" + a + " - Math.floor(" + a + "))";
     }), new Fn("floor", 1, function(a) {
       return Math.floor(a);
+    }, function(a) {
+      return "Math.floor(" + a + ")";
     })
   ];
 
@@ -1041,6 +1062,14 @@
         return param.evaluate(env);
       });
       return (_ref = this.fn).compute.apply(_ref, paramValues);
+    };
+
+    Apply.prototype.compileString = function() {
+      var paramCompileStrings, _ref;
+      paramCompileStrings = this.params.map(function(param) {
+        return param.compileString();
+      });
+      return (_ref = this.fn).compileString.apply(_ref, paramCompileStrings);
     };
 
     return Apply;
@@ -1221,6 +1250,40 @@
       }
     }
   };
+
+  
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+
+// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+
+// MIT license
+
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame']
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
+;
 
   onceDragConsummated = function(downEvent, callback) {
     var handleMove, originalX, originalY, removeListeners;

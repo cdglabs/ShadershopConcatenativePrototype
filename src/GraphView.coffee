@@ -25,27 +25,22 @@ GraphView = React.createClass
         else if data.apply.axis == "result"
           graph.drawHorizontalLine(data.apply.evaluate(), data.styleOpts)
       else
+        s = data.apply.compileString()
 
-        if editor.spreadParam
-          env = new Env()
+        if editor.spreadParam and editor.spreadParam != editor.xParam and @props.grid
           spreadDistance = 0.5
           spreadNum = 5
           styleOpts = _.clone(data.styleOpts)
-          styleOpts.opacity = 0.2
+          styleOpts.opacity = 0.1
           for i in [0...spreadNum]
             for neg in [-1, 1]
               spreadOffset = spreadDistance * i * neg
-              env.set(editor.spreadParam, editor.spreadParam.value + spreadOffset)
-              graphFn = (xValue) ->
-                env.set(editor.xParam, xValue)
-                data.apply.evaluate(env)
+              graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")
               graph.drawGraph(graphFn, styleOpts)
 
-        env = new Env()
-        graphFn = (xValue) ->
-          env.set(editor.xParam, xValue)
-          data.apply.evaluate(env)
+        graphFn = eval("(function (x) { var spreadOffset = 0; return #{s}; })")
         graph.drawGraph(graphFn, data.styleOpts)
+
 
   componentDidMount: ->
     @sizeCanvas()

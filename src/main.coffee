@@ -15,7 +15,10 @@ refresh = ->
 
 
 updateHover = ->
-  return if editor.dragging
+  if editor.dragging
+    editor.spreadParam = null
+    return
+
   el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y)
 
   editor.hoveredLink = null
@@ -28,6 +31,8 @@ updateHover = ->
     editor.cursor       ?= el.annotation?.cursor
 
     el = el.parentNode
+
+  editor.spreadParam = editor.hoveredParam
 
 pointermove = (e) ->
   editor.mousePosition = {x: e.clientX, y: e.clientY}

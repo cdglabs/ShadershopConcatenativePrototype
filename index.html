@@ -61,8 +61,12 @@ canvas {
 .link {
   position: relative;
   background-color: #fff;
-  display: flex;
   border-bottom: 1px solid #ccc;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
 }
 .addLinkButton {
   position: absolute;
@@ -107,6 +111,10 @@ canvas {
   border-radius: 4px;
   overflow: hidden;
   background-color: #fff;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
 }
 .paramTitle, .paramValue {
