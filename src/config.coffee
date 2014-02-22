@@ -1,8 +1,10 @@
-config = {
+window.config = config = {
   # In pixels:
   minGridSpacing: 70
   hitTolerance: 15
   snapTolerance: 5
+
+  resolution: 0.5
 
   styles: {
     param: {color: "green", opacity: 0.4}

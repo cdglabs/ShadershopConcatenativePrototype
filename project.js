@@ -232,7 +232,7 @@
     };
 
     Graph.prototype.drawGraph = function(fn, styleOpts) {
-      var cx, cxMax, cxMin, cy, cyMax, cyMin, i, resolution, sizeX, sizeY, x, y, _i, _ref, _ref1, _ref2, _ref3;
+      var cx, cxMax, cxMin, cy, cyMax, cyMin, dCy, i, lastCx, lastCy, lastSample, sizeX, sizeY, x, y, _i, _ref, _ref1, _ref2;
       this.ctx.save();
       sizeX = this.xMax - this.xMin;
       sizeY = this.yMax - this.yMin;
@@ -243,15 +243,37 @@
       this.ctx.lineWidth = (_ref = styleOpts.lineWidth) != null ? _ref : 2;
       this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
       this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
+      /*
+      
+      All this lastCy, etc. crap is to optimize having fewer lineTo calls. It
+      fixes weird artifacting with straight lines in Chrome.
+      */
+
       this.ctx.beginPath();
-      resolution = 1;
-      for (i = _i = 0, _ref3 = this.width() / resolution; 0 <= _ref3 ? _i <= _ref3 : _i >= _ref3; i = 0 <= _ref3 ? ++_i : --_i) {
-        cx = i * resolution;
+      lastSample = this.width() / config.resolution;
+      lastCx = null;
+      lastCy = null;
+      dCy = null;
+      for (i = _i = 0; 0 <= lastSample ? _i <= lastSample : _i >= lastSample; i = 0 <= lastSample ? ++_i : --_i) {
+        cx = i * config.resolution;
         x = lerp(cx, cxMin, cxMax, this.xMin, this.xMax);
         y = fn(x);
         cy = lerp(y, this.yMin, this.yMax, cyMin, cyMax);
-        this.ctx.lineTo(cx, cy);
+        if (lastCy == null) {
+          this.ctx.moveTo(cx, cy);
+        }
+        if (dCy != null) {
+          if (Math.abs((cy - lastCy) - dCy) > .000001) {
+            this.ctx.lineTo(lastCx, lastCy);
+          }
+        }
+        if (lastCy != null) {
+          dCy = cy - lastCy;
+        }
+        lastCx = cx;
+        lastCy = cy;
       }
+      this.ctx.lineTo(cx, cy);
       this.ctx.stroke();
       return this.ctx.restore();
     };
@@ -334,8 +356,8 @@
             spreadDistance = 0.5;
             spreadNum = 5;
             styleOpts = _.clone(data.styleOpts);
-            styleOpts.opacity = 0.1;
-            for (i = _j = 0; 0 <= spreadNum ? _j < spreadNum : _j > spreadNum; i = 0 <= spreadNum ? ++_j : --_j) {
+            for (i = _j = 1; 1 <= spreadNum ? _j < spreadNum : _j > spreadNum; i = 1 <= spreadNum ? ++_j : --_j) {
+              styleOpts.opacity = lerp(i, 1, spreadNum, 0.25, 0.1);
               _ref1 = [-1, 1];
               for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
                 neg = _ref1[_k];
@@ -705,8 +727,7 @@
       }
     },
     handleMouseDown: function(e) {
-      var originalValue, originalX, originalY, param,
-        _this = this;
+      var originalValue, originalX, originalY, param;
       if (this.isFocused()) {
         return;
       }
@@ -716,19 +737,17 @@
       originalX = e.clientX;
       originalY = e.clientY;
       originalValue = param.value;
-      return onceDragConsummated(e, function() {
-        return editor.dragging = {
-          cursor: _this.cursor(),
-          onMove: function(e) {
-            var d, dx, dy, multiplier;
-            dx = e.clientX - originalX;
-            dy = -(e.clientY - originalY);
-            d = param.axis === "x" ? dx : dy;
-            multiplier = 0.1;
-            return param.value = originalValue + d * multiplier;
-          }
-        };
-      });
+      return editor.dragging = {
+        cursor: this.cursor(),
+        onMove: function(e) {
+          var d, dx, dy, multiplier;
+          dx = e.clientX - originalX;
+          dy = -(e.clientY - originalY);
+          d = param.axis === "x" ? dx : dy;
+          multiplier = 0.1;
+          return param.value = originalValue + d * multiplier;
+        }
+      };
     },
     handleInput: function(e) {
       return this.props.param.value = +this.cleanAndGetValue();
@@ -867,10 +886,11 @@
     }
   });
 
-  config = {
+  window.config = config = {
     minGridSpacing: 70,
     hitTolerance: 15,
     snapTolerance: 5,
+    resolution: 0.5,
     styles: {
       param: {
         color: "green",

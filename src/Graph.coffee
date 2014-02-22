@@ -199,15 +199,44 @@ class Graph
     # @ctx.shadowColor = "rgba(0,0,0,0.65)"
     # @ctx.shadowBlur = 3
 
+
+
+    ###
+
+    All this lastCy, etc. crap is to optimize having fewer lineTo calls. It
+    fixes weird artifacting with straight lines in Chrome.
+
+    ###
+
     @ctx.beginPath()
 
-    resolution = 1
-    for i in [0..(@width()/resolution)]
-      cx = i * resolution
+    lastSample = @width() / config.resolution
+
+    lastCx = null
+    lastCy = null
+    dCy = null
+    for i in [0..lastSample]
+      cx = i * config.resolution
       x = lerp(cx, cxMin, cxMax, @xMin, @xMax)
       y = fn(x)
       cy = lerp(y, @yMin, @yMax, cyMin, cyMax)
-      @ctx.lineTo(cx, cy)
+
+      if !lastCy?
+        @ctx.moveTo(cx, cy)
+
+      if dCy?
+        if Math.abs((cy - lastCy) - dCy) > .000001
+          @ctx.lineTo(lastCx, lastCy)
+
+      dCy = cy - lastCy if lastCy?
+      lastCx = cx
+      lastCy = cy
+
+    @ctx.lineTo(cx, cy)
+
+
+
+
 
     @ctx.stroke()
     @ctx.restore()
