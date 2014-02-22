@@ -426,32 +426,34 @@
     render: function() {
       var apply, drawData, param, styleOpts, _i, _len, _ref;
       drawData = [];
-      apply = editor.applyForChainLink(this.props.chain, this.props.link);
-      if (apply.params) {
-        _ref = apply.params;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          param = _ref[_i];
-          if (param instanceof Param && param !== editor.xParam) {
-            styleOpts = config.styles.param;
-          } else {
-            styleOpts = config.styles.apply;
+      if (_.contains(this.props.chain.links, this.props.link)) {
+        apply = editor.applyForChainLink(this.props.chain, this.props.link);
+        if (apply.params) {
+          _ref = apply.params;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            param = _ref[_i];
+            if (param instanceof Param && param !== editor.xParam) {
+              styleOpts = config.styles.param;
+            } else {
+              styleOpts = config.styles.apply;
+            }
+            drawData.push({
+              apply: param,
+              styleOpts: styleOpts
+            });
           }
+        }
+        if (this.props.link === editor.hoveredLink) {
           drawData.push({
-            apply: param,
-            styleOpts: styleOpts
+            apply: apply,
+            styleOpts: config.styles.hoveredApply
+          });
+        } else {
+          drawData.push({
+            apply: apply,
+            styleOpts: config.styles.selectedApply
           });
         }
-      }
-      if (this.props.link === editor.hoveredLink) {
-        drawData.push({
-          apply: apply,
-          styleOpts: config.styles.hoveredApply
-        });
-      } else {
-        drawData.push({
-          apply: apply,
-          styleOpts: config.styles.selectedApply
-        });
       }
       return GraphView({
         drawData: drawData
@@ -942,7 +944,7 @@
     editor.hoveredLink = null;
     editor.hoveredParam = null;
     editor.cursor = null;
-    while (el.nodeType === Node.ELEMENT_NODE) {
+    while ((el != null ? el.nodeType : void 0) === Node.ELEMENT_NODE) {
       if (editor.hoveredLink == null) {
         editor.hoveredLink = (_ref = el.annotation) != null ? _ref.hoverLink : void 0;
       }

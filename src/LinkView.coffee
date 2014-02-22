@@ -17,18 +17,19 @@ AnnotateMixin = {
 LinkThumbnailView = React.createClass
   render: ->
     drawData = []
-    apply = editor.applyForChainLink(@props.chain, @props.link)
-    if apply.params
-      for param in apply.params
-        if param instanceof Param and param != editor.xParam
-          styleOpts = config.styles.param
-        else
-          styleOpts = config.styles.apply
-        drawData.push({apply: param, styleOpts})
-    if @props.link == editor.hoveredLink
-      drawData.push({apply, styleOpts: config.styles.hoveredApply})
-    else
-      drawData.push({apply, styleOpts: config.styles.selectedApply})
+    if _.contains(@props.chain.links, @props.link)
+      apply = editor.applyForChainLink(@props.chain, @props.link)
+      if apply.params
+        for param in apply.params
+          if param instanceof Param and param != editor.xParam
+            styleOpts = config.styles.param
+          else
+            styleOpts = config.styles.apply
+          drawData.push({apply: param, styleOpts})
+      if @props.link == editor.hoveredLink
+        drawData.push({apply, styleOpts: config.styles.hoveredApply})
+      else
+        drawData.push({apply, styleOpts: config.styles.selectedApply})
     GraphView {drawData}
 
 

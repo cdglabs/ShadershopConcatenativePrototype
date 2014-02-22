@@ -25,7 +25,7 @@ updateHover = ->
   editor.hoveredParam = null
   editor.cursor = null
 
-  while el.nodeType == Node.ELEMENT_NODE
+  while el?.nodeType == Node.ELEMENT_NODE
     editor.hoveredLink  ?= el.annotation?.hoverLink
     editor.hoveredParam ?= el.annotation?.hoverParam
     editor.cursor       ?= el.annotation?.cursor
