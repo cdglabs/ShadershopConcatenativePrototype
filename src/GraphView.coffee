@@ -32,7 +32,7 @@ GraphView = React.createClass
           spreadNum = 5
           styleOpts = _.clone(data.styleOpts)
           for i in [1...spreadNum]
-            styleOpts.opacity = lerp(i, 1, spreadNum, 0.25, 0.1)
+            styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
             for neg in [-1, 1]
               spreadOffset = spreadDistance * i * neg
               graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")

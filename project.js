@@ -154,8 +154,8 @@
       };
       labelDistance = 5;
       color = "0,0,0";
-      minorOpacity = 0.1;
-      majorOpacity = 0.2;
+      minorOpacity = 0.05;
+      majorOpacity = 0.1;
       axesOpacity = 0.5;
       labelOpacity = 1.0;
       textHeight = 12;
@@ -357,7 +357,7 @@
             spreadNum = 5;
             styleOpts = _.clone(data.styleOpts);
             for (i = _j = 1; 1 <= spreadNum ? _j < spreadNum : _j > spreadNum; i = 1 <= spreadNum ? ++_j : --_j) {
-              styleOpts.opacity = lerp(i, 1, spreadNum, 0.25, 0.1);
+              styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin);
               _ref1 = [-1, 1];
               for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
                 neg = _ref1[_k];
@@ -673,12 +673,12 @@
   });
 
   truncate = function(value) {
-    var decimalPlace, s;
-    s = "" + value;
-    decimalPlace = s.indexOf(".");
-    if (decimalPlace) {
-      return s.substr(0, decimalPlace + 4);
+    var s;
+    s = value.toFixed(4);
+    if (s.indexOf(".") !== -1) {
+      s = s.replace(/\.?0*$/, "");
     }
+    return s;
   };
 
   ContentEditableMixin = {
@@ -893,6 +893,8 @@
     hitTolerance: 15,
     snapTolerance: 5,
     resolution: 0.5,
+    spreadOpacityMax: 0.2,
+    spreadOpacityMin: 0.02,
     styles: {
       param: {
         color: "green",
@@ -1069,6 +1071,18 @@
       return Math.floor(a);
     }, function(a) {
       return "Math.floor(" + a + ")";
+    }), new Fn("ceil", 1, function(a) {
+      return Math.ceil(a);
+    }, function(a) {
+      return "Math.ceil(" + a + ")";
+    }), new Fn("min", 2, function(a, b) {
+      return Math.min(a, b);
+    }, function(a, b) {
+      return "Math.min(" + a + ", " + b + ")";
+    }), new Fn("max", 2, function(a, b) {
+      return Math.max(a, b);
+    }, function(a, b) {
+      return "Math.max(" + a + ", " + b + ")";
     })
   ];
 

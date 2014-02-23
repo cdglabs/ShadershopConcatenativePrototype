@@ -117,8 +117,8 @@ class Graph
 
     labelDistance = 5
     color = "0,0,0"
-    minorOpacity = 0.1
-    majorOpacity = 0.2
+    minorOpacity = 0.05
+    majorOpacity = 0.1
     axesOpacity = 0.5
     labelOpacity = 1.0
     textHeight = 12

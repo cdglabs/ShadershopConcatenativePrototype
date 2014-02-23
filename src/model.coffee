@@ -57,6 +57,15 @@ fnsToAdd = [
   new Fn "floor", 1,
     (a) -> Math.floor(a)
     (a) -> "Math.floor(#{a})"
+  new Fn "ceil", 1,
+    (a) -> Math.ceil(a)
+    (a) -> "Math.ceil(#{a})"
+  new Fn "min", 2,
+    (a, b) -> Math.min(a, b)
+    (a, b) -> "Math.min(#{a}, #{b})"
+  new Fn "max", 2,
+    (a, b) -> Math.max(a, b)
+    (a, b) -> "Math.max(#{a}, #{b})"
 ]
 
 

@@ -6,6 +6,9 @@ window.config = config = {
 
   resolution: 0.5
 
+  spreadOpacityMax: 0.2
+  spreadOpacityMin: 0.02
+
   styles: {
     param: {color: "green", opacity: 0.4}
     hoveredParam: {color: "green", opacity: 1}

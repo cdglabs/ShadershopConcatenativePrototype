@@ -1,8 +1,8 @@
 truncate = (value) ->
-  s = "" + value
-  decimalPlace = s.indexOf(".")
-  if decimalPlace
-    s.substr(0, decimalPlace + 4)
+  s = value.toFixed(4)
+  if s.indexOf(".") != -1
+    s = s.replace(/\.?0*$/, "")
+  return s
 
 
 
