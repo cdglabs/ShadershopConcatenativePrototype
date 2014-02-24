@@ -5,9 +5,6 @@ class Param
     @axis = "result"
     @reach = "single"
 
-  evaluate: (env) ->
-    env?.lookup(this) ? @value
-
   compileString: ->
     if this == editor.xParam
       "x"
@@ -17,76 +14,43 @@ class Param
       ""+@value
 
 
-class Env
-  constructor: ->
-    @paramValues = {}
-  set: (param, value) ->
-    @paramValues[param.id] = value
-  lookup: (param) ->
-    @paramValues[param.id]
-
-
 class Fn
-  constructor: (@title, @numParams, @compute, @compileString) ->
+  constructor: (@title, @numParams, @compileString) ->
 
 fnsToAdd = [
   new Fn "+", 2,
-    (a, b) -> a + b
     (a, b) -> "(#{a} + #{b})"
   new Fn "-", 2,
-    (a, b) -> a - b
     (a, b) -> "(#{a} - #{b})"
   new Fn "*", 2,
-    (a, b) -> a * b
     (a, b) -> "(#{a} * #{b})"
   new Fn "/", 2,
-    (a, b) -> a / b
     (a, b) -> "(#{a} / #{b})"
   new Fn "abs", 1,
-    (a) -> Math.abs(a)
     (a) -> "Math.abs(#{a})"
   new Fn "sin", 1,
-    (a) -> Math.sin(a)
     (a) -> "Math.sin(#{a})"
   new Fn "cos", 1,
-    (a) -> Math.cos(a)
     (a) -> "Math.cos(#{a})"
   new Fn "fract", 1,
-    (a) -> a - Math.floor(a)
     (a) -> "(#{a} - Math.floor(#{a}))"
   new Fn "floor", 1,
-    (a) -> Math.floor(a)
     (a) -> "Math.floor(#{a})"
   new Fn "ceil", 1,
-    (a) -> Math.ceil(a)
     (a) -> "Math.ceil(#{a})"
   new Fn "min", 2,
-    (a, b) -> Math.min(a, b)
     (a, b) -> "Math.min(#{a}, #{b})"
   new Fn "max", 2,
-    (a, b) -> Math.max(a, b)
     (a, b) -> "Math.max(#{a}, #{b})"
 ]
 
 
 class Apply
   constructor: (@fn, @params) ->
-  evaluate: (env) ->
-    paramValues = @params.map (param) ->
-      param.evaluate(env)
-    @fn.compute(paramValues...)
   compileString: ->
     paramCompileStrings = @params.map (param) ->
       param.compileString()
     @fn.compileString(paramCompileStrings...)
-  # isEqualTo: (otherApply) ->
-  #   return false unless otherApply instanceof Apply
-  #   return false if @fn != otherApply.fn
-  #   for param, i in @params
-  #     otherParam = otherApply.params[i]
-  #     return false if param instanceof Param and param != otherParam
-  #     return false if !param.isEqualTo(otherParam)
-  #   return true
 
 
 

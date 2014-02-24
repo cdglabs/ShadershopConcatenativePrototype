@@ -19,13 +19,15 @@ GraphView = React.createClass
       graph.drawGrid()
 
     for data in @props.drawData
+      s = data.apply.compileString()
+
       if data.apply instanceof Param && data.apply != editor.xParam
+        graphFn = eval("(function (x) { var spreadOffset = 0; return #{s}; })")
         if data.apply.axis == "x"
-          graph.drawVerticalLine(data.apply.evaluate(), data.styleOpts)
+          graph.drawVerticalLine(graphFn(0), data.styleOpts)
         else if data.apply.axis == "result"
-          graph.drawHorizontalLine(data.apply.evaluate(), data.styleOpts)
+          graph.drawHorizontalLine(graphFn(0), data.styleOpts)
       else
-        s = data.apply.compileString()
 
         if editor.spreadParam and editor.spreadParam != editor.xParam and @props.grid
           spreadDistance = 0.5
