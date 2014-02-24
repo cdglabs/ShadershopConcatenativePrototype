@@ -66,10 +66,6 @@ canvas {
   position: relative;
   background-color: #fff;
   border-bottom: 1px solid #ccc;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
   display: flex;
 }
 .addLinkButton {
@@ -80,6 +76,7 @@ canvas {
   width: 16px;
   height: 16px;
   padding: 0px;
+  line-height: 16px;
   z-index: 10;
   opacity: 0;
 
@@ -88,17 +85,17 @@ canvas {
   font-weight: bold;
   text-shadow: 0 1px 0 rgba(255,255,255,0.5);
   background-color: #ddd;
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#eee), to(#ccc));
+  background-image: linear-gradient(to bottom, #eee, #ccc);
   box-shadow: 0 2px 1px rgba(0,0,0,0.16), 0 0 1px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.55);
   border-radius: 20px;
   border: 0px;
 }
 .addLinkButton:hover {
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f3f3f3), to(#d3d3d3));
+  background-image: linear-gradient(to bottom, #f3f3f3, #d3d3d3);
 }
 .addLinkButton:active {
+  background-image: linear-gradient(to bottom, #cacaca, #d5d5d5);
   box-shadow: 0 1px 1px rgba(255,255,255,0.35), inset 0 0 1px rgba(0,0,0,0.5), inset 0 1px 4px rgba(0,0,0,0.4);
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#cacaca), to(#d5d5d5));
 }
 
 .linkRow:hover .addLinkButton {
@@ -133,10 +130,6 @@ canvas {
   border-radius: 4px;
   overflow: hidden;
   background-color: #fff;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
   display: flex;
 }
 .paramTitle, .paramValue {
@@ -183,6 +176,7 @@ canvas {
 <script src="vendor/underscore-min.js"></script>
 <script src="vendor/pointerevents.min.js"></script>
 <script src="vendor/keymaster.js"></script>
+<script src="vendor/prefixfree.js"></script>
 <script src="vendor/react-with-addons.js"></script>
 <script src="project.js"></script>
 <script>
