@@ -983,8 +983,6 @@
       this.value = value != null ? value : 0;
       this.id = _.uniqueId("p");
       this.title = "";
-      this.axis = "result";
-      this.reach = "single";
     }
 
     Param.prototype.compileString = function() {
@@ -1135,7 +1133,6 @@
 
   Editor = (function() {
     function Editor() {
-      this.params = [];
       this.chains = [];
       this.xParam = null;
       this.spreadParam = null;
@@ -1148,13 +1145,6 @@
       };
       this.dragging = null;
     }
-
-    Editor.prototype.addParam = function() {
-      var param;
-      param = new Param();
-      this.params.push(param);
-      return param;
-    };
 
     Editor.prototype.addChain = function(startParam) {
       var chain;
@@ -1191,8 +1181,6 @@
     var a, chain;
     a = new Param();
     editor.xParam = a;
-    a.axis = "x";
-    a.reach = "span";
     return chain = editor.addChain(a);
   })();
 

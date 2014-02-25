@@ -2,8 +2,6 @@ class Param
   constructor: (@value = 0) ->
     @id = _.uniqueId("p")
     @title = ""
-    @axis = "result"
-    @reach = "single"
 
   compileString: ->
     if this == editor.xParam
@@ -103,7 +101,6 @@ class StartLink
 
 class Editor
   constructor: ->
-    @params = []
     @chains = []
     @xParam = null
     @spreadParam = null
@@ -118,11 +115,6 @@ class Editor
   # ===========================================================================
   # Manipulating
   # ===========================================================================
-
-  addParam: ->
-    param = new Param()
-    @params.push param
-    return param
 
   addChain: (startParam) ->
     chain = new Chain(startParam)
@@ -146,24 +138,13 @@ class Editor
 
 
 
-
-
-
 editor = new Editor()
 
 do ->
   a = new Param()
   editor.xParam = a
 
-  a.axis = "x"
-  a.reach = "span"
-
   chain = editor.addChain(a)
-
-
-
-
-
 
 
 
