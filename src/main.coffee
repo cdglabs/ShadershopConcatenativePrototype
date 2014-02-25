@@ -21,12 +21,12 @@ updateHover = ->
 
   el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y)
 
-  editor.hoveredLink = null
+  editor.hoveredApply = null
   editor.hoveredParam = null
   editor.cursor = null
 
   while el?.nodeType == Node.ELEMENT_NODE
-    editor.hoveredLink  ?= el.annotation?.hoverLink
+    editor.hoveredApply ?= el.annotation?.hoverApply
     editor.hoveredParam ?= el.annotation?.hoverParam
     editor.cursor       ?= el.annotation?.cursor
 

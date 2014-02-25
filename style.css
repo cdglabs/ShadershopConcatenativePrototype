@@ -67,32 +67,32 @@ Steps palette
 Link
 ============================================================================ */
 
-.link {
+.apply {
   position: relative;
   background-color: #fff;
   border-bottom: 1px solid #ccc;
   display: -webkit-flex;
   display: flex;
 }
-.link.hovered {
+.apply.hovered {
   background-color: #fee;
 }
-.linkPlaceholder {
+.applyPlaceholder {
   height: 37px;
   background-color: #bbb;
   box-shadow: inset 0px 1px 3px rgba(0,0,0,0.5);
   /*border-bottom: 1px solid #ccc;*/
 }
 
-.link > .linkTitle {
+.apply > .fnTitle {
   margin: auto 0px auto 6px;
 }
 
-.link > .param {
+.apply > .param {
   margin: auto 0px auto 6px;
 }
 
-.link > .tinyGraph {
+.apply > .tinyGraph {
   margin: 0px 0px 0px auto;
   width: 36px;
   height: 36px;

@@ -2,14 +2,9 @@ MainGraphView = React.createClass
   render: ->
     drawData = []
 
-    # Draw the result for each chain.
-    for chain in editor.chains
-      link = _.last(chain.links)
-      apply = editor.applyForChainLink(chain, link)
-      drawData.push {apply, styleOpts: config.styles.selectedApply}
+    drawData.push {apply: editor.root, styleOpts: config.styles.selectedApply}
 
-    if link = editor.hoveredLink
-      apply = editor.applyForChainLink(chain, link)
+    if apply = editor.hoveredApply
       if apply.params
         for param in apply.params
           if param instanceof Param and param != editor.xParam

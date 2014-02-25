@@ -130,7 +130,7 @@ class Graph
 
     [largeSpacing, smallSpacing] = @findSpacing()
 
-    @ctx.lineWidth = 1
+    @ctx.lineWidth = 0.5
 
 
     # draw minor grid lines
