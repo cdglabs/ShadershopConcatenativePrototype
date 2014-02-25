@@ -59,7 +59,7 @@
       return {
         self: {
           apply: this.props.apply,
-          cursor: "-webkit-grab"
+          cursor: this.props.apply instanceof Param ? "" : "-webkit-grab"
         }
       };
     },
@@ -103,13 +103,14 @@
             }));
           },
           onMove: function(e) {
-            var applyEl, applyEls, insertAfterEl, refApply, _i, _len, _ref, _ref1;
+            var applyEl, applyEls, insertAfterEl, myHeight, refApply, _i, _len, _ref, _ref1;
             insertAfterEl = null;
             applyEls = document.querySelectorAll(".manager .apply");
             for (_i = 0, _len = applyEls.length; _i < _len; _i++) {
               applyEl = applyEls[_i];
               rect = applyEl.getBoundingClientRect();
-              if ((rect.bottom + rect.height * 2 > (_ref = e.clientY) && _ref > rect.top + rect.height / 2) && (rect.left < (_ref1 = e.clientX) && _ref1 < rect.right)) {
+              myHeight = 37;
+              if ((rect.bottom + myHeight * 1.5 > (_ref = e.clientY) && _ref > rect.top + myHeight / 2) && (rect.left < (_ref1 = e.clientX) && _ref1 < rect.right)) {
                 insertAfterEl = applyEl;
               }
             }
@@ -154,12 +155,15 @@
       }) : [
         R.div({
           className: "fnTitle"
-        }, apply.fn.title), _.tail(apply.params).map(function(param, i) {
+        }, apply.fn.title), apply.params.map(function(param, i) {
+          if (i === 0) {
+            return null;
+          }
           return ParamView({
             param: param,
             key: "" + i + "/" + param.id,
             replaceSelf: function(p) {
-              return apply.params[i] = p;
+              return apply.setParam(i, p);
             }
           });
         })

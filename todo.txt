@@ -1,8 +1,8 @@
 Remove annotate, use dataFor
+Break up graph calls into multiple calls
 Optimize graph by checking if the compileString is the same
-
-
-replaceWith for param (for linking)
+Make reordering around ProvisionalApply's better
+Implement replaceWith for first apply
 
 
 

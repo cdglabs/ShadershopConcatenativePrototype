@@ -4,7 +4,7 @@ ApplyView = React.createClass
     {
       self: {
         apply: @props.apply
-        cursor: "-webkit-grab"
+        cursor: if @props.apply instanceof Param then "" else "-webkit-grab"
       }
     }
 
@@ -42,7 +42,8 @@ ApplyView = React.createClass
           applyEls = document.querySelectorAll(".manager .apply")
           for applyEl in applyEls
             rect = applyEl.getBoundingClientRect()
-            if rect.bottom + rect.height * 2 > e.clientY > rect.top + rect.height / 2 and rect.left < e.clientX < rect.right
+            myHeight = 37
+            if rect.bottom + myHeight * 1.5 > e.clientY > rect.top + myHeight / 2 and rect.left < e.clientX < rect.right
               insertAfterEl = applyEl
 
           editor.removeApply(apply)
@@ -75,9 +76,10 @@ ApplyInternalsView = React.createClass
         [
           R.div {className: "fnTitle"},
             apply.fn.title
-          _.tail(apply.params).map (param, i) ->
+          apply.params.map (param, i) ->
+            return null if i == 0
             ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
-              apply.params[i] = p
+              apply.setParam(i, p)
             }
         ]
       ApplyThumbnailView {apply}
