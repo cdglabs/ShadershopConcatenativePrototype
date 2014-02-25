@@ -184,16 +184,14 @@ Param
 }
 
 
-.addLink {
+.provisionalApply {
   background-color: #eee;
-  box-shadow: 0px 1px 5px rgba(0,0,0,0.5) inset;
   overflow: auto;
   height: 200px;
-}
-.addLink .row {
-  padding: 6px;
   border-bottom: 1px solid #ccc;
 }
-
+.provisionalApply .possibleApply:last-child {
+  border-bottom: 0px;
+}
 
 

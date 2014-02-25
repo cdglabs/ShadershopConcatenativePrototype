@@ -182,33 +182,31 @@
       var apply, drawData, param, styleOpts, _i, _len, _ref;
       apply = this.props.apply;
       drawData = [];
-      if (true) {
-        if (apply.params) {
-          _ref = apply.params;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            param = _ref[_i];
-            if (param instanceof Param && param !== editor.xParam) {
-              styleOpts = config.styles.param;
-            } else {
-              styleOpts = config.styles.apply;
-            }
-            drawData.push({
-              apply: param,
-              styleOpts: styleOpts
-            });
+      if (apply.params) {
+        _ref = apply.params;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          param = _ref[_i];
+          if (param instanceof Param && param !== editor.xParam) {
+            styleOpts = config.styles.param;
+          } else {
+            styleOpts = config.styles.apply;
           }
-        }
-        if (apply === editor.hoveredApply) {
           drawData.push({
-            apply: apply,
-            styleOpts: config.styles.hoveredApply
-          });
-        } else {
-          drawData.push({
-            apply: apply,
-            styleOpts: config.styles.selectedApply
+            apply: param,
+            styleOpts: styleOpts
           });
         }
+      }
+      if (apply === editor.hoveredApply) {
+        drawData.push({
+          apply: apply,
+          styleOpts: config.styles.hoveredApply
+        });
+      } else {
+        drawData.push({
+          apply: apply,
+          styleOpts: config.styles.selectedApply
+        });
       }
       return R.div({
         className: "tinyGraph"
@@ -259,7 +257,7 @@
       var apply;
       apply = this.props.apply;
       return R.div({
-        className: "addLink"
+        className: "provisionalApply"
       }, apply.possibleApplies.map(function(possibleApply) {
         return PossibleApplyView({
           apply: apply,

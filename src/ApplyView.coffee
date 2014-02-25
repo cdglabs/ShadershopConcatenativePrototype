@@ -91,18 +91,17 @@ ApplyThumbnailView = React.createClass
   render: ->
     {apply} = @props
     drawData = []
-    if true # TODO: check if all its params are defined
-      if apply.params
-        for param in apply.params
-          if param instanceof Param and param != editor.xParam
-            styleOpts = config.styles.param
-          else
-            styleOpts = config.styles.apply
-          drawData.push({apply: param, styleOpts})
-      if apply == editor.hoveredApply
-        drawData.push({apply, styleOpts: config.styles.hoveredApply})
-      else
-        drawData.push({apply, styleOpts: config.styles.selectedApply})
+    if apply.params
+      for param in apply.params
+        if param instanceof Param and param != editor.xParam
+          styleOpts = config.styles.param
+        else
+          styleOpts = config.styles.apply
+        drawData.push({apply: param, styleOpts})
+    if apply == editor.hoveredApply
+      drawData.push({apply, styleOpts: config.styles.hoveredApply})
+    else
+      drawData.push({apply, styleOpts: config.styles.selectedApply})
     R.div {className: "tinyGraph"},
       GraphView {drawData}
 
@@ -131,7 +130,7 @@ PossibleApplyView = React.createClass
 ProvisionalApplyView = React.createClass
   render: ->
     {apply} = @props
-    R.div {className: "addLink"},
+    R.div {className: "provisionalApply"},
       apply.possibleApplies.map (possibleApply) ->
         PossibleApplyView {apply, possibleApply}
 
