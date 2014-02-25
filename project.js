@@ -156,8 +156,8 @@
       color = "0,0,0";
       minorOpacity = 0.05;
       majorOpacity = 0.1;
-      axesOpacity = 0.5;
-      labelOpacity = 1.0;
+      axesOpacity = 0.3;
+      labelOpacity = 0.3;
       textHeight = 12;
       minorColor = "rgba(" + color + ", " + minorOpacity + ")";
       majorColor = "rgba(" + color + ", " + majorOpacity + ")";
@@ -983,6 +983,7 @@
       this.value = value != null ? value : 0;
       this.id = _.uniqueId("p");
       this.title = "";
+      this.axis = "result";
     }
 
     Param.prototype.compileString = function() {

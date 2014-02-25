@@ -2,6 +2,7 @@ class Param
   constructor: (@value = 0) ->
     @id = _.uniqueId("p")
     @title = ""
+    @axis = "result"
 
   compileString: ->
     if this == editor.xParam
