@@ -12,7 +12,7 @@ refreshView = do ->
           MainGraphView {}
         R.div {className: "manager"},
           editor.applies().map (apply) ->
-            ApplyView {apply}
+            ApplyRowView {apply, key: apply.id}
         R.div {className: "dragging"},
           DraggingView {}
 

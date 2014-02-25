@@ -14,38 +14,45 @@ class Param
 
 
 class Fn
-  constructor: (@title, @numParams, @compileString) ->
+  constructor: (@title, @defaultParams, @compileString) ->
 
 fnsToAdd = [
-  new Fn "+", 2,
+  new Fn "+", [0, 0],
     (a, b) -> "(#{a} + #{b})"
-  new Fn "-", 2,
+  new Fn "-", [0, 0],
     (a, b) -> "(#{a} - #{b})"
-  new Fn "*", 2,
+  new Fn "*", [1, 1],
     (a, b) -> "(#{a} * #{b})"
-  new Fn "/", 2,
+  new Fn "/", [1, 1],
     (a, b) -> "(#{a} / #{b})"
-  new Fn "abs", 1,
+  new Fn "abs", [0],
     (a) -> "Math.abs(#{a})"
-  new Fn "sin", 1,
+  new Fn "sin", [0],
     (a) -> "Math.sin(#{a})"
-  new Fn "cos", 1,
+  new Fn "cos", [0],
     (a) -> "Math.cos(#{a})"
-  new Fn "fract", 1,
+  new Fn "fract", [0],
     (a) -> "(#{a} - Math.floor(#{a}))"
-  new Fn "floor", 1,
+  new Fn "floor", [0],
     (a) -> "Math.floor(#{a})"
-  new Fn "ceil", 1,
+  new Fn "ceil", [0],
     (a) -> "Math.ceil(#{a})"
-  new Fn "min", 2,
+  new Fn "min", [0, 0],
     (a, b) -> "Math.min(#{a}, #{b})"
-  new Fn "max", 2,
+  new Fn "max", [0, 0],
     (a, b) -> "Math.max(#{a}, #{b})"
 ]
 
 
 class Apply
-  constructor: (@fn, @params) ->
+  constructor: (@fn) ->
+    @id = _.uniqueId("a")
+    @params = @fn.defaultParams.map (paramValue) ->
+      new Param(paramValue)
+
+  setParam: (index, param) ->
+    @params[index] = param
+
   compileString: ->
     paramCompileStrings = @params.map (param) ->
       param.compileString()
@@ -53,45 +60,26 @@ class Apply
 
 
 
+class ProvisionalApply
+  constructor: ->
+    @id = _.uniqueId("a")
+    @params = [null]
+    @possibleApplies = fnsToAdd.map (fn) ->
+      new Apply(fn)
+    @selectedApply = null
+
+  setParam: (index, param) ->
+    @params[index] = param
+    for possibleApply in @possibleApplies
+      possibleApply.setParam(index, param)
+
+  compileString: ->
+    if @selectedApply
+      @selectedApply.compileString()
+    else
+      @params[0].compileString()
 
 
-
-
-
-# class Chain
-#   constructor: (startParam) ->
-#     startLink = new StartLink(startParam)
-#     @links = [startLink]
-
-#   appendLink: (fn) ->
-#     additionalParams = [0...fn.numParams-1].map -> new Param()
-#     link = new Link(fn, additionalParams)
-#     @links.push(link)
-#     return link
-
-#   appendLinkAfter: (fn, refLink) ->
-#     additionalParams = [0...fn.numParams-1].map -> new Param()
-#     link = new Link(fn, additionalParams)
-#     i = @links.indexOf(refLink)
-#     @links.splice(i+1, 0, link)
-#     return link
-
-#   insertLinkAfter: (link, refLink) ->
-#     i = @links.indexOf(refLink)
-#     @links.splice(i+1, 0, link)
-
-#   removeLink: (refLink) ->
-#     i = @links.indexOf(refLink)
-#     if i != -1
-#       @links.splice(i, 1)
-
-# class Link
-#   constructor: (@fn, @additionalParams) ->
-#     @addLinkVisible = false
-#     @id = _.uniqueId("l")
-
-# class StartLink
-#   constructor: (@startParam) ->
 
 
 
@@ -140,42 +128,23 @@ class Editor
     else
       nextApply = @nextApply(apply)
       if nextApply
-        nextApply.params[0] = apply.params[0]
+        nextApply.setParam(0, apply.params[0])
 
   insertApplyAfter: (apply, refApply) ->
     if @root == refApply
       @root = apply
-      apply.params[0] = refApply
+      apply.setParam(0, refApply)
     else
       nextApply = @nextApply(refApply)
       if nextApply
-        nextApply.params[0] = apply
-        apply.params[0] = refApply
+        nextApply.setParam(0, apply)
+        apply.setParam(0, refApply)
+
+  replaceApply: (apply, refApply) ->
+    @insertApplyAfter(apply, refApply)
+    @removeApply(refApply)
 
 
-  # # ===========================================================================
-  # # Manipulating
-  # # ===========================================================================
-
-  # addChain: (startParam) ->
-  #   chain = new Chain(startParam)
-  #   @chains.push(chain)
-  #   return chain
-
-
-  # # ===========================================================================
-  # # Rendering
-  # # ===========================================================================
-
-  # applyForChainLink: (chain, link) ->
-  #   for l in chain.links
-  #     if l instanceof StartLink
-  #       apply = l.startParam
-  #     else
-  #       params = [apply].concat(l.additionalParams)
-  #       apply = new Apply(l.fn, params)
-  #     break if l == link
-  #   return apply
 
 
 
@@ -185,12 +154,12 @@ do ->
   a = new Param()
   editor.xParam = a
 
-  sin = new Apply(fnsToAdd[5], [a])
-  plus = new Apply(fnsToAdd[0], [sin, new Param()])
+  sin = new Apply(fnsToAdd[5])
+  sin.setParam(0, a)
+  plus = new Apply(fnsToAdd[0])
+  plus.setParam(0, sin)
 
   editor.root = plus
-
-  # chain = editor.addChain(a)
 
 
 

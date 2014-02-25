@@ -1,12 +1,10 @@
-plus
+Remove annotate, use dataFor
+Optimize graph by checking if the compileString is the same
 
 
+replaceWith for param (for linking)
 
 
-
-
-
-Preview added links in the add menu (create by reacting)
 
 
 Add parameter inspector
@@ -15,10 +13,6 @@ Add parameter inspector
   sweep
 
 
-
-
-Easy things to do
-  Clean up Chain API (insertLinkAfter and appendLinkAfter)
 
 
 
@@ -48,10 +42,6 @@ Styling:
   Maybe switch to stylus?
 
 
-
-
-Default values for functions
-  (makes the architecture consistent)
 
 
 Snapping to grid for scrubbing

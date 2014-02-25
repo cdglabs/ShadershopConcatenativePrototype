@@ -1,15 +1,16 @@
 ApplyView = React.createClass
   mixins: [AnnotateMixin]
-  annotations: {
-    self: -> {
-      apply: @props.apply
-      cursor: "-webkit-grab"
+  annotate: ->
+    {
+      self: {
+        apply: @props.apply
+        cursor: "-webkit-grab"
+      }
     }
-    thumb: -> {hoverApply: @props.apply}
-  }
 
   handleMouseDown: (e) ->
     return if e.target.closest(".param")?
+    return if @props.isProvisional
 
     {apply} = @props
     e.preventDefault()
@@ -52,6 +53,7 @@ ApplyView = React.createClass
 
   render: ->
     {apply, isDraggingCopy} = @props
+
     if !isDraggingCopy and apply == editor.dragging?.apply
       return R.div {className: "applyPlaceholder"}
 
@@ -60,6 +62,13 @@ ApplyView = React.createClass
       hovered: apply == editor.hoveredApply
     }
     R.div {className: classNames, onMouseDown: @handleMouseDown},
+      ApplyInternalsView {apply}
+
+
+ApplyInternalsView = React.createClass
+  render: ->
+    {apply} = @props
+    R.div {className: "applyInternals"},
       if apply instanceof Param
         ParamView {param: apply}
       else
@@ -71,11 +80,14 @@ ApplyView = React.createClass
               apply.params[i] = p
             }
         ]
-      R.div {className: "tinyGraph", ref: "thumb"},
-        ApplyThumbnailView {apply}
+      ApplyThumbnailView {apply}
 
 
 ApplyThumbnailView = React.createClass
+  mixins: [AnnotateMixin]
+  annotate: ->
+    {self: {hoverApply: @props.apply}}
+
   render: ->
     {apply} = @props
     drawData = []
@@ -91,4 +103,60 @@ ApplyThumbnailView = React.createClass
         drawData.push({apply, styleOpts: config.styles.hoveredApply})
       else
         drawData.push({apply, styleOpts: config.styles.selectedApply})
-    GraphView {drawData}
+    R.div {className: "tinyGraph"},
+      GraphView {drawData}
+
+
+PossibleApplyView = React.createClass
+  mixins: [DataForMixin, AnnotateMixin]
+  annotate: ->
+    if @props.possibleApply.params.length > 1
+      {self: {hoverParam: @props.possibleApply.params[1]}}
+  handleHoverEnter: ->
+    @props.apply.selectedApply = @props.possibleApply
+  handleHoverLeave: ->
+    @props.apply.selectedApply = null
+  handleClick: ->
+    editor.replaceApply(@props.possibleApply, @props.apply)
+  render: ->
+    {apply, possibleApply} = @props
+    classNames = cx {
+      possibleApply: true
+      selectedPossibleApply: apply.selectedApply == possibleApply
+    }
+    R.div {className: classNames, onClick: @handleClick},
+      ApplyInternalsView {apply: possibleApply}
+
+
+ProvisionalApplyView = React.createClass
+  render: ->
+    {apply} = @props
+    R.div {className: "addLink"},
+      apply.possibleApplies.map (possibleApply) ->
+        PossibleApplyView {apply, possibleApply}
+
+
+
+ApplyRowView = React.createClass
+  toggleProvisionalApply: ->
+    {apply} = @props
+    nextApply = editor.nextApply(apply)
+    if nextApply instanceof ProvisionalApply
+      editor.removeApply(nextApply)
+    else
+      editor.insertApplyAfter(new ProvisionalApply(), apply)
+
+  render: ->
+    {apply} = @props
+    R.div {className: "applyRow"},
+      if apply instanceof ProvisionalApply
+        ProvisionalApplyView {apply}
+      else
+        [
+          ApplyView {apply}
+          R.button {className: "addApplyButton", onClick: @toggleProvisionalApply}, "+"
+        ]
+
+
+
+

@@ -68,11 +68,8 @@ Link
 ============================================================================ */
 
 .apply {
-  position: relative;
   background-color: #fff;
   border-bottom: 1px solid #ccc;
-  display: -webkit-flex;
-  display: flex;
 }
 .apply.hovered {
   background-color: #fee;
@@ -84,20 +81,32 @@ Link
   /*border-bottom: 1px solid #ccc;*/
 }
 
-.apply > .fnTitle {
+.applyInternals {
+  display: -webkit-flex;
+  display: flex;
+}
+
+.applyInternals > .fnTitle {
   margin: auto 0px auto 6px;
 }
 
-.apply > .param {
+.applyInternals > .param {
   margin: auto 0px auto 6px;
 }
 
-.apply > .tinyGraph {
+.applyInternals > .tinyGraph {
   margin: 0px 0px 0px auto;
   width: 36px;
   height: 36px;
   border-left: 1px solid #ccc;
   background-color: white;
+}
+
+.possibleApply {
+  border-bottom: 1px solid #ccc;
+}
+.selectedPossibleApply {
+  background-color: rgba(127, 200, 255, 0.7);
 }
 
 
@@ -140,7 +149,7 @@ Param
 
 
 
-.addLinkButton {
+.addApplyButton {
   position: absolute;
   left: 50%;
   margin-top: -8px;
@@ -162,15 +171,15 @@ Param
   border-radius: 20px;
   border: 0px;
 }
-.addLinkButton:hover {
+.addApplyButton:hover {
   background-image: linear-gradient(to bottom, #f3f3f3, #d3d3d3);
 }
-.addLinkButton:active {
+.addApplyButton:active {
   background-image: linear-gradient(to bottom, #cacaca, #d5d5d5);
   box-shadow: 0 1px 1px rgba(255,255,255,0.35), inset 0 0 1px rgba(0,0,0,0.5), inset 0 1px 4px rgba(0,0,0,0.4);
 }
 
-.linkRow:hover .addLinkButton {
+.applyRow:hover .addApplyButton {
   opacity: 1;
 }
 
