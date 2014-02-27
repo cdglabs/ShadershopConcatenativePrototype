@@ -1,13 +1,16 @@
-GraphView = React.createClass
+GridView = React.createClass
   sizeCanvas: ->
     canvas = @getDOMNode()
     rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width
-    canvas.height = rect.height
+    if canvas.width != rect.width or canvas.height != rect.height
+      canvas.width = rect.width
+      canvas.height = rect.height
+      return true
+    return false
 
   handleResize: ->
-    @sizeCanvas()
-    @refreshGraph()
+    if @sizeCanvas()
+      @refreshGraph()
 
   refreshGraph: ->
     canvas = @getDOMNode()
@@ -15,33 +18,62 @@ GraphView = React.createClass
     graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
     graph.clear()
 
-    if @props.grid
-      graph.drawGrid()
+    graph.drawGrid()
 
-    for data in @props.drawData
-      s = data.apply.compileString()
+  componentDidMount: ->
+    @sizeCanvas()
+    @refreshGraph()
+    window.addEventListener("resize", @handleResize)
 
-      if data.apply instanceof Param && data.apply != editor.xParam
-        graphFn = eval("(function (x) { var spreadOffset = 0; return #{s}; })")
-        if data.apply.axis == "x"
-          graph.drawVerticalLine(graphFn(0), data.styleOpts)
-        else if data.apply.axis == "result"
-          graph.drawHorizontalLine(graphFn(0), data.styleOpts)
-      else
+  componentWillUnmount: ->
+    window.removeEventListener("resize", @handleResize)
 
-        if editor.spreadParam and editor.spreadParam != editor.xParam and @props.grid
-          spreadDistance = 0.5
-          spreadNum = 5
-          styleOpts = _.clone(data.styleOpts)
-          for i in [1...spreadNum]
-            styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
-            for neg in [-1, 1]
-              spreadOffset = spreadDistance * i * neg
-              graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")
-              graph.drawGraph(graphFn, styleOpts)
+  render: ->
+    R.canvas {}
 
-        graphFn = eval("(function (x) { var spreadOffset = 0; return #{s}; })")
-        graph.drawGraph(graphFn, data.styleOpts)
+
+
+GraphView = React.createClass
+  sizeCanvas: ->
+    canvas = @getDOMNode()
+    rect = canvas.getBoundingClientRect()
+    if canvas.width != rect.width or canvas.height != rect.height
+      canvas.width = rect.width
+      canvas.height = rect.height
+      return true
+    return false
+
+  handleResize: ->
+    if @sizeCanvas()
+      @refreshGraph()
+
+  refreshGraph: ->
+    {apply, spreadOffset, styleOpts} = @props
+    spreadOffset ?= 0
+
+    canvas = @getDOMNode()
+
+    s = apply.compileString()
+
+    # Optimization: Check if we need to redraw
+    drawOptions = _.extend {s, spreadOffset, axis: apply.axis}, styleOpts
+    if _.isEqual drawOptions, @lastDropOptions_
+      return
+    @lastDropOptions_ = drawOptions
+
+
+    graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
+    graph.clear()
+
+    graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")
+
+    if apply instanceof Param && apply != editor.xParam
+      if apply.axis == "x"
+        graph.drawVerticalLine(graphFn(0), styleOpts)
+      else if apply.axis == "result"
+        graph.drawHorizontalLine(graphFn(0), styleOpts)
+    else
+      graph.drawGraph(graphFn, styleOpts)
 
 
   componentDidMount: ->
@@ -57,3 +89,4 @@ GraphView = React.createClass
 
   render: ->
     R.canvas {}
+

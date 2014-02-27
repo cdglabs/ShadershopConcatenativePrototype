@@ -8,8 +8,7 @@ refreshView = do ->
       editor.dragging?.cursor ? editor.cursor ? ""
     render: ->
       R.div {className: "editor", style: {cursor: @cursor()}},
-        R.div {className: "main"},
-          MainGraphView {}
+        MainGraphView {}
         R.div {className: "manager"},
           editor.applies().map (apply) ->
             ApplyRowView {apply, key: apply.id}

@@ -1,8 +1,18 @@
 MainGraphView = React.createClass
   render: ->
-    drawData = []
+    graphViews = []
 
-    drawData.push {apply: editor.root, styleOpts: config.styles.selectedApply}
+    if editor.spreadParam and editor.spreadParam != editor.xParam
+      spreadDistance = 0.5
+      spreadNum = 5
+      for i in [1...spreadNum]
+        styleOpts = _.clone(config.styles.selectedApply)
+        styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
+        for neg in [-1, 1]
+          spreadOffset = spreadDistance * i * neg
+          graphViews.push(GraphView {apply: editor.root, styleOpts, spreadOffset})
+
+    graphViews.push(GraphView {apply: editor.root, styleOpts: config.styles.selectedApply})
 
     if apply = editor.hoveredApply
       if apply.params
@@ -11,10 +21,12 @@ MainGraphView = React.createClass
             styleOpts = config.styles.param
           else
             styleOpts = config.styles.apply
-          drawData.push({apply: param, styleOpts})
-      drawData.push {apply, styleOpts: config.styles.hoveredApply}
+          graphViews.push(GraphView {apply: param, styleOpts})
+      graphViews.push(GraphView {apply, styleOpts: config.styles.hoveredApply})
 
     if param = editor.hoveredParam
-      drawData.push {apply: param, styleOpts: config.styles.hoveredParam}
+      graphViews.push(GraphView {apply: param, styleOpts: config.styles.hoveredParam})
 
-    GraphView {drawData, grid: true}
+    R.div {className: "main"},
+      GridView {}
+      graphViews

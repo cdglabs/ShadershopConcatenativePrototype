@@ -1,8 +1,7 @@
 Remove annotate, use dataFor
-Break up graph calls into multiple calls
-Optimize graph by checking if the compileString is the same
 Make reordering around ProvisionalApply's better
 Implement replaceWith for first apply
+DRY up GraphView and GridView
 
 
 
