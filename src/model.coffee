@@ -12,35 +12,58 @@ class Param
     else
       ""+@value
 
+  compileGlslString: ->
+    if this == editor.xParam
+      "x"
+    else if this == editor.yParam
+      "y"
+    else
+      floatString = ""+@value
+      if floatString.indexOf(".") == -1
+        floatString += "."
+      return floatString
+
 
 class Fn
-  constructor: (@title, @defaultParams, @compileString) ->
+  constructor: (@title, @defaultParams, @compileString, @compileGlslString) ->
 
 fnsToAdd = [
   new Fn "+", [0, 0],
     (a, b) -> "(#{a} + #{b})"
+    (a, b) -> "(#{a} + #{b})"
   new Fn "-", [0, 0],
+    (a, b) -> "(#{a} - #{b})"
     (a, b) -> "(#{a} - #{b})"
   new Fn "*", [1, 1],
     (a, b) -> "(#{a} * #{b})"
+    (a, b) -> "(#{a} * #{b})"
   new Fn "/", [1, 1],
+    (a, b) -> "(#{a} / #{b})"
     (a, b) -> "(#{a} / #{b})"
   new Fn "abs", [0],
     (a) -> "Math.abs(#{a})"
+    (a) -> "abs(#{a})"
   new Fn "sin", [0],
     (a) -> "Math.sin(#{a})"
+    (a) -> "sin(#{a})"
   new Fn "cos", [0],
     (a) -> "Math.cos(#{a})"
+    (a) -> "cos(#{a})"
   new Fn "fract", [0],
     (a) -> "(#{a} - Math.floor(#{a}))"
+    (a) -> "fract(#{a})"
   new Fn "floor", [0],
     (a) -> "Math.floor(#{a})"
+    (a) -> "floor(#{a})"
   new Fn "ceil", [0],
     (a) -> "Math.ceil(#{a})"
+    (a) -> "ceil(#{a})"
   new Fn "min", [0, 0],
     (a, b) -> "Math.min(#{a}, #{b})"
+    (a, b) -> "min(#{a}, #{b})"
   new Fn "max", [0, 0],
     (a, b) -> "Math.max(#{a}, #{b})"
+    (a, b) -> "max(#{a}, #{b})"
 ]
 
 
@@ -58,6 +81,11 @@ class Apply
       param.compileString()
     @fn.compileString(paramCompileStrings...)
 
+  compileGlslString: ->
+    paramCompileStrings = @params.map (param) ->
+      param.compileGlslString()
+    @fn.compileGlslString(paramCompileStrings...)
+
 
 
 class ProvisionalApply
@@ -73,11 +101,14 @@ class ProvisionalApply
     for possibleApply in @possibleApplies
       possibleApply.setParam(index, param)
 
+  effectiveApply: ->
+    @selectedApply ? @params[0]
+
   compileString: ->
-    if @selectedApply
-      @selectedApply.compileString()
-    else
-      @params[0].compileString()
+    @effectiveApply().compileString()
+
+  compileGlslString: ->
+    @effectiveApply().compileGlslString()
 
 
 
@@ -93,6 +124,7 @@ class Editor
     @root = null
 
     @xParam = null
+    @yParam = null
     @spreadParam = null
 
     @hoveredParam = null
@@ -101,6 +133,8 @@ class Editor
     @cursor = null
     @mousePosition = {x: 0, y: 0}
     @dragging = null
+
+    @shaderView = false
 
 
   applies: ->

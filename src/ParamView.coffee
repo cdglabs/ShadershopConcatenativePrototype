@@ -88,6 +88,8 @@ ParamValueView = React.createClass
       do =>
         if editor.xParam == param
           R.i {}, "x"
+        else if editor.yParam == param
+          R.i {}, "y"
         else
           truncate(param.value)
 
@@ -161,10 +163,15 @@ ParamView = React.createClass
       else
         param.axis = "result"
     else if key.shift
-      if param == editor.spreadParam
-        editor.spreadParam = null
+      if editor.xParam == param
+        editor.xParam = null
       else
-        editor.spreadParam = param
+        editor.xParam = param
+    else if key.option
+      if editor.yParam == param
+        editor.yParam = null
+      else
+        editor.yParam = param
   handleMouseUp: (e) ->
     return unless draggingParam = editor.dragging?.param
     @props.replaceSelf(draggingParam)

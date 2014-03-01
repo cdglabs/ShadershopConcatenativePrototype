@@ -1,7 +1,10 @@
-Remove annotate, use dataFor
-Make reordering around ProvisionalApply's better
-Implement replaceWith for first apply
-DRY up GraphView and GridView
+Code cleanup
+  Remove annotate, use dataFor
+  Make reordering around ProvisionalApply's better
+  Implement replaceWith for first apply
+  DRY up GraphView and GridView
+  Optimization is broken on resize - need to force redraw
+  Fix -0 for truncate
 
 
 
@@ -13,14 +16,12 @@ Add parameter inspector
 
 
 
+Things to think about
+  Changing which parameter is the x-axis
+    Confusing
+    Might work with an animation to see the "rotation"?
+  Feature: Scrubbing the x value and seeing the results (numbers)
 
-
-
-Hacky things
-  transclusion drag-drop UI uses a variable on editor
-    param replacer prop - should be a param slot?
-  hover implementation
-  separate the idea of a parameter (or result) and a view of the parameter
 
 
 
@@ -34,11 +35,6 @@ Animate
   Hovered link
   Every graph when you add a new link
 
-
-
-
-Styling:
-  Maybe switch to stylus?
 
 
 
@@ -56,3 +52,31 @@ Long term:
   Function abstraction
   Higher-dimensional
   Different types of vis (i.e. color map = shader)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bret - Glen feedback (28 Feb 2014)
+  Keep parameter spread visible but "on the grid" of the initial hover
+    Red-blue to show increase/decrease on the parameter
+  Play with a horizontal layout (Forth style?) to get more "code" on the screen
+  For branching problem:
+    Have "stops" and then drag output thumbnails onto parameter slots
+  For visualizing sin(fract(x)):
+    Show a sin wave and highlight the range of fract on the domain of sin, show where we're sampling from
+    Scrubbing interface: as you move x-wise on the final graph, show where we sampled from on virgin graphs
+    Show the y-to-x "rotation" as you go from fract to sin, while also showing the span of values
+  Package functions with an outliner interface
+    Maybe don't even need to explicitly expose parameters, instead just open the function up and link a parameter from the outside to the inside. This way you could even modify subcalls. But then when you change the prototype you're in disaster land...

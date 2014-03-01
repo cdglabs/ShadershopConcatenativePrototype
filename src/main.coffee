@@ -69,3 +69,9 @@ pointerup = (e) ->
     editor.dragging = null
     refresh()
   , 1) # Can remove setTimeout once I get event order right
+
+
+
+key "s", ->
+  editor.shaderView = !editor.shaderView
+  refresh()
