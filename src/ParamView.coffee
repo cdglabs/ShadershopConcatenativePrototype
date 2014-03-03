@@ -172,14 +172,11 @@ ParamView = React.createClass
         editor.yParam = null
       else
         editor.yParam = param
-  handleMouseUp: (e) ->
-    return unless draggingParam = editor.dragging?.param
-    @props.replaceSelf(draggingParam)
   render: ->
     classNames = cx {
       param: true
       hovered: editor.hoveredParam == @props.param
     }
-    R.div {className: classNames, onClick: @handleClick, onMouseUp: @handleMouseUp},
+    R.div {className: classNames, onClick: @handleClick},
       ParamTitleView {param: @props.param}
       ParamValueView {param: @props.param}

@@ -71,22 +71,34 @@ ApplyInternalsView = React.createClass
     {apply} = @props
     R.div {className: "applyInternals"},
       if apply instanceof Param
-        ParamView {param: apply}
+        R.div {className: "paramSlot"},
+          ParamView {param: apply}
       else
         [
           R.div {className: "fnTitle"},
             apply.fn.title
-          apply.params.map (param, i) ->
-            return null if i == 0
-            if param instanceof Param
-              ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
-                apply.setParam(i, p)
-              }
-            else
-              R.div {className: "paramApply"},
-                ApplyThumbnailView {apply: param}
+          apply.params.map (param, paramIndex) ->
+            return null if paramIndex == 0
+            ParamSlotView {param, apply, paramIndex}
+
         ]
       ApplyThumbnailView {apply}
+
+
+ParamSlotView = React.createClass
+  mixins: [DataForMixin]
+
+  handleTransclusionDrop: (p) ->
+    {param, apply, paramIndex} = @props
+    apply.setParam(paramIndex, p)
+
+  render: ->
+    {param, apply, paramIndex} = @props
+    R.div {className: "paramSlot"},
+      if param instanceof Param
+        ParamView {param: param}
+      else
+        ApplyThumbnailView {apply: param}
 
 
 ApplyThumbnailView = React.createClass

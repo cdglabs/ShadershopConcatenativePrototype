@@ -60,11 +60,23 @@ updateHover2 = ->
 
 
 
+closestDataFor = (el, property) ->
+  while el?.nodeType == Node.ELEMENT_NODE
+    if found = el.dataFor?[property]
+      return found
+    el = el.parentNode
+  return undefined
+
+
+
 pointermove = (e) ->
   editor.mousePosition = {x: e.clientX, y: e.clientY}
   editor.dragging?.onMove?(e)
 
 pointerup = (e) ->
+  if p = editor.dragging?.param
+    closestDataFor(e.target, "handleTransclusionDrop")?(p)
+
   setTimeout(->
     editor.dragging = null
     refresh()

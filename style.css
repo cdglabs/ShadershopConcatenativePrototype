@@ -91,15 +91,11 @@ Link
   margin: auto 0px auto 6px;
 }
 
-.applyInternals > .param {
+.applyInternals > .paramSlot {
   margin: auto 0px auto 6px;
 }
 
-.applyInternals > .paramApply {
-  margin: auto 0px auto 6px;
-}
-
-.paramApply .tinyGraph {
+.paramSlot .tinyGraph {
   position: relative;
   width: 30px;
   height: 30px;
