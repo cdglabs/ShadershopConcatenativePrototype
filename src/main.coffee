@@ -74,7 +74,7 @@ pointermove = (e) ->
   editor.dragging?.onMove?(e)
 
 pointerup = (e) ->
-  if p = editor.dragging?.param
+  if p = editor.dragging?.transclusion
     closestDataFor(e.target, "handleTransclusionDrop")?(p)
 
   setTimeout(->

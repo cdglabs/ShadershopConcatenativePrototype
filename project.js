@@ -69,6 +69,9 @@
       if (e.target.closest(".param") != null) {
         return;
       }
+      if (e.target.closest(".applyThumbnail") != null) {
+        return;
+      }
       if (this.props.isProvisional) {
         return;
       }
@@ -233,7 +236,7 @@
         key: "result"
       }));
       return R.div({
-        className: "tinyGraph"
+        className: "applyThumbnail"
       }, graphViews);
     }
   });
@@ -944,7 +947,7 @@
               param: _this.props.param
             });
           },
-          param: _this.props.param
+          transclusion: _this.props.param
         };
       });
     },
@@ -1320,7 +1323,7 @@
 
   pointerup = function(e) {
     var p, _base, _ref;
-    if (p = (_ref = editor.dragging) != null ? _ref.param : void 0) {
+    if (p = (_ref = editor.dragging) != null ? _ref.transclusion : void 0) {
       if (typeof (_base = closestDataFor(e.target, "handleTransclusionDrop")) === "function") {
         _base(p);
       }

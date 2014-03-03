@@ -95,7 +95,7 @@ Link
   margin: auto 0px auto 6px;
 }
 
-.paramSlot .tinyGraph {
+.paramSlot .applyThumbnail {
   position: relative;
   width: 30px;
   height: 30px;
@@ -103,7 +103,7 @@ Link
   background-color: white;
 }
 
-.applyInternals > .tinyGraph {
+.applyInternals > .applyThumbnail {
   position: relative;
   margin: 0px 0px 0px auto;
   width: 36px;

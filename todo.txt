@@ -8,6 +8,8 @@ Code cleanup
   shader view should show hoveredApply
 
 
+Catch infinite loops with apply reordering
+
 
 
 Add parameter inspector

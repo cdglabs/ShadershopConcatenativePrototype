@@ -130,7 +130,7 @@ ParamTitleView = React.createClass
         offset: offset
         render: =>
           ParamView {param: @props.param}
-        param: @props.param
+        transclusion: @props.param
       }
 
   handleInput: ->

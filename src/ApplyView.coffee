@@ -10,6 +10,7 @@ ApplyView = React.createClass
 
   handleMouseDown: (e) ->
     return if e.target.closest(".param")?
+    return if e.target.closest(".applyThumbnail")?
     return if @props.isProvisional
 
     {apply} = @props
@@ -71,6 +72,7 @@ ApplyInternalsView = React.createClass
     {apply} = @props
     R.div {className: "applyInternals"},
       if apply instanceof Param
+        # TODO: Switch this to ParamSlotView
         R.div {className: "paramSlot"},
           ParamView {param: apply}
       else
@@ -80,7 +82,6 @@ ApplyInternalsView = React.createClass
           apply.params.map (param, paramIndex) ->
             return null if paramIndex == 0
             ParamSlotView {param, apply, paramIndex}
-
         ]
       ApplyThumbnailView {apply}
 
@@ -125,7 +126,7 @@ ApplyThumbnailView = React.createClass
       styleOpts = config.styles.selectedApply
     graphViews.push(GraphView {apply, styleOpts, key: "result"})
 
-    R.div {className: "tinyGraph"},
+    R.div {className: "applyThumbnail"},
       graphViews
 
 
