@@ -78,9 +78,13 @@ ApplyInternalsView = React.createClass
             apply.fn.title
           apply.params.map (param, i) ->
             return null if i == 0
-            ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
-              apply.setParam(i, p)
-            }
+            if param instanceof Param
+              ParamView {param: param, key: "#{i}/#{param.id}", replaceSelf: (p) ->
+                apply.setParam(i, p)
+              }
+            else
+              R.div {className: "paramApply"},
+                ApplyThumbnailView {apply: param}
         ]
       ApplyThumbnailView {apply}
 

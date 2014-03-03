@@ -95,6 +95,18 @@ Link
   margin: auto 0px auto 6px;
 }
 
+.applyInternals > .paramApply {
+  margin: auto 0px auto 6px;
+}
+
+.paramApply .tinyGraph {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ccc;
+  background-color: white;
+}
+
 .applyInternals > .tinyGraph {
   position: relative;
   margin: 0px 0px 0px auto;

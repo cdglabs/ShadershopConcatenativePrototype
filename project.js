@@ -159,13 +159,21 @@
           if (i === 0) {
             return null;
           }
-          return ParamView({
-            param: param,
-            key: "" + i + "/" + param.id,
-            replaceSelf: function(p) {
-              return apply.setParam(i, p);
-            }
-          });
+          if (param instanceof Param) {
+            return ParamView({
+              param: param,
+              key: "" + i + "/" + param.id,
+              replaceSelf: function(p) {
+                return apply.setParam(i, p);
+              }
+            });
+          } else {
+            return R.div({
+              className: "paramApply"
+            }, ApplyThumbnailView({
+              apply: param
+            }));
+          }
         })
       ], ApplyThumbnailView({
         apply: apply
@@ -1562,14 +1570,15 @@
   editor = new Editor();
 
   (function() {
-    var a, plus, sin;
+    var a, sin, times;
     a = new Param();
     editor.xParam = a;
     sin = new Apply(fnsToAdd[5]);
     sin.setParam(0, a);
-    plus = new Apply(fnsToAdd[0]);
-    plus.setParam(0, sin);
-    return editor.root = plus;
+    times = new Apply(fnsToAdd[2]);
+    times.setParam(0, sin);
+    times.setParam(1, sin);
+    return editor.root = times;
   })();
 
   lerp = function(x, dMin, dMax, rMin, rMax) {

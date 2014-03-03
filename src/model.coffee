@@ -190,10 +190,12 @@ do ->
 
   sin = new Apply(fnsToAdd[5])
   sin.setParam(0, a)
-  plus = new Apply(fnsToAdd[0])
-  plus.setParam(0, sin)
 
-  editor.root = plus
+  times = new Apply(fnsToAdd[2])
+  times.setParam(0, sin)
+  times.setParam(1, sin)
+
+  editor.root = times
 
 
 

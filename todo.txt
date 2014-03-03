@@ -5,6 +5,7 @@ Code cleanup
   DRY up GraphView and GridView
   Optimization is broken on resize - need to force redraw
   Fix -0 for truncate
+  shader view should show hoveredApply
 
 
 
