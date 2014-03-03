@@ -95,7 +95,7 @@ Link
   margin: auto 0px auto 6px;
 }
 
-.paramSlot .applyThumbnail {
+.applyThumbnail {
   position: relative;
   width: 30px;
   height: 30px;
@@ -104,12 +104,10 @@ Link
 }
 
 .applyInternals > .applyThumbnail {
-  position: relative;
   margin: 0px 0px 0px auto;
   width: 36px;
   height: 36px;
-  border-left: 1px solid #ccc;
-  background-color: white;
+  border-width: 0px 0px 0px 1px;
 }
 
 .possibleApply {

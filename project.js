@@ -205,6 +205,33 @@
         }
       };
     },
+    handleMouseDown: function(e) {
+      var apply, el, offset, rect,
+        _this = this;
+      e.preventDefault();
+      apply = this.props.apply;
+      el = this.getDOMNode();
+      rect = el.getBoundingClientRect();
+      offset = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+      editor.dragging = {
+        cursor: "-webkit-grabbing"
+      };
+      return onceDragConsummated(e, function() {
+        return editor.dragging = {
+          cursor: "-webkit-grabbing",
+          offset: offset,
+          render: function() {
+            return ApplyThumbnailView({
+              apply: apply
+            });
+          },
+          transclusion: apply
+        };
+      });
+    },
     render: function() {
       var apply, graphViews, i, param, styleOpts, _i, _len, _ref;
       apply = this.props.apply;
@@ -236,7 +263,8 @@
         key: "result"
       }));
       return R.div({
-        className: "applyThumbnail"
+        className: "applyThumbnail",
+        onMouseDown: this.handleMouseDown
       }, graphViews);
     }
   });

@@ -107,6 +107,31 @@ ApplyThumbnailView = React.createClass
   annotate: ->
     {self: {hoverApply: @props.apply}}
 
+  handleMouseDown: (e) ->
+    e.preventDefault()
+
+    {apply} = @props
+
+    el = @getDOMNode()
+    rect = el.getBoundingClientRect()
+    offset = {
+      x: e.clientX - rect.left
+      y: e.clientY - rect.top
+    }
+
+    editor.dragging = {
+      cursor: "-webkit-grabbing"
+    }
+
+    onceDragConsummated e, =>
+      editor.dragging = {
+        cursor: "-webkit-grabbing"
+        offset: offset
+        render: =>
+          ApplyThumbnailView {apply}
+        transclusion: apply
+      }
+
   render: ->
     {apply} = @props
 
@@ -126,7 +151,7 @@ ApplyThumbnailView = React.createClass
       styleOpts = config.styles.selectedApply
     graphViews.push(GraphView {apply, styleOpts, key: "result"})
 
-    R.div {className: "applyThumbnail"},
+    R.div {className: "applyThumbnail", onMouseDown: @handleMouseDown},
       graphViews
 
 
