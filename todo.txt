@@ -2,14 +2,12 @@ Code cleanup
   Remove annotate, use dataFor
   Make reordering around ProvisionalApply's better
   Implement replaceWith for first apply
-  DRY up GraphView and GridView
   DRY up transclusion start (mousedown handlers in ApplyThumbnailView and ParamTitleView)
-  Optimization is broken on resize - need to force redraw
   Fix -0 for truncate
   shader view should show hoveredApply
 
 
-Catch infinite loops with apply reordering
+Catch infinite loops with apply reordering and transclusion
 
 
 

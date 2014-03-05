@@ -1,4 +1,17 @@
-GridView = React.createClass
+CanvasView = React.createClass
+  clear: ->
+    canvas = @getDOMNode()
+    ctx = canvas.getContext("2d")
+    ctx.save()
+    ctx.setTransform(1,0,0,1,0,0)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.restore()
+
+  draw: ->
+    @clear()
+    canvas = @getDOMNode()
+    @props.drawFn(canvas)
+
   sizeCanvas: ->
     canvas = @getDOMNode()
     rect = canvas.getBoundingClientRect()
@@ -10,19 +23,11 @@ GridView = React.createClass
 
   handleResize: ->
     if @sizeCanvas()
-      @refreshGraph()
-
-  refreshGraph: ->
-    canvas = @getDOMNode()
-
-    graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
-    graph.clear()
-
-    graph.drawGrid()
+      @draw()
 
   componentDidMount: ->
     @sizeCanvas()
-    @refreshGraph()
+    @draw()
     window.addEventListener("resize", @handleResize)
 
   componentWillUnmount: ->
@@ -32,39 +37,25 @@ GridView = React.createClass
     R.canvas {}
 
 
+GridView = React.createClass
+  drawFn: (canvas) ->
+    graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
+    graph.drawGrid()
+
+  render: ->
+    CanvasView {drawFn: @drawFn}
+
 
 GraphView = React.createClass
-  sizeCanvas: ->
-    canvas = @getDOMNode()
-    rect = canvas.getBoundingClientRect()
-    if canvas.width != rect.width or canvas.height != rect.height
-      canvas.width = rect.width
-      canvas.height = rect.height
-      return true
-    return false
+  getDefaultProps: ->
+    {spreadOffset: 0}
 
-  handleResize: ->
-    if @sizeCanvas()
-      @refreshGraph()
-
-  refreshGraph: ->
+  drawFn: (canvas) ->
     {apply, spreadOffset, styleOpts} = @props
-    spreadOffset ?= 0
-
-    canvas = @getDOMNode()
-
-    s = apply.compileString()
-
-    # Optimization: Check if we need to redraw
-    drawOptions = _.extend {s, spreadOffset, axis: apply.axis}, styleOpts
-    if _.isEqual drawOptions, @lastDropOptions_
-      return
-    @lastDropOptions_ = drawOptions
-
 
     graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
-    graph.clear()
 
+    s = apply.compileString()
     graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")
 
     if apply instanceof Param && apply != editor.xParam
@@ -75,18 +66,17 @@ GraphView = React.createClass
     else
       graph.drawGraph(graphFn, styleOpts)
 
-
-  componentDidMount: ->
-    @sizeCanvas()
-    @refreshGraph()
-    window.addEventListener("resize", @handleResize)
+  render: ->
+    CanvasView {drawFn: @drawFn, ref: "canvas"}
 
   componentDidUpdate: ->
-    @refreshGraph()
+    {apply, spreadOffset, styleOpts} = @props
 
-  componentWillUnmount: ->
-    window.removeEventListener("resize", @handleResize)
+    # Optimization: Check if we need to redraw
+    s = apply.compileString()
+    drawOptions = _.extend {s, spreadOffset, axis: apply.axis}, styleOpts
+    if _.isEqual drawOptions, @lastDropOptions_
+      return
+    @lastDropOptions_ = drawOptions
 
-  render: ->
-    R.canvas {}
-
+    @refs.canvas.draw()
