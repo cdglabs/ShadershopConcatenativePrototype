@@ -136,7 +136,8 @@
       }
       classNames = cx({
         apply: true,
-        hovered: apply === editor.hoveredApply
+        hovered: apply === editor.hoveredApply,
+        isStart: typeof apply.isStart === "function" ? apply.isStart() : void 0
       });
       return R.div({
         className: classNames,
@@ -236,7 +237,7 @@
       var apply, graphViews, i, param, styleOpts, _i, _len, _ref;
       apply = this.props.apply;
       graphViews = [];
-      if (apply.params) {
+      if (apply.params && !(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {
         _ref = apply.params;
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
           param = _ref[i];
@@ -1417,7 +1418,11 @@
   })();
 
   fnsToAdd = [
-    new Fn("+", [0, 0], function(a, b) {
+    new Fn("", [null, 0], function(a, b) {
+      return "" + b;
+    }, function(a, b) {
+      return "" + b;
+    }), new Fn("+", [0, 0], function(a, b) {
       return "(" + a + " + " + b + ")";
     }, function(a, b) {
       return "(" + a + " + " + b + ")";
@@ -1437,6 +1442,14 @@
       return "Math.abs(" + a + ")";
     }, function(a) {
       return "abs(" + a + ")";
+    }), new Fn("sqrt", [0], function(a) {
+      return "Math.sqrt(" + a + ")";
+    }, function(a) {
+      return "sqrt(" + a + ")";
+    }), new Fn("pow", [1, 1], function(a, b) {
+      return "Math.pow(Math.abs(" + a + "), " + b + ")";
+    }, function(a, b) {
+      return "pow(" + a + ", " + b + ")";
     }), new Fn("sin", [0], function(a) {
       return "Math.sin(" + a + ")";
     }, function(a) {
@@ -1495,6 +1508,10 @@
         return param.compileGlslString();
       });
       return (_ref = this.fn).compileGlslString.apply(_ref, paramCompileStrings);
+    };
+
+    Apply.prototype.isStart = function() {
+      return this.fn === fnsToAdd[0];
     };
 
     return Apply;
@@ -1622,15 +1639,10 @@
   editor = new Editor();
 
   (function() {
-    var a, sin, times;
+    var a;
     a = new Param();
     editor.xParam = a;
-    sin = new Apply(fnsToAdd[5]);
-    sin.setParam(0, a);
-    times = new Apply(fnsToAdd[2]);
-    times.setParam(0, sin);
-    times.setParam(1, sin);
-    return editor.root = times;
+    return editor.root = a;
   })();
 
   lerp = function(x, dMin, dMax, rMin, rMax) {

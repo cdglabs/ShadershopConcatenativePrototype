@@ -62,6 +62,7 @@ ApplyView = React.createClass
     classNames = cx {
       apply: true
       hovered: apply == editor.hoveredApply
+      isStart: apply.isStart?()
     }
     R.div {className: classNames, onMouseDown: @handleMouseDown},
       ApplyInternalsView {apply}
@@ -137,7 +138,7 @@ ApplyThumbnailView = React.createClass
 
     graphViews = []
 
-    if apply.params
+    if apply.params and !apply.isStart?()
       for param, i in apply.params
         if param instanceof Param and param != editor.xParam
           styleOpts = config.styles.param

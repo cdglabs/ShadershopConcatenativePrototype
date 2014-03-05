@@ -28,6 +28,9 @@ class Fn
   constructor: (@title, @defaultParams, @compileString, @compileGlslString) ->
 
 fnsToAdd = [
+  new Fn "", [null, 0],
+    (a, b) -> "#{b}"
+    (a, b) -> "#{b}"
   new Fn "+", [0, 0],
     (a, b) -> "(#{a} + #{b})"
     (a, b) -> "(#{a} + #{b})"
@@ -43,6 +46,12 @@ fnsToAdd = [
   new Fn "abs", [0],
     (a) -> "Math.abs(#{a})"
     (a) -> "abs(#{a})"
+  new Fn "sqrt", [0],
+    (a) -> "Math.sqrt(#{a})"
+    (a) -> "sqrt(#{a})"
+  new Fn "pow", [1, 1],
+    (a, b) -> "Math.pow(Math.abs(#{a}), #{b})"
+    (a, b) -> "pow(#{a}, #{b})"
   new Fn "sin", [0],
     (a) -> "Math.sin(#{a})"
     (a) -> "sin(#{a})"
@@ -85,6 +94,9 @@ class Apply
     paramCompileStrings = @params.map (param) ->
       param.compileGlslString()
     @fn.compileGlslString(paramCompileStrings...)
+
+  isStart: ->
+    @fn == fnsToAdd[0]
 
 
 
@@ -188,14 +200,7 @@ do ->
   a = new Param()
   editor.xParam = a
 
-  sin = new Apply(fnsToAdd[5])
-  sin.setParam(0, a)
-
-  times = new Apply(fnsToAdd[2])
-  times.setParam(0, sin)
-  times.setParam(1, sin)
-
-  editor.root = times
+  editor.root = a
 
 
 

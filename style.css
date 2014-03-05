@@ -74,6 +74,9 @@ Link
 .apply.hovered {
   background-color: #fee;
 }
+.apply.isStart {
+  border-top: 2px solid #333;
+}
 .applyPlaceholder {
   height: 37px;
   background-color: #bbb;
