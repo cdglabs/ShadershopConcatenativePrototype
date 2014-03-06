@@ -33,4 +33,4 @@ MainGraphView = React.createClass
         graphViews
       if editor.shaderView
         R.span {style: {opacity: config.shaderOpacity}},
-          ShaderGraphView {apply: editor.root}
+          ShaderGraphView {apply: editor.hoveredApply ? editor.root}

@@ -4,7 +4,6 @@ Code cleanup
   Implement replaceWith for first apply
   DRY up transclusion start (mousedown handlers in ApplyThumbnailView and ParamTitleView)
   Fix -0 for truncate
-  shader view should show hoveredApply
 
 
 Catch infinite loops with apply reordering and transclusion

@@ -770,7 +770,7 @@
 
   MainGraphView = React.createClass({
     render: function() {
-      var apply, graphViews, i, neg, param, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1;
+      var apply, graphViews, i, neg, param, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2;
       graphViews = [];
       if (editor.spreadParam && editor.spreadParam !== editor.xParam) {
         spreadDistance = 0.5;
@@ -828,7 +828,7 @@
           opacity: config.shaderOpacity
         }
       }, ShaderGraphView({
-        apply: editor.root
+        apply: (_ref2 = editor.hoveredApply) != null ? _ref2 : editor.root
       })) : void 0);
     }
   });
