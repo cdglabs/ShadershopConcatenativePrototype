@@ -278,7 +278,8 @@
       return editor.hoveredParam = null;
     },
     handleClick: function() {
-      return editor.replaceApply(this.props.possibleApply, this.props.apply);
+      editor.replaceApply(this.props.possibleApply, this.props.apply);
+      return editor.hoveredParam = null;
     },
     render: function() {
       var apply, classNames, possibleApply, _ref;

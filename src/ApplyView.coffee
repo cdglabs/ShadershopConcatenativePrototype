@@ -159,6 +159,7 @@ PossibleApplyView = React.createClass
     editor.hoveredParam = null
   handleClick: ->
     editor.replaceApply(@props.possibleApply, @props.apply)
+    editor.hoveredParam = null
   render: ->
     {apply, possibleApply} = @props
     classNames = cx {
