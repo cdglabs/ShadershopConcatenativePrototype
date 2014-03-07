@@ -91,12 +91,6 @@ key "s", ->
   editor.shaderView = !editor.shaderView
   refresh()
 
-key "a", ->
-  deconstructed = objectManager.deconstruct(editor)
-  console.log "deconstructed", deconstructed
-  reconstructed = objectManager.reconstruct(deconstructed)
-  console.log "reconstructed", reconstructed
-
 
 
 saveState = ->

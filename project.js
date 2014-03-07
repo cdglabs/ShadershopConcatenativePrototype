@@ -1504,14 +1504,6 @@
     return refresh();
   });
 
-  key("a", function() {
-    var deconstructed, reconstructed;
-    deconstructed = objectManager.deconstruct(editor);
-    console.log("deconstructed", deconstructed);
-    reconstructed = objectManager.reconstruct(deconstructed);
-    return console.log("reconstructed", reconstructed);
-  });
-
   saveState = function() {
     var deconstructed, deconstructedString;
     deconstructed = objectManager.deconstruct(editor);
