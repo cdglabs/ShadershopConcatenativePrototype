@@ -55,7 +55,7 @@ GraphView = React.createClass
 
     graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
 
-    s = apply.compileString()
+    s = @compileString_ ? apply.compileString()
     graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")
 
     if apply instanceof Param && apply != editor.xParam
@@ -73,10 +73,11 @@ GraphView = React.createClass
     {apply, spreadOffset, styleOpts} = @props
 
     # Optimization: Check if we need to redraw
-    s = apply.compileString()
-    drawOptions = _.extend {s, spreadOffset, axis: apply.axis}, styleOpts
-    if _.isEqual drawOptions, @lastDropOptions_
+    @compileString_ = apply.compileString()
+    drawOptions = _.extend {@compileString_, spreadOffset, axis: apply.axis}, styleOpts
+    if _.isEqual drawOptions, @lastDrawOptions_
       return
-    @lastDropOptions_ = drawOptions
+    @lastDrawOptions_ = drawOptions
+
 
     @refs.canvas.draw()

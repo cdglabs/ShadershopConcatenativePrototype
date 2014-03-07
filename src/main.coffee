@@ -1,5 +1,7 @@
+editor = null
 
 window.init = ->
+  loadState()
   window.addEventListener("pointermove", pointermove)
   window.addEventListener("pointerup", pointerup)
 
@@ -13,6 +15,7 @@ refresh = ->
     updateHover()
     updateHover2()
     refreshView()
+    saveState()
 
 
 updateHover = ->
@@ -87,3 +90,31 @@ pointerup = (e) ->
 key "s", ->
   editor.shaderView = !editor.shaderView
   refresh()
+
+key "a", ->
+  deconstructed = objectManager.deconstruct(editor)
+  console.log "deconstructed", deconstructed
+  reconstructed = objectManager.reconstruct(deconstructed)
+  console.log "reconstructed", reconstructed
+
+
+
+saveState = ->
+  deconstructed = objectManager.deconstruct(editor)
+  deconstructedString = JSON.stringify(deconstructed)
+  window.localStorage.spaceShader = deconstructedString
+
+loadState = ->
+  deconstructedString = window.localStorage.spaceShader
+  if !deconstructedString
+    loadInitialEditor()
+  else
+    deconstructed = JSON.parse(deconstructedString)
+    editor = objectManager.reconstruct(deconstructed)
+
+loadInitialEditor = ->
+  editor = new Editor()
+  a = new Param()
+  editor.xParam = a
+
+  editor.root = a

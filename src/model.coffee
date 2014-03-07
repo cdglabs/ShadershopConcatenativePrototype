@@ -1,6 +1,6 @@
 class Param
   constructor: (@value = 0) ->
-    @id = _.uniqueId("p")
+    objectManager.assignId(this)
     @title = ""
     @axis = "result"
 
@@ -26,6 +26,7 @@ class Param
 
 class Fn
   constructor: (@title, @defaultParams, @compileString, @compileGlslString) ->
+    objectManager.registerBuiltInObject("fn-"+@title, this)
 
 fnsToAdd = [
   new Fn "", [null, 0],
@@ -78,9 +79,13 @@ fnsToAdd = [
 
 class Apply
   constructor: (@fn) ->
-    @id = _.uniqueId("a")
+    objectManager.assignId(this)
+    @params = []
+    @initializeDefaultParams() if @fn
+
+  initializeDefaultParams: ->
     @params = @fn.defaultParams.map (paramValue) ->
-      new Param(paramValue)
+      param = new Param(paramValue)
 
   setParam: (index, param) ->
     @params[index] = param
@@ -102,7 +107,7 @@ class Apply
 
 class ProvisionalApply
   constructor: ->
-    @id = _.uniqueId("a")
+    objectManager.assignId(this)
     @params = [null]
     @possibleApplies = fnsToAdd.map (fn) ->
       new Apply(fn)
@@ -194,13 +199,11 @@ class Editor
 
 
 
-editor = new Editor()
 
-do ->
-  a = new Param()
-  editor.xParam = a
-
-  editor.root = a
+objectManager.registerClass("Param", Param)
+objectManager.registerClass("Apply", Apply)
+objectManager.registerClass("ProvisionalApply", ProvisionalApply)
+objectManager.registerClass("Editor", Editor)
 
 
 
