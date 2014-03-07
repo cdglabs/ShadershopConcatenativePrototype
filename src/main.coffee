@@ -12,17 +12,8 @@ window.init = ->
 
 refresh = ->
   requestAnimationFrame ->
-    updateHover()
     refreshView()
     saveState()
-
-
-updateHover = ->
-  if editor.dragging
-    editor.spreadParam = null
-    return
-
-  editor.spreadParam = editor.hoveredParam
 
 
 
@@ -40,6 +31,8 @@ pointermove = (e) ->
   editor.dragging?.onMove?(e)
 
 pointerup = (e) ->
+  editor.dragging?.onUp?(e)
+
   if p = editor.dragging?.transclusion
     closestDataFor(e.target, "handleTransclusionDrop")?(p)
 

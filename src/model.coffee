@@ -7,7 +7,7 @@ class Param
   compileString: ->
     if this == editor.xParam
       "x"
-    else if this == editor.spreadParam
+    else if this == editor.spreadParam()
       "(#{@value} + spreadOffset)"
     else
       ""+@value
@@ -142,7 +142,6 @@ class Editor
 
     @xParam = null
     @yParam = null
-    @spreadParam = null
 
     @hoveredParam = null
     @hoveredApply = null
@@ -152,6 +151,12 @@ class Editor
     @dragging = null
 
     @shaderView = false
+
+
+  spreadParam: ->
+    return null if @dragging
+    return null if @hoveredParam == @xParam or @hoveredParam == @yParam
+    return @hoveredParam
 
 
   applies: ->

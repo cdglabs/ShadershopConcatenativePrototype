@@ -60,11 +60,14 @@ ParamValueView = React.createClass
     editor.dragging = {
       cursor: @cursor()
       onMove: (e) ->
+        editor.hoveredParam = param
         dx = e.clientX - originalX
         dy = -(e.clientY - originalY)
         d = if param.axis == "x" then dx else dy
         multiplier = 0.1
         param.value = originalValue + d * multiplier
+      onUp: (e) ->
+        editor.hoveredParam = null
     }
 
 

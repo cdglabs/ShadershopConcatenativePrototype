@@ -2,7 +2,7 @@ MainGraphView = React.createClass
   render: ->
     graphViews = []
 
-    if editor.spreadParam and editor.spreadParam != editor.xParam
+    if editor.spreadParam()
       spreadDistance = 0.5
       spreadNum = 5
       for i in [1...spreadNum]
