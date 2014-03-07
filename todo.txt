@@ -1,4 +1,5 @@
 Fix transclusion
+Fix "click" on paramTitle and paramValue
 
 Code cleanup
   Remove annotate, use dataFor
