@@ -118,3 +118,8 @@ loadInitialEditor = ->
   editor.xParam = a
 
   editor.root = a
+
+window.reset = ->
+  loadInitialEditor()
+  saveState()
+  window.location.reload()

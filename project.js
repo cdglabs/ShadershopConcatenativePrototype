@@ -1538,6 +1538,12 @@
     return editor.root = a;
   };
 
+  window.reset = function() {
+    loadInitialEditor();
+    saveState();
+    return window.location.reload();
+  };
+
   Param = (function() {
     function Param(value) {
       this.value = value != null ? value : 0;
