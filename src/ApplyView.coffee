@@ -1,12 +1,5 @@
 ApplyView = React.createClass
-  mixins: [AnnotateMixin]
-  annotate: ->
-    {
-      self: {
-        apply: @props.apply
-        cursor: if @props.apply instanceof Param then "" else "-webkit-grab"
-      }
-    }
+  mixins: [DataForMixin]
 
   handleMouseDown: (e) ->
     return if e.target.closest(".param")?
@@ -49,7 +42,7 @@ ApplyView = React.createClass
 
           editor.removeApply(apply)
           if insertAfterEl
-            refApply = insertAfterEl.annotation.apply
+            refApply = insertAfterEl.dataFor.props.apply
             editor.insertApplyAfter(apply, refApply)
       }
 
@@ -64,7 +57,7 @@ ApplyView = React.createClass
       hovered: apply == editor.hoveredApply
       isStart: apply.isStart?()
     }
-    R.div {className: classNames, onMouseDown: @handleMouseDown},
+    R.div {className: classNames, style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown},
       ApplyInternalsView {apply}
 
 
@@ -104,10 +97,6 @@ ParamSlotView = React.createClass
 
 
 ApplyThumbnailView = React.createClass
-  mixins: [AnnotateMixin]
-  annotate: ->
-    {self: {hoverApply: @props.apply}}
-
   handleMouseDown: (e) ->
     e.preventDefault()
 
@@ -133,6 +122,11 @@ ApplyThumbnailView = React.createClass
         transclusion: apply
       }
 
+  handleMouseEnter: (e) ->
+    editor.hoveredApply = @props.apply
+  handleMouseLeave: (e) ->
+    editor.hoveredApply = null
+
   render: ->
     {apply} = @props
 
@@ -152,19 +146,17 @@ ApplyThumbnailView = React.createClass
       styleOpts = config.styles.selectedApply
     graphViews.push(GraphView {apply, styleOpts, key: "result"})
 
-    R.div {className: "applyThumbnail", onMouseDown: @handleMouseDown},
+    R.div {className: "applyThumbnail", style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
       graphViews
 
 
 PossibleApplyView = React.createClass
-  mixins: [DataForMixin, AnnotateMixin]
-  annotate: ->
-    if @props.possibleApply.params.length > 1
-      {self: {hoverParam: @props.possibleApply.params[1]}}
-  handleHoverEnter: ->
+  handleMouseEnter: ->
     @props.apply.selectedApply = @props.possibleApply
-  handleHoverLeave: ->
+    editor.hoveredParam = @props.possibleApply.params[1]
+  handleMouseLeave: ->
     @props.apply.selectedApply = null
+    editor.hoveredParam = null
   handleClick: ->
     editor.replaceApply(@props.possibleApply, @props.apply)
   render: ->
@@ -173,7 +165,7 @@ PossibleApplyView = React.createClass
       possibleApply: true
       selectedPossibleApply: apply.selectedApply == possibleApply
     }
-    R.div {className: classNames, onClick: @handleClick},
+    R.div {className: classNames, onClick: @handleClick, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
       ApplyInternalsView {apply: possibleApply}
 
 

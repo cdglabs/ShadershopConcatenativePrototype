@@ -13,7 +13,6 @@ window.init = ->
 refresh = ->
   requestAnimationFrame ->
     updateHover()
-    updateHover2()
     refreshView()
     saveState()
 
@@ -23,43 +22,7 @@ updateHover = ->
     editor.spreadParam = null
     return
 
-  el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y)
-
-  editor.hoveredApply = null
-  editor.hoveredParam = null
-  editor.cursor = null
-
-  while el?.nodeType == Node.ELEMENT_NODE
-    editor.hoveredApply ?= el.annotation?.hoverApply
-    editor.hoveredParam ?= el.annotation?.hoverParam
-    editor.cursor       ?= el.annotation?.cursor
-
-    el = el.parentNode
-
   editor.spreadParam = editor.hoveredParam
-
-
-lastHoveredEls = []
-updateHover2 = ->
-  return if editor.dragging
-
-  hoveredEls = []
-
-  el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y)
-  while el?.nodeType == Node.ELEMENT_NODE
-    if el.dataFor?.handleHoverEnter
-      hoveredEls.push(el)
-    el = el.parentNode
-
-  for lastHoveredEl in lastHoveredEls
-    unless _.contains hoveredEls, lastHoveredEl
-      lastHoveredEl.dataFor.handleHoverLeave?()
-
-  for hoveredEl in hoveredEls
-    unless _.contains lastHoveredEls, hoveredEl
-      hoveredEl.dataFor.handleHoverEnter()
-
-  lastHoveredEls = hoveredEls
 
 
 

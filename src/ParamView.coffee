@@ -33,11 +33,7 @@ ContentEditableMixin = {
 
 
 ParamValueView = React.createClass
-  mixins: [ContentEditableMixin, AnnotateMixin]
-  annotate: ->
-    {
-      self: {cursor: @cursor()}
-    }
+  mixins: [ContentEditableMixin]
 
   shouldComponentUpdate: ->
     return !@isFocused()
@@ -83,7 +79,7 @@ ParamValueView = React.createClass
       onMouseDown: @handleMouseDown
       onDoubleClick: @focusAndSelect
       onInput: @handleInput
-      "data-cursor": @cursor()
+      style: {cursor: @cursor()}
     },
       do =>
         if editor.xParam == param
@@ -96,11 +92,7 @@ ParamValueView = React.createClass
 
 
 ParamTitleView = React.createClass
-  mixins: [ContentEditableMixin, AnnotateMixin]
-  annotate: ->
-    {
-      self: {cursor: @cursor()}
-    }
+  mixins: [ContentEditableMixin]
 
   cursor: ->
     if @isFocused()
@@ -144,17 +136,12 @@ ParamTitleView = React.createClass
       onMouseDown: @handleMouseDown
       onDoubleClick: @focusAndSelect
       onInput: @handleInput
-      "data-cursor": @cursor()
+      style: {cursor: @cursor()}
     }, param.title
 
 
 
 ParamView = React.createClass
-  mixins: [AnnotateMixin]
-  annotate: ->
-    {
-      self: {hoverParam: @props.param}
-    }
   handleClick: (e) ->
     {param} = @props
     if key.command
@@ -172,11 +159,15 @@ ParamView = React.createClass
         editor.yParam = null
       else
         editor.yParam = param
+  handleMouseEnter: ->
+    editor.hoveredParam = @props.param
+  handleMouseLeave: ->
+    editor.hoveredParam = null
   render: ->
     classNames = cx {
       param: true
       hovered: editor.hoveredParam == @props.param
     }
-    R.div {className: classNames, onClick: @handleClick},
+    R.div {className: classNames, onClick: @handleClick, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
       ParamTitleView {param: @props.param}
       ParamValueView {param: @props.param}

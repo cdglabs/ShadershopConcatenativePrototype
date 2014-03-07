@@ -33,10 +33,6 @@ Dragging
 ============================================================================ */
 
 .dragging {
-  position: absolute;
-  top: 0; left: 0;
-  pointer-events: none;
-  z-index: 100;
 }
 .draggingObject {
   position: absolute;
@@ -47,6 +43,12 @@ Dragging
 .draggingObject > .param {
   margin: 0;
   opacity: 0.7;
+}
+.draggingOverlay {
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background-color: rgba(0,0,0,0.2);
+  z-index: 200;
 }
 
 

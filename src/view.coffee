@@ -4,10 +4,8 @@ cx = React.addons.classSet
 refreshView = do ->
 
   EditorView = React.createClass
-    cursor: ->
-      editor.dragging?.cursor ? editor.cursor ? ""
     render: ->
-      R.div {className: "editor", style: {cursor: @cursor()}},
+      R.div {className: "editor", style: {cursor: editor.dragging?.cursor ? ""}},
         MainGraphView {}
         R.div {className: "manager"},
           editor.applies().map (apply) ->
