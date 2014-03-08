@@ -95,7 +95,7 @@ ParamValueView = React.createClass
 
 
 ParamTitleView = React.createClass
-  mixins: [ContentEditableMixin]
+  mixins: [ContentEditableMixin, TranscludeMixin]
 
   cursor: ->
     if @isFocused()
@@ -105,28 +105,10 @@ ParamTitleView = React.createClass
 
   handleMouseDown: (e) ->
     return if @isFocused()
-
-    e.preventDefault()
-
-    el = @getDOMNode()
-    rect = el.getBoundingClientRect()
-    offset = {
-      x: e.clientX - rect.left
-      y: e.clientY - rect.top
-    }
-
-    editor.dragging = {
-      cursor: "-webkit-grabbing"
-    }
-
-    onceDragConsummated e, =>
-      editor.dragging = {
-        cursor: "-webkit-grabbing"
-        offset: offset
-        render: =>
-          ParamView {param: @props.param}
-        transclusion: @props.param
-      }
+    {param} = @props
+    render = =>
+      ParamView {param}
+    @startTransclude(e, param, render)
 
   handleInput: ->
     @props.param.title = @cleanAndGetValue()

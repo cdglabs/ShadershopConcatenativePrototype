@@ -1,11 +1,8 @@
-Fix transclusion
 Fix "click" on paramTitle and paramValue
 
 Code cleanup
-  Remove annotate, use dataFor
   Make reordering around ProvisionalApply's better
   Implement replaceWith for first apply
-  DRY up transclusion start (mousedown handlers in ApplyThumbnailView and ParamTitleView)
   Fix -0 for truncate
 
 
