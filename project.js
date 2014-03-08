@@ -753,11 +753,15 @@
         spreadDistance = 0.5;
         spreadNum = 5;
         for (i = _i = 1; 1 <= spreadNum ? _i < spreadNum : _i > spreadNum; i = 1 <= spreadNum ? ++_i : --_i) {
-          styleOpts = _.clone(config.styles.selectedApply);
-          styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin);
           _ref = [-1, 1];
           for (_j = 0, _len = _ref.length; _j < _len; _j++) {
             neg = _ref[_j];
+            if (neg === -1) {
+              styleOpts = _.clone(config.styles.spreadNegative);
+            } else {
+              styleOpts = _.clone(config.styles.spreadPositive);
+            }
+            styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin);
             spreadOffset = spreadDistance * i * neg;
             graphViews.push(GraphView({
               apply: editor.root,
@@ -1344,6 +1348,12 @@
       },
       selectedApply: {
         color: "#000"
+      },
+      spreadPositive: {
+        color: "#900"
+      },
+      spreadNegative: {
+        color: "#009"
       }
     }
   };

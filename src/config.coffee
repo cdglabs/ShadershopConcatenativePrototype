@@ -17,5 +17,7 @@ window.config = config = {
     apply: {color: "#000", opacity: 0.1}
     hoveredApply: {color: "#900"}
     selectedApply: {color: "#000"}
+    spreadPositive: {color: "#900"}
+    spreadNegative: {color: "#009"}
   }
 }
