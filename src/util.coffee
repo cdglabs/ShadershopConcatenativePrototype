@@ -63,7 +63,8 @@ Element::closest = (selector) ->
 
 
 
-onceDragConsummated = (downEvent, callback) ->
+onceDragConsummated = (downEvent, callback, notConsummatedCallback=null) ->
+  consummated = false
   originalX = downEvent.clientX
   originalY = downEvent.clientY
 
@@ -72,14 +73,20 @@ onceDragConsummated = (downEvent, callback) ->
     dy = moveEvent.clientY - originalY
     d  = Math.max(Math.abs(dx), Math.abs(dy))
     if d > 3
+      consummated = true
       removeListeners()
-      callback(moveEvent)
+      callback?(moveEvent)
+
+  handleUp = (upEvent) ->
+    if !consummated
+      notConsummatedCallback?(upEvent)
+    removeListeners()
 
   removeListeners = ->
     window.removeEventListener("mousemove", handleMove)
-    window.removeEventListener("mouseup", removeListeners)
+    window.removeEventListener("mouseup", handleUp)
 
   window.addEventListener("mousemove", handleMove)
-  window.addEventListener("mouseup", removeListeners)
+  window.addEventListener("mouseup", handleUp)
 
 

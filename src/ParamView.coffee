@@ -59,16 +59,19 @@ ParamValueView = React.createClass
 
     editor.dragging = {
       cursor: @cursor()
-      onMove: (e) ->
+      onMove: (e) =>
         editor.hoveredParam = param
         dx = e.clientX - originalX
         dy = -(e.clientY - originalY)
         d = if param.axis == "x" then dx else dy
         multiplier = 0.1
         param.value = originalValue + d * multiplier
-      onUp: (e) ->
+      onUp: (e) =>
         editor.hoveredParam = null
     }
+
+    onceDragConsummated e, null, =>
+      @focusAndSelect()
 
 
   handleInput: (e) ->
@@ -109,6 +112,8 @@ ParamTitleView = React.createClass
     render = =>
       ParamView {param}
     @startTransclude(e, param, render)
+    onceDragConsummated e, null, =>
+      @focusAndSelect()
 
   handleInput: ->
     @props.param.title = @cleanAndGetValue()
@@ -127,7 +132,7 @@ ParamTitleView = React.createClass
 
 
 ParamView = React.createClass
-  handleClick: (e) ->
+  handleMouseDown: (e) ->
     {param} = @props
     if key.command
       if param.axis == "result"
@@ -153,6 +158,6 @@ ParamView = React.createClass
       param: true
       hovered: editor.hoveredParam == @props.param
     }
-    R.div {className: classNames, onClick: @handleClick, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
+    R.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
       ParamTitleView {param: @props.param}
       ParamValueView {param: @props.param}

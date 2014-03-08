@@ -989,7 +989,8 @@
       }
     },
     handleMouseDown: function(e) {
-      var originalValue, originalX, originalY, param;
+      var originalValue, originalX, originalY, param,
+        _this = this;
       if (this.isFocused()) {
         return;
       }
@@ -999,7 +1000,7 @@
       originalX = e.clientX;
       originalY = e.clientY;
       originalValue = param.value;
-      return editor.dragging = {
+      editor.dragging = {
         cursor: this.cursor(),
         onMove: function(e) {
           var d, dx, dy, multiplier;
@@ -1014,6 +1015,9 @@
           return editor.hoveredParam = null;
         }
       };
+      return onceDragConsummated(e, null, function() {
+        return _this.focusAndSelect();
+      });
     },
     handleInput: function(e) {
       return this.props.param.value = +this.cleanAndGetValue();
@@ -1064,7 +1068,10 @@
           param: param
         });
       };
-      return this.startTransclude(e, param, render);
+      this.startTransclude(e, param, render);
+      return onceDragConsummated(e, null, function() {
+        return _this.focusAndSelect();
+      });
     },
     handleInput: function() {
       return this.props.param.title = this.cleanAndGetValue();
@@ -1086,7 +1093,7 @@
   });
 
   ParamView = React.createClass({
-    handleClick: function(e) {
+    handleMouseDown: function(e) {
       var param;
       param = this.props.param;
       if (key.command) {
@@ -1123,7 +1130,7 @@
       });
       return R.div({
         className: classNames,
-        onClick: this.handleClick,
+        onMouseDown: this.handleMouseDown,
         onMouseEnter: this.handleMouseEnter,
         onMouseLeave: this.handleMouseLeave
       }, ParamTitleView({
@@ -1784,8 +1791,12 @@
 }());
 ;
 
-  onceDragConsummated = function(downEvent, callback) {
-    var handleMove, originalX, originalY, removeListeners;
+  onceDragConsummated = function(downEvent, callback, notConsummatedCallback) {
+    var consummated, handleMove, handleUp, originalX, originalY, removeListeners;
+    if (notConsummatedCallback == null) {
+      notConsummatedCallback = null;
+    }
+    consummated = false;
     originalX = downEvent.clientX;
     originalY = downEvent.clientY;
     handleMove = function(moveEvent) {
@@ -1794,16 +1805,25 @@
       dy = moveEvent.clientY - originalY;
       d = Math.max(Math.abs(dx), Math.abs(dy));
       if (d > 3) {
+        consummated = true;
         removeListeners();
-        return callback(moveEvent);
+        return typeof callback === "function" ? callback(moveEvent) : void 0;
       }
+    };
+    handleUp = function(upEvent) {
+      if (!consummated) {
+        if (typeof notConsummatedCallback === "function") {
+          notConsummatedCallback(upEvent);
+        }
+      }
+      return removeListeners();
     };
     removeListeners = function() {
       window.removeEventListener("mousemove", handleMove);
-      return window.removeEventListener("mouseup", removeListeners);
+      return window.removeEventListener("mouseup", handleUp);
     };
     window.addEventListener("mousemove", handleMove);
-    return window.addEventListener("mouseup", removeListeners);
+    return window.addEventListener("mouseup", handleUp);
   };
 
   R = React.DOM;

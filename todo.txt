@@ -1,5 +1,3 @@
-Fix "click" on paramTitle and paramValue
-
 Code cleanup
   Make reordering around ProvisionalApply's better
   Implement replaceWith for first apply
