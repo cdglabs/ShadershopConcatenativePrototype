@@ -112,7 +112,10 @@ class Shader
          1.0, -1.0,
          1.0,  1.0
       ])
-      @gl_.drawArrays(@gl_.TRIANGLES, 0, 6)
+      @initialized_ = true
+
+    @gl_.viewport(0, 0, @gl_.canvas.width, @gl_.canvas.height)
+    @gl_.drawArrays(@gl_.TRIANGLES, 0, 6)
 
   bufferAttribute_: (attrib, data, size=2) ->
     location = @gl_.getAttribLocation(@program_, attrib)

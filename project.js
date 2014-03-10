@@ -1256,8 +1256,10 @@
       if (!this.initialized_) {
         this.gl_.useProgram(this.program_);
         this.bufferAttribute_("vertexPosition", [-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0]);
-        return this.gl_.drawArrays(this.gl_.TRIANGLES, 0, 6);
+        this.initialized_ = true;
       }
+      this.gl_.viewport(0, 0, this.gl_.canvas.width, this.gl_.canvas.height);
+      return this.gl_.drawArrays(this.gl_.TRIANGLES, 0, 6);
     };
 
     Shader.prototype.bufferAttribute_ = function(attrib, data, size) {
