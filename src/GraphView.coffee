@@ -1,14 +1,5 @@
 CanvasView = React.createClass
-  clear: ->
-    canvas = @getDOMNode()
-    ctx = canvas.getContext("2d")
-    ctx.save()
-    ctx.setTransform(1,0,0,1,0,0)
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.restore()
-
   draw: ->
-    @clear()
     canvas = @getDOMNode()
     @props.drawFn(canvas)
 
@@ -40,6 +31,7 @@ CanvasView = React.createClass
 GridView = React.createClass
   drawFn: (canvas) ->
     graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
+    graph.clear()
     graph.drawGrid()
 
   render: ->
@@ -54,6 +46,8 @@ GraphView = React.createClass
     {apply, spreadOffset, styleOpts} = @props
 
     graph = canvas.graph ?= new Graph(canvas, -10, 10, -10, 10)
+
+    graph.clear()
 
     s = @compileString_ ? apply.compileString()
     graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")

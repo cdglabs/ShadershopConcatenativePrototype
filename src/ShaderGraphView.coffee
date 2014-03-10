@@ -1,20 +1,6 @@
 ShaderGraphView = React.createClass
-  sizeCanvas: ->
-    canvas = @getDOMNode()
-    rect = canvas.getBoundingClientRect()
-    if canvas.width != rect.width or canvas.height != rect.height
-      canvas.width = rect.width
-      canvas.height = rect.height
-      return true
-    return false
-
-  handleResize: ->
-    if @sizeCanvas()
-      @refreshGraph()
-
-  refreshGraph: ->
+  drawFn: (canvas) ->
     {apply} = @props
-    canvas = @getDOMNode()
 
     shader = canvas.shader ?= new Shader(canvas)
 
@@ -54,18 +40,8 @@ ShaderGraphView = React.createClass
 
     shader.draw()
 
-
-  componentDidMount: ->
-    @sizeCanvas()
-    @refreshGraph()
-    window.addEventListener("resize", @handleResize)
+  render: ->
+    CanvasView {drawFn: @drawFn, ref: "canvas"}
 
   componentDidUpdate: ->
-    @refreshGraph()
-
-  componentWillUnmount: ->
-    window.removeEventListener("resize", @handleResize)
-
-  render: ->
-    R.canvas {}
-
+    @refs.canvas.draw()

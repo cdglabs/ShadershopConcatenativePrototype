@@ -643,18 +643,8 @@
   })();
 
   CanvasView = React.createClass({
-    clear: function() {
-      var canvas, ctx;
-      canvas = this.getDOMNode();
-      ctx = canvas.getContext("2d");
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      return ctx.restore();
-    },
     draw: function() {
       var canvas;
-      this.clear();
       canvas = this.getDOMNode();
       return this.props.drawFn(canvas);
     },
@@ -691,6 +681,7 @@
     drawFn: function(canvas) {
       var graph;
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
+      graph.clear();
       return graph.drawGrid();
     },
     render: function() {
@@ -710,6 +701,7 @@
       var apply, graph, graphFn, s, spreadOffset, styleOpts, _ref, _ref1;
       _ref = this.props, apply = _ref.apply, spreadOffset = _ref.spreadOffset, styleOpts = _ref.styleOpts;
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
+      graph.clear();
       s = (_ref1 = this.compileString_) != null ? _ref1 : apply.compileString();
       graphFn = eval("(function (x) { var spreadOffset = " + spreadOffset + "; return " + s + "; })");
       if (apply instanceof Param && apply !== editor.xParam) {
@@ -1280,26 +1272,9 @@
   })();
 
   ShaderGraphView = React.createClass({
-    sizeCanvas: function() {
-      var canvas, rect;
-      canvas = this.getDOMNode();
-      rect = canvas.getBoundingClientRect();
-      if (canvas.width !== rect.width || canvas.height !== rect.height) {
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        return true;
-      }
-      return false;
-    },
-    handleResize: function() {
-      if (this.sizeCanvas()) {
-        return this.refreshGraph();
-      }
-    },
-    refreshGraph: function() {
-      var apply, canvas, fragmentSrc, s, shader, vertexSrc;
+    drawFn: function(canvas) {
+      var apply, fragmentSrc, s, shader, vertexSrc;
       apply = this.props.apply;
-      canvas = this.getDOMNode();
       shader = canvas.shader != null ? canvas.shader : canvas.shader = new Shader(canvas);
       s = apply.compileGlslString();
       vertexSrc = "precision mediump float;\n\nattribute vec3 vertexPosition;\n\nvoid main() {\n  gl_Position = vec4(vertexPosition, 1.0);\n}";
@@ -1311,19 +1286,14 @@
       });
       return shader.draw();
     },
-    componentDidMount: function() {
-      this.sizeCanvas();
-      this.refreshGraph();
-      return window.addEventListener("resize", this.handleResize);
+    render: function() {
+      return CanvasView({
+        drawFn: this.drawFn,
+        ref: "canvas"
+      });
     },
     componentDidUpdate: function() {
-      return this.refreshGraph();
-    },
-    componentWillUnmount: function() {
-      return window.removeEventListener("resize", this.handleResize);
-    },
-    render: function() {
-      return R.canvas({});
+      return this.refs.canvas.draw();
     }
   });
 
