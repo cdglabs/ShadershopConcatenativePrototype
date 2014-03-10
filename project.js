@@ -1300,10 +1300,13 @@
       canvas = this.getDOMNode();
       shader = canvas.shader != null ? canvas.shader : canvas.shader = new Shader(canvas);
       s = apply.compileGlslString();
-      vertexSrc = "precision mediump float;\n\nattribute vec3 vertexPosition;\nvarying vec2 position;\n\nvoid main() {\n  gl_Position = vec4(vertexPosition, 1.0);\n  position = (vertexPosition.xy + 1.0) * 0.5;\n}";
-      fragmentSrc = "precision mediump float;\n\nvarying vec2 position;\n\nvoid main() {\n  float x = mix(-10., 10., position.x);\n  float y = mix(-10., 10., position.y);\n  float outputValue = " + s + ";\n  gl_FragColor = vec4(vec3(outputValue), 1);\n}";
+      vertexSrc = "precision mediump float;\n\nattribute vec3 vertexPosition;\n\nvoid main() {\n  gl_Position = vec4(vertexPosition, 1.0);\n}";
+      fragmentSrc = "precision mediump float;\n\nuniform vec2 resolution;\n\nvoid main() {\n  vec2 p = gl_FragCoord.xy / resolution;\n  float x = mix(-10., 10., p.x);\n  float y = mix(-10., 10., p.y);\n\n  float outputValue = " + s + ";\n  gl_FragColor = vec4(vec3(outputValue), 1);\n}";
       shader.setVertexSrc(vertexSrc);
       shader.setFragmentSrc(fragmentSrc);
+      shader.setUniforms({
+        resolution: [canvas.width, canvas.height]
+      });
       return shader.draw();
     },
     componentDidMount: function() {

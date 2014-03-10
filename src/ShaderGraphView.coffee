@@ -24,22 +24,22 @@ ShaderGraphView = React.createClass
       precision mediump float;
 
       attribute vec3 vertexPosition;
-      varying vec2 position;
 
       void main() {
         gl_Position = vec4(vertexPosition, 1.0);
-        position = (vertexPosition.xy + 1.0) * 0.5;
       }
     """
 
     fragmentSrc = """
       precision mediump float;
 
-      varying vec2 position;
+      uniform vec2 resolution;
 
       void main() {
-        float x = mix(-10., 10., position.x);
-        float y = mix(-10., 10., position.y);
+        vec2 p = gl_FragCoord.xy / resolution;
+        float x = mix(-10., 10., p.x);
+        float y = mix(-10., 10., p.y);
+
         float outputValue = #{s};
         gl_FragColor = vec4(vec3(outputValue), 1);
       }
@@ -47,6 +47,10 @@ ShaderGraphView = React.createClass
 
     shader.setVertexSrc(vertexSrc)
     shader.setFragmentSrc(fragmentSrc)
+
+    shader.setUniforms({
+      resolution: [canvas.width, canvas.height]
+    })
 
     shader.draw()
 
