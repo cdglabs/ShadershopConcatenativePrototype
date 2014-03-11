@@ -556,17 +556,15 @@
     };
 
     Graph.prototype.drawGraph = function(fn, styleOpts) {
-      var cx, cxMax, cxMin, cy, cyMax, cyMin, dCy, i, lastCx, lastCy, lastSample, sizeX, sizeY, x, y, _i, _ref, _ref1, _ref2;
+      var cx, cxMax, cxMin, cy, cyMax, cyMin, dCy, i, lastCx, lastCy, lastSample, sizeX, sizeY, x, y, _i;
       this.ctx.save();
+      this.setStyleOpts(styleOpts);
       sizeX = this.xMax - this.xMin;
       sizeY = this.yMax - this.yMin;
       cxMin = 0;
       cxMax = this.width();
       cyMin = this.height();
       cyMax = 0;
-      this.ctx.lineWidth = (_ref = styleOpts.lineWidth) != null ? _ref : 2;
-      this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
-      this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
       /*
       
       All this lastCy, etc. crap is to optimize having fewer lineTo calls. It
@@ -603,16 +601,14 @@
     };
 
     Graph.prototype.drawHorizontalLine = function(y, styleOpts) {
-      var cxMax, cxMin, cy, cyMax, cyMin, _ref, _ref1, _ref2;
+      var cxMax, cxMin, cy, cyMax, cyMin;
       this.ctx.save();
+      this.setStyleOpts(styleOpts);
       cxMin = 0;
       cxMax = this.width();
       cyMin = this.height();
       cyMax = 0;
       cy = lerp(y, this.yMin, this.yMax, cyMin, cyMax);
-      this.ctx.lineWidth = (_ref = styleOpts.lineWidth) != null ? _ref : 2;
-      this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
-      this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
       this.ctx.beginPath();
       this.ctx.moveTo(cxMin, cy);
       this.ctx.lineTo(cxMax, cy);
@@ -621,21 +617,23 @@
     };
 
     Graph.prototype.drawVerticalLine = function(x, styleOpts) {
-      var cx, cxMax, cxMin, cyMax, cyMin, _ref, _ref1, _ref2;
+      var cx, cxMax, cxMin, cyMax, cyMin;
       this.ctx.save();
+      this.setStyleOpts(styleOpts);
       cxMin = 0;
       cxMax = this.width();
       cyMin = this.height();
       cyMax = 0;
       cx = lerp(x, this.xMin, this.xMax, cxMin, cxMax);
-      this.ctx.lineWidth = (_ref = styleOpts.lineWidth) != null ? _ref : 2;
-      this.ctx.strokeStyle = (_ref1 = styleOpts.color) != null ? _ref1 : "#006";
-      this.ctx.globalAlpha = (_ref2 = styleOpts.opacity) != null ? _ref2 : 1;
       this.ctx.beginPath();
       this.ctx.moveTo(cx, cyMin);
       this.ctx.lineTo(cx, cyMax);
       this.ctx.stroke();
       return this.ctx.restore();
+    };
+
+    Graph.prototype.setStyleOpts = function(styleOpts) {
+      return _.extend(this.ctx, config.styles["default"], styleOpts);
     };
 
     return Graph;
@@ -753,7 +751,7 @@
             } else {
               styleOpts = _.clone(config.styles.spreadPositive);
             }
-            styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin);
+            styleOpts.globalAlpha = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin);
             spreadOffset = spreadDistance * i * neg;
             graphViews.push(GraphView({
               apply: editor.root,
@@ -1311,29 +1309,34 @@
     spreadOpacityMin: 0.02,
     shaderOpacity: 1,
     styles: {
+      "default": {
+        strokeStyle: "#000",
+        globalAlpha: 1,
+        lineWidth: 2
+      },
       param: {
-        color: "green",
-        opacity: 0.4
+        strokeStyle: "green",
+        globalAlpha: 0.4
       },
       hoveredParam: {
-        color: "green",
-        opacity: 1
+        strokeStyle: "green",
+        globalAlpha: 1
       },
       apply: {
-        color: "#000",
-        opacity: 0.1
+        strokeStyle: "#000",
+        globalAlpha: 0.1
       },
       hoveredApply: {
-        color: "#900"
+        strokeStyle: "#900"
       },
       selectedApply: {
-        color: "#000"
+        strokeStyle: "#000"
       },
       spreadPositive: {
-        color: "#900"
+        strokeStyle: "#900"
       },
       spreadNegative: {
-        color: "#009"
+        strokeStyle: "#009"
       }
     }
   };

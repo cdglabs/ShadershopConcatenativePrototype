@@ -185,6 +185,8 @@ class Graph
 
   drawGraph: (fn, styleOpts) ->
     @ctx.save()
+    @setStyleOpts(styleOpts)
+
     sizeX = @xMax - @xMin
     sizeY = @yMax - @yMin
 
@@ -192,12 +194,6 @@ class Graph
     cxMax = @width()
     cyMin = @height()
     cyMax = 0
-
-    @ctx.lineWidth = styleOpts.lineWidth ? 2
-    @ctx.strokeStyle = styleOpts.color ? "#006"
-    @ctx.globalAlpha = styleOpts.opacity ? 1
-    # @ctx.shadowColor = "rgba(0,0,0,0.65)"
-    # @ctx.shadowBlur = 3
 
 
 
@@ -244,6 +240,7 @@ class Graph
 
   drawHorizontalLine: (y, styleOpts) ->
     @ctx.save()
+    @setStyleOpts(styleOpts)
 
     cxMin = 0
     cxMax = @width()
@@ -251,10 +248,6 @@ class Graph
     cyMax = 0
 
     cy = lerp(y, @yMin, @yMax, cyMin, cyMax)
-
-    @ctx.lineWidth = styleOpts.lineWidth ? 2
-    @ctx.strokeStyle = styleOpts.color ? "#006"
-    @ctx.globalAlpha = styleOpts.opacity ? 1
 
     @ctx.beginPath()
 
@@ -267,6 +260,7 @@ class Graph
 
   drawVerticalLine: (x, styleOpts) ->
     @ctx.save()
+    @setStyleOpts(styleOpts)
 
     cxMin = 0
     cxMax = @width()
@@ -274,10 +268,6 @@ class Graph
     cyMax = 0
 
     cx = lerp(x, @xMin, @xMax, cxMin, cxMax)
-
-    @ctx.lineWidth = styleOpts.lineWidth ? 2
-    @ctx.strokeStyle = styleOpts.color ? "#006"
-    @ctx.globalAlpha = styleOpts.opacity ? 1
 
     @ctx.beginPath()
 
@@ -287,5 +277,7 @@ class Graph
     @ctx.stroke()
     @ctx.restore()
 
+  setStyleOpts: (styleOpts) ->
+    _.extend(@ctx, config.styles.default, styleOpts)
 
 

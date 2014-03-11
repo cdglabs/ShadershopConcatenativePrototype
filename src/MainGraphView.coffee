@@ -11,7 +11,7 @@ MainGraphView = React.createClass
             styleOpts = _.clone(config.styles.spreadNegative)
           else
             styleOpts = _.clone(config.styles.spreadPositive)
-          styleOpts.opacity = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
+          styleOpts.globalAlpha = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
           spreadOffset = spreadDistance * i * neg
           graphViews.push(GraphView {apply: editor.root, styleOpts, spreadOffset})
 

@@ -12,12 +12,13 @@ window.config = config = {
   shaderOpacity: 1
 
   styles: {
-    param: {color: "green", opacity: 0.4}
-    hoveredParam: {color: "green", opacity: 1}
-    apply: {color: "#000", opacity: 0.1}
-    hoveredApply: {color: "#900"}
-    selectedApply: {color: "#000"}
-    spreadPositive: {color: "#900"}
-    spreadNegative: {color: "#009"}
+    default: {strokeStyle: "#000", globalAlpha: 1, lineWidth: 2}
+    param: {strokeStyle: "green", globalAlpha: 0.4}
+    hoveredParam: {strokeStyle: "green", globalAlpha: 1}
+    apply: {strokeStyle: "#000", globalAlpha: 0.1}
+    hoveredApply: {strokeStyle: "#900"}
+    selectedApply: {strokeStyle: "#000"}
+    spreadPositive: {strokeStyle: "#900"}
+    spreadNegative: {strokeStyle: "#009"}
   }
 }

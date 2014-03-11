@@ -41,6 +41,9 @@ Snapping to grid for scrubbing
 
 
 Pan and zoom the main graph
+  generalize canvas graph methods
+  input x, y bounds
+  output bounds
 
 
 
