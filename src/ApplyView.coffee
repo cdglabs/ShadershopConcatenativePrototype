@@ -129,6 +129,10 @@ ApplyThumbnailView = React.createClass
     graphViews.push(GraphView {apply, styleOpts, key: "result"})
 
     R.div {className: "applyThumbnail", style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
+      # if editor.shaderView
+      #   ShaderGraphView {apply: apply}
+      # else
+      #   graphViews
       graphViews
 
 

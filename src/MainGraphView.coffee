@@ -31,9 +31,10 @@ MainGraphView = React.createClass
       graphViews.push(GraphView {apply: param, styleOpts: config.styles.hoveredParam})
 
     R.div {className: "main"},
-      R.span {},
-        GridView {}
-        graphViews
       if editor.shaderView
         R.span {style: {opacity: config.shaderOpacity}},
           ShaderGraphView {apply: editor.hoveredApply ? editor.root}
+      else
+        R.span {},
+          GridView {}
+          graphViews

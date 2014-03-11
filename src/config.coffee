@@ -9,7 +9,7 @@ window.config = config = {
   spreadOpacityMax: 0.2
   spreadOpacityMin: 0.02
 
-  shaderOpacity: 0.5
+  shaderOpacity: 1
 
   styles: {
     param: {color: "green", opacity: 0.4}

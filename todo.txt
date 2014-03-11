@@ -1,7 +1,6 @@
 Code cleanup
   Make reordering around ProvisionalApply's better
   Implement replaceWith for first apply
-  Fix -0 for truncate
 
 
 Catch infinite loops with apply reordering and transclusion
@@ -79,3 +78,18 @@ Bret - Glen feedback (28 Feb 2014)
     Show the y-to-x "rotation" as you go from fract to sin, while also showing the span of values
   Package functions with an outliner interface
     Maybe don't even need to explicitly expose parameters, instead just open the function up and link a parameter from the outside to the inside. This way you could even modify subcalls. But then when you change the prototype you're in disaster land...
+
+
+
+
+
+
+
+Principles (in progress)
+  Visualize every intermediate step of a computation.
+  Construct a computation as a series of tranformations.
+  Manipulate parameters as scrubbable geometry on the relevant dimension(s) of the visualization (direct manipulation).
+
+
+
+

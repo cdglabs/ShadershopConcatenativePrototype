@@ -54,6 +54,17 @@ Dragging
 
 
 /* ============================================================================
+Output Switch
+============================================================================ */
+
+.outputSwitch {
+  position: absolute;
+  left: 30px;
+  bottom: 30px;
+}
+
+
+/* ============================================================================
 Steps palette
 ============================================================================ */
 
@@ -113,10 +124,12 @@ Link
 }
 
 .applyInternals > .applyThumbnail {
-  margin: 0px 0px 0px auto;
+  margin: 0px 0px -1px auto;
   width: 36px;
   height: 36px;
-  border-width: 0px 0px 0px 1px;
+  border: 0;
+  border-left: 1px solid #ddd;
+  border-bottom: 1px solid #ccc;
 }
 
 .possibleApply {

@@ -23,11 +23,3 @@ pointermove = (e) ->
 pointerup = (e) ->
   editor.dragging?.onUp?(e)
   editor.dragging = null
-
-
-
-
-
-key "s", ->
-  editor.shaderView = !editor.shaderView
-  refresh()

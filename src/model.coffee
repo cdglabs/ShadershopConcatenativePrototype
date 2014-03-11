@@ -150,7 +150,9 @@ class Editor
     @mousePosition = {x: 0, y: 0}
     @dragging = null
 
+    @outputSwitch = "Cartesian"
     @shaderView = false
+    @contourView = false
 
 
   spreadParam: ->
