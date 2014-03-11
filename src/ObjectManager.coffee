@@ -1,4 +1,4 @@
-class ObjectManager
+ObjectManager = new class
   constructor: ->
     @idCounter_ = 0
     @classNames_ = {} # className: classConstructor
@@ -88,5 +88,3 @@ class ObjectManager
     return root
 
 
-
-objectManager = new ObjectManager()

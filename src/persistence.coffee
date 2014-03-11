@@ -1,5 +1,5 @@
 saveState = ->
-  deconstructed = objectManager.deconstruct(editor)
+  deconstructed = ObjectManager.deconstruct(editor)
   deconstructedString = JSON.stringify(deconstructed)
   window.localStorage.spaceShader = deconstructedString
 
@@ -9,7 +9,7 @@ loadState = ->
     loadInitialEditor()
   else
     deconstructed = JSON.parse(deconstructedString)
-    editor = objectManager.reconstruct(deconstructed)
+    editor = ObjectManager.reconstruct(deconstructed)
 
 loadInitialEditor = ->
   editor = new Editor()
