@@ -1,4 +1,4 @@
-MainGraphView = React.createClass
+MainCartesianGraphView = React.createClass
   render: ->
     graphViews = []
 
@@ -30,11 +30,22 @@ MainGraphView = React.createClass
     if param = editor.hoveredParam
       graphViews.push(GraphView {apply: param, styleOpts: config.styles.hoveredParam})
 
+    R.span {},
+      GridView {}
+      graphViews
+
+
+MainShaderGraphView = React.createClass
+  render: ->
+    R.span {style: {opacity: config.shaderOpacity}},
+      ShaderGraphView {apply: editor.hoveredApply ? editor.root}
+      GridView {}
+
+
+MainGraphView = React.createClass
+  render: ->
     R.div {className: "main"},
       if editor.shaderView
-        R.span {style: {opacity: config.shaderOpacity}},
-          ShaderGraphView {apply: editor.hoveredApply ? editor.root}
+        MainShaderGraphView {}
       else
-        R.span {},
-          GridView {}
-          graphViews
+        MainCartesianGraphView {}

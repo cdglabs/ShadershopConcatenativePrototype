@@ -11,6 +11,8 @@ window.config = config = {
 
   shaderOpacity: 1
 
+  gridColor: "210,200,170"
+
   styles: {
     default: {strokeStyle: "#000", globalAlpha: 1, lineWidth: 2}
     param: {strokeStyle: "green", globalAlpha: 0.4}

@@ -116,11 +116,11 @@ class Graph
       [lerp(x, @xMin, @xMax, cxMin, cxMax), lerp(y, @yMin, @yMax, cyMin, cyMax)]
 
     labelDistance = 5
-    color = "0,0,0"
-    minorOpacity = 0.05
-    majorOpacity = 0.1
-    axesOpacity = 0.3
-    labelOpacity = 0.3
+    color = config.gridColor
+    minorOpacity = 0.3
+    majorOpacity = 0.4
+    axesOpacity = 1.0
+    labelOpacity = 1.0
     textHeight = 12
 
     minorColor = "rgba(#{color}, #{minorOpacity})"
