@@ -1360,7 +1360,7 @@
     loadState();
     window.addEventListener("pointermove", pointermove);
     window.addEventListener("pointerup", pointerup);
-    _ref = ["mousedown", "mousemove", "mouseup", "keydown", "scroll"];
+    _ref = ["mousedown", "mousemove", "mouseup", "keydown", "scroll", "change"];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       eventName = _ref[_i];
       window.addEventListener(eventName, refresh);

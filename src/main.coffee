@@ -5,7 +5,7 @@ window.init = ->
   window.addEventListener("pointermove", pointermove)
   window.addEventListener("pointerup", pointerup)
 
-  for eventName in ["mousedown", "mousemove", "mouseup", "keydown", "scroll"]
+  for eventName in ["mousedown", "mousemove", "mouseup", "keydown", "scroll", "change"]
     window.addEventListener(eventName, refresh)
   refresh()
 
