@@ -11,19 +11,22 @@ module.exports = class Apply
 
   initializeDefaultParams: ->
     @params = @fn.defaultParams.map (paramValue) ->
-      param = new Param(paramValue)
+      if paramValue?
+        param = new Param(paramValue)
+      else
+        param = null
 
   setParam: (index, param) ->
     @params[index] = param
 
   compileString: ->
     paramCompileStrings = @params.map (param) ->
-      param.compileString()
+      param?.compileString()
     @fn.compileString(paramCompileStrings...)
 
   compileGlslString: ->
     paramCompileStrings = @params.map (param) ->
-      param.compileGlslString()
+      param?.compileGlslString()
     @fn.compileGlslString(paramCompileStrings...)
 
   isStart: ->

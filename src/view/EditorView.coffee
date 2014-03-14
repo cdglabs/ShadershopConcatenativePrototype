@@ -28,7 +28,11 @@ OutputSwitchView = React.createClass
 
 module.exports = EditorView = React.createClass
   render: ->
-    R.div {className: "editor", style: {cursor: editor.dragging?.cursor ? ""}},
+    classNames = cx {
+      editor: true
+      dragging: editor.dragging?
+    }
+    R.div {className: classNames, style: {cursor: editor.dragging?.cursor ? ""}},
       MainGraphView {}
       R.div {className: "manager"},
         editor.applies().map (apply) ->

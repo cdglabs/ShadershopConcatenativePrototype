@@ -36,6 +36,7 @@ Dragging
 }
 .draggingObject {
   position: absolute;
+  z-index: 100;
   pointer-events: none;
 }
 .draggingObject > * {
@@ -212,6 +213,9 @@ Param
 
 .applyRow:hover .addApplyButton {
   opacity: 1;
+}
+.dragging .applyRow:hover .addApplyButton {
+  opacity: 0;
 }
 
 

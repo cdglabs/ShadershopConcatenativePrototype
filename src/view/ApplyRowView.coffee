@@ -10,8 +10,6 @@ GraphView = require("./rendering/GraphView")
 
 
 ApplyView = React.createClass
-  mixins: [DataForMixin]
-
   handleMouseDown: (e) ->
     return if e.target.closest(".param")?
     return if e.target.closest(".applyThumbnail")?
@@ -20,10 +18,12 @@ ApplyView = React.createClass
     {apply} = @props
     e.preventDefault()
 
-    return if apply instanceof Param
+    return unless apply.params[0]?
 
     el = @getDOMNode()
     rect = el.getBoundingClientRect()
+    myWidth = rect.width
+    myHeight = rect.height
     offset = {
       x: e.clientX - rect.left
       y: e.clientY - rect.top
@@ -39,15 +39,15 @@ ApplyView = React.createClass
         offset: offset
         apply: apply
         render: =>
-          R.div {style: {"min-width": rect.width, height: rect.height}},
+          R.div {style: {"min-width": myWidth, height: myHeight}},
             ApplyView {apply, isDraggingCopy: true}
         onMove: (e) =>
           insertAfterEl = null
 
-          applyEls = document.querySelectorAll(".manager .apply")
+          applyEls = document.querySelectorAll(".applyRow")
           for applyEl in applyEls
+            continue if applyEl.querySelector(".applyPlaceholder")
             rect = applyEl.getBoundingClientRect()
-            myHeight = 37
             if rect.bottom + myHeight * 1.5 > e.clientY > rect.top + myHeight / 2 and rect.left < e.clientX < rect.right
               insertAfterEl = applyEl
 
@@ -76,18 +76,11 @@ ApplyInternalsView = React.createClass
   render: ->
     {apply} = @props
     R.div {className: "applyInternals"},
-      if apply instanceof Param
-        # TODO: Switch this to ParamSlotView
-        R.div {className: "paramSlot"},
-          ParamView {param: apply}
-      else
-        [
-          R.div {className: "fnTitle"},
-            apply.fn.title
-          apply.params.map (param, paramIndex) ->
-            return null if paramIndex == 0
-            ParamSlotView {param, apply, paramIndex}
-        ]
+      R.div {className: "fnTitle"},
+        apply.fn.title
+      apply.params.map (param, paramIndex) ->
+        return null if paramIndex == 0
+        ParamSlotView {param, apply, paramIndex}
       ApplyThumbnailView {apply}
 
 
@@ -183,13 +176,15 @@ ProvisionalApplyView = React.createClass
 
 
 module.exports = ApplyRowView = React.createClass
+  mixins: [DataForMixin]
+
   toggleProvisionalApply: ->
     {apply} = @props
     nextApply = editor.nextApply(apply)
     if nextApply instanceof ProvisionalApply
       editor.removeApply(nextApply)
     else
-      editor.insertApplyAfter(new ProvisionalApply(), apply)
+      editor.insertNewApplyAfter(apply)
 
   render: ->
     {apply} = @props

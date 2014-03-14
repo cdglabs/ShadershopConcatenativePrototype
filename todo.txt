@@ -1,6 +1,5 @@
 Code cleanup
-  Make reordering around ProvisionalApply's better
-  Implement replaceWith for first apply
+  Should provisionalApply be an Apply?
 
 
 Catch infinite loops with apply reordering and transclusion
@@ -57,6 +56,12 @@ Long term:
 
 
 
+
+
+
+Visualization ideas
+  "Bump" map (gradient's normal determines shading)
+  Animated vector field (wind map)
 
 
 

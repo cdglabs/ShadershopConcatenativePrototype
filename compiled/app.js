@@ -95,23 +95,26 @@
 
 }).call(this);
 }, "editor": function(exports, require, module) {(function() {
-  var Editor, Param, Persistence, a, editor;
+  var Apply, Editor, Param, Persistence, builtInFns, editor, startApply;
 
-  require("model/register");
+  require("./model/register");
 
-  Persistence = require("persistence/Persistence");
+  Persistence = require("./persistence/Persistence");
 
-  Editor = require("model/Editor");
+  Editor = require("./model/Editor");
 
-  Param = require("model/Param");
+  Apply = require("./model/Apply");
+
+  Param = require("./model/Param");
+
+  builtInFns = require("./model/builtInFns");
 
   editor = Persistence.loadState();
 
   if (!editor) {
     editor = new Editor();
-    a = new Param();
-    editor.xParam = a;
-    editor.root = a;
+    startApply = new Apply(builtInFns[0]);
+    editor.root = startApply;
   }
 
   window.editor = editor;
@@ -120,7 +123,7 @@
 
 }).call(this);
 }, "main": function(exports, require, module) {(function() {
-  var EditorView, Persistence, editor, eventName, handleWindowMouseMove, handleWindowMouseUp, refresh, refreshView, _i, _len, _ref;
+  var EditorView, Persistence, editor, eventName, handleWindowMouseMove, handleWindowMouseUp, refresh, refreshView, willRefreshNextFrame, _i, _len, _ref;
 
   require("./util/domAddons");
 
@@ -130,12 +133,22 @@
 
   EditorView = require("./view/EditorView");
 
-  console.log("made it here", editor);
+  window.reset = function() {
+    Persistence.reset();
+    return location.reload();
+  };
+
+  willRefreshNextFrame = false;
 
   refresh = function() {
+    if (willRefreshNextFrame) {
+      return;
+    }
+    willRefreshNextFrame = true;
     return requestAnimationFrame(function() {
       refreshView();
-      return Persistence.saveState(editor);
+      Persistence.saveState(editor);
+      return willRefreshNextFrame = false;
     });
   };
 
@@ -199,7 +212,11 @@
     Apply.prototype.initializeDefaultParams = function() {
       return this.params = this.fn.defaultParams.map(function(paramValue) {
         var param;
-        return param = new Param(paramValue);
+        if (paramValue != null) {
+          return param = new Param(paramValue);
+        } else {
+          return param = null;
+        }
       });
     };
 
@@ -210,7 +227,7 @@
     Apply.prototype.compileString = function() {
       var paramCompileStrings, _ref;
       paramCompileStrings = this.params.map(function(param) {
-        return param.compileString();
+        return param != null ? param.compileString() : void 0;
       });
       return (_ref = this.fn).compileString.apply(_ref, paramCompileStrings);
     };
@@ -218,7 +235,7 @@
     Apply.prototype.compileGlslString = function() {
       var paramCompileStrings, _ref;
       paramCompileStrings = this.params.map(function(param) {
-        return param.compileGlslString();
+        return param != null ? param.compileGlslString() : void 0;
       });
       return (_ref = this.fn).compileGlslString.apply(_ref, paramCompileStrings);
     };
@@ -233,9 +250,11 @@
 
 }).call(this);
 }, "model/Editor": function(exports, require, module) {(function() {
-  var Editor, Param;
+  var Editor, Param, ProvisionalApply;
 
   Param = require("./Param");
+
+  ProvisionalApply = require("./ProvisionalApply");
 
   module.exports = Editor = (function() {
     function Editor() {
@@ -269,11 +288,8 @@
       var applies, apply;
       applies = [];
       apply = this.root;
-      while (true) {
+      while (apply != null) {
         applies.unshift(apply);
-        if (apply instanceof Param) {
-          break;
-        }
         apply = apply.params[0];
       }
       return applies;
@@ -282,7 +298,7 @@
     Editor.prototype.nextApply = function(refApply) {
       var nextApply;
       nextApply = this.root;
-      while (!(nextApply instanceof Param) && nextApply.params[0] !== refApply) {
+      while (nextApply && nextApply.params[0] !== refApply) {
         nextApply = nextApply.params[0];
       }
       if (nextApply instanceof Param) {
@@ -316,6 +332,12 @@
           return apply.setParam(0, refApply);
         }
       }
+    };
+
+    Editor.prototype.insertNewApplyAfter = function(refApply) {
+      var apply;
+      apply = new ProvisionalApply();
+      return this.insertApplyAfter(apply, refApply);
     };
 
     Editor.prototype.replaceApply = function(apply, refApply) {
@@ -845,9 +867,8 @@
   GraphView = require("./rendering/GraphView");
 
   ApplyView = React.createClass({
-    mixins: [DataForMixin],
     handleMouseDown: function(e) {
-      var apply, el, offset, rect;
+      var apply, el, myHeight, myWidth, offset, rect;
       if (e.target.closest(".param") != null) {
         return;
       }
@@ -859,11 +880,13 @@
       }
       apply = this.props.apply;
       e.preventDefault();
-      if (apply instanceof Param) {
+      if (apply.params[0] == null) {
         return;
       }
       el = this.getDOMNode();
       rect = el.getBoundingClientRect();
+      myWidth = rect.width;
+      myHeight = rect.height;
       offset = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
@@ -880,8 +903,8 @@
             render: function() {
               return R.div({
                 style: {
-                  "min-width": rect.width,
-                  height: rect.height
+                  "min-width": myWidth,
+                  height: myHeight
                 }
               }, ApplyView({
                 apply: apply,
@@ -889,13 +912,15 @@
               }));
             },
             onMove: function(e) {
-              var applyEl, applyEls, insertAfterEl, myHeight, refApply, _i, _len, _ref, _ref1;
+              var applyEl, applyEls, insertAfterEl, refApply, _i, _len, _ref, _ref1;
               insertAfterEl = null;
-              applyEls = document.querySelectorAll(".manager .apply");
+              applyEls = document.querySelectorAll(".applyRow");
               for (_i = 0, _len = applyEls.length; _i < _len; _i++) {
                 applyEl = applyEls[_i];
+                if (applyEl.querySelector(".applyPlaceholder")) {
+                  continue;
+                }
                 rect = applyEl.getBoundingClientRect();
-                myHeight = 37;
                 if ((rect.bottom + myHeight * 1.5 > (_ref = e.clientY) && _ref > rect.top + myHeight / 2) && (rect.left < (_ref1 = e.clientX) && _ref1 < rect.right)) {
                   insertAfterEl = applyEl;
                 }
@@ -941,24 +966,18 @@
       apply = this.props.apply;
       return R.div({
         className: "applyInternals"
-      }, apply instanceof Param ? R.div({
-        className: "paramSlot"
-      }, ParamView({
-        param: apply
-      })) : [
-        R.div({
-          className: "fnTitle"
-        }, apply.fn.title), apply.params.map(function(param, paramIndex) {
-          if (paramIndex === 0) {
-            return null;
-          }
-          return ParamSlotView({
-            param: param,
-            apply: apply,
-            paramIndex: paramIndex
-          });
-        })
-      ], ApplyThumbnailView({
+      }, R.div({
+        className: "fnTitle"
+      }, apply.fn.title), apply.params.map(function(param, paramIndex) {
+        if (paramIndex === 0) {
+          return null;
+        }
+        return ParamSlotView({
+          param: param,
+          apply: apply,
+          paramIndex: paramIndex
+        });
+      }), ApplyThumbnailView({
         apply: apply
       }));
     }
@@ -1093,6 +1112,7 @@
   });
 
   module.exports = ApplyRowView = React.createClass({
+    mixins: [DataForMixin],
     toggleProvisionalApply: function() {
       var apply, nextApply;
       apply = this.props.apply;
@@ -1100,7 +1120,7 @@
       if (nextApply instanceof ProvisionalApply) {
         return editor.removeApply(nextApply);
       } else {
-        return editor.insertApplyAfter(new ProvisionalApply(), apply);
+        return editor.insertNewApplyAfter(apply);
       }
     },
     render: function() {
@@ -1190,9 +1210,13 @@
 
   module.exports = EditorView = React.createClass({
     render: function() {
-      var _ref, _ref1;
+      var classNames, _ref, _ref1;
+      classNames = cx({
+        editor: true,
+        dragging: editor.dragging != null
+      });
       return R.div({
-        className: "editor",
+        className: classNames,
         style: {
           cursor: (_ref = (_ref1 = editor.dragging) != null ? _ref1.cursor : void 0) != null ? _ref : ""
         }
@@ -1260,7 +1284,7 @@
         styleOpts: config.styles.selectedApply
       }));
       if (apply = editor.hoveredApply) {
-        if (apply.params) {
+        if (apply.params && !(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {
           _ref1 = apply.params;
           for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
             param = _ref1[_k];
@@ -1557,7 +1581,9 @@
 
 }).call(this);
 }, "view/mixins/StartTranscludeMixin": function(exports, require, module) {(function() {
-  var StartTranscludeMixin;
+  var StartTranscludeMixin, onceDragConsummated;
+
+  onceDragConsummated = require("../../util/onceDragConsummated");
 
   module.exports = StartTranscludeMixin = {
     startTransclude: function(e, apply, render) {

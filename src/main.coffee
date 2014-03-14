@@ -4,13 +4,20 @@ Persistence = require("./persistence/Persistence")
 EditorView = require("./view/EditorView")
 
 
-console.log "made it here", editor
+window.reset = ->
+  Persistence.reset()
+  location.reload()
 
 
+
+willRefreshNextFrame = false
 refresh = ->
+  return if willRefreshNextFrame
+  willRefreshNextFrame = true
   requestAnimationFrame ->
     refreshView()
     Persistence.saveState(editor)
+    willRefreshNextFrame = false
 
 refreshView = ->
   editorEl = document.querySelector("#editor")
@@ -33,3 +40,4 @@ for eventName in ["mousedown", "mousemove", "mouseup", "keydown", "scroll", "cha
   window.addEventListener(eventName, refresh)
 
 refresh()
+

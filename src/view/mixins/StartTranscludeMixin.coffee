@@ -1,3 +1,6 @@
+onceDragConsummated = require("../../util/onceDragConsummated")
+
+
 module.exports = StartTranscludeMixin = {
   startTransclude: (e, apply, render) ->
     e.preventDefault()
