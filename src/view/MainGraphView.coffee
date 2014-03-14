@@ -1,3 +1,13 @@
+R = React.DOM
+cx = React.addons.classSet
+lerp = require("../util/lerp")
+Param = require("../model/Param")
+GridView = require("./rendering/GridView")
+GraphView = require("./rendering/GraphView")
+ShaderGraphView = require("./rendering/ShaderGraphView")
+config = require("../config")
+
+
 MainCartesianGraphView = React.createClass
   render: ->
     graphViews = []
@@ -42,7 +52,7 @@ MainShaderGraphView = React.createClass
       GridView {}
 
 
-MainGraphView = React.createClass
+module.exports = MainGraphView = React.createClass
   render: ->
     R.div {className: "main"},
       if editor.shaderView

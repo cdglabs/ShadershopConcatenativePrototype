@@ -1,3 +1,14 @@
+R = React.DOM
+cx = React.addons.classSet
+Param = require("../model/Param")
+ProvisionalApply = require("../model/ProvisionalApply")
+onceDragConsummated = require("../util/onceDragConsummated")
+DataForMixin = require("./mixins/DataForMixin")
+StartTranscludeMixin = require("./mixins/StartTranscludeMixin")
+ParamView = require("./ParamView")
+GraphView = require("./rendering/GraphView")
+
+
 ApplyView = React.createClass
   mixins: [DataForMixin]
 
@@ -98,7 +109,7 @@ ParamSlotView = React.createClass
 
 
 ApplyThumbnailView = React.createClass
-  mixins: [TranscludeMixin]
+  mixins: [StartTranscludeMixin]
   handleMouseDown: (e) ->
     {apply} = @props
     render = =>
@@ -171,7 +182,7 @@ ProvisionalApplyView = React.createClass
 
 
 
-ApplyRowView = React.createClass
+module.exports = ApplyRowView = React.createClass
   toggleProvisionalApply: ->
     {apply} = @props
     nextApply = editor.nextApply(apply)

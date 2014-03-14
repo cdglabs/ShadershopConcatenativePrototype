@@ -1,4 +1,4 @@
-window.config = config = {
+module.exports = window.config = config = {
   # In pixels:
   minGridSpacing: 70
   hitTolerance: 15

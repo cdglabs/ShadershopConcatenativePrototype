@@ -1,4 +1,8 @@
-DraggingView = React.createClass
+R = React.DOM
+cx = React.addons.classSet
+
+
+module.exports = DraggingView = React.createClass
   render: ->
     R.div {},
       if editor.dragging?.render

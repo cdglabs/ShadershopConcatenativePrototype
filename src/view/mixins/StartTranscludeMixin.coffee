@@ -1,12 +1,4 @@
-DataForMixin = {
-  componentDidMount: -> @updateDataForAnnotation()
-  componentDidUpdate: -> @updateDataForAnnotation()
-  updateDataForAnnotation: ->
-    el = @getDOMNode()
-    el.dataFor = this
-}
-
-TranscludeMixin = {
+module.exports = StartTranscludeMixin = {
   startTransclude: (e, apply, render) ->
     e.preventDefault()
 

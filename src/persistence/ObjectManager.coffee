@@ -1,4 +1,4 @@
-ObjectManager = new class
+module.exports = ObjectManager = new class
   constructor: ->
     @idCounter_ = 0
     @classNames_ = {} # className: classConstructor

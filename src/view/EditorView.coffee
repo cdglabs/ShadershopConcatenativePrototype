@@ -1,5 +1,9 @@
 R = React.DOM
 cx = React.addons.classSet
+ApplyRowView = require("./ApplyRowView")
+MainGraphView = require("./MainGraphView")
+DraggingView = require("./DraggingView")
+
 
 OutputSwitchView = React.createClass
   handleChange: (e) ->
@@ -22,19 +26,13 @@ OutputSwitchView = React.createClass
         R.option {value: "Contour Map"}, "Contour Map"
 
 
-refreshView = do ->
-
-  EditorView = React.createClass
-    render: ->
-      R.div {className: "editor", style: {cursor: editor.dragging?.cursor ? ""}},
-        MainGraphView {}
-        R.div {className: "manager"},
-          editor.applies().map (apply) ->
-            ApplyRowView {apply, key: apply.__id}
-        OutputSwitchView {}
-        R.div {className: "dragging"},
-          DraggingView {}
-
-  return ->
-    editorEl = document.querySelector("#editor")
-    React.renderComponent(EditorView(), editorEl)
+module.exports = EditorView = React.createClass
+  render: ->
+    R.div {className: "editor", style: {cursor: editor.dragging?.cursor ? ""}},
+      MainGraphView {}
+      R.div {className: "manager"},
+        editor.applies().map (apply) ->
+          ApplyRowView {apply, key: apply.__id}
+      OutputSwitchView {}
+      R.div {className: "dragging"},
+        DraggingView {}

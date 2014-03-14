@@ -1,3 +1,7 @@
+config = require("../../config")
+lerp = require("../../util/lerp")
+
+
 ###
 
 Need to snap to grid lines
@@ -37,7 +41,7 @@ drawLine = (ctx, [x1, y1], [x2, y2]) ->
 
 
 
-class Graph
+module.exports = class Graph
   constructor: (@canvas, @xMin, @xMax, @yMin, @yMax) ->
     @ctx = @canvas.getContext("2d")
 

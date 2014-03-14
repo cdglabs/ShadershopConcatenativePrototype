@@ -1,4 +1,10 @@
-ShaderGraphView = React.createClass
+R = React.DOM
+cx = React.addons.classSet
+CanvasView = require("./CanvasView")
+Shader = require("./Shader")
+
+
+module.exports = ShaderGraphView = React.createClass
   drawFn: (canvas) ->
     {apply} = @props
 

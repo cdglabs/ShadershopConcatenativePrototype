@@ -17,7 +17,7 @@ to set uniforms,
 ###
 
 
-class Shader
+module.exports = class Shader
   constructor: (@canvas) ->
     @vertexSrc = null
     @fragmentSrc = null

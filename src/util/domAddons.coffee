@@ -1,13 +1,3 @@
-lerp = (x, dMin, dMax, rMin, rMax) ->
-  ratio = (x - dMin) / (dMax - dMin)
-  ratio * (rMax - rMin) + rMin
-
-
-compose = (f, g) ->
-  (x) -> f(g(x))
-
-
-
 Element::matches ?= Element::webkitMatchesSelector ? Element::mozMatchesSelector ? Element::oMatchesSelector
 
 Element::closest = (selector) ->
@@ -58,35 +48,3 @@ Element::closest = (selector) ->
         };
 }());
 `
-
-
-
-
-
-onceDragConsummated = (downEvent, callback, notConsummatedCallback=null) ->
-  consummated = false
-  originalX = downEvent.clientX
-  originalY = downEvent.clientY
-
-  handleMove = (moveEvent) ->
-    dx = moveEvent.clientX - originalX
-    dy = moveEvent.clientY - originalY
-    d  = Math.max(Math.abs(dx), Math.abs(dy))
-    if d > 3
-      consummated = true
-      removeListeners()
-      callback?(moveEvent)
-
-  handleUp = (upEvent) ->
-    if !consummated
-      notConsummatedCallback?(upEvent)
-    removeListeners()
-
-  removeListeners = ->
-    window.removeEventListener("mousemove", handleMove)
-    window.removeEventListener("mouseup", handleUp)
-
-  window.addEventListener("mousemove", handleMove)
-  window.addEventListener("mouseup", handleUp)
-
-

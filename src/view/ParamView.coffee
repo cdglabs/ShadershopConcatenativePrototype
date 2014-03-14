@@ -1,3 +1,9 @@
+R = React.DOM
+cx = React.addons.classSet
+onceDragConsummated = require("../util/onceDragConsummated")
+StartTranscludeMixin = require("./mixins/StartTranscludeMixin")
+
+
 truncate = (value) ->
   s = value.toFixed(4)
   if s.indexOf(".") != -1
@@ -102,7 +108,7 @@ ParamValueView = React.createClass
 
 
 ParamTitleView = React.createClass
-  mixins: [ContentEditableMixin, TranscludeMixin]
+  mixins: [ContentEditableMixin, StartTranscludeMixin]
 
   cursor: ->
     if @isFocused()
@@ -136,7 +142,7 @@ ParamTitleView = React.createClass
 
 
 
-ParamView = React.createClass
+module.exports = ParamView = React.createClass
   handleMouseDown: (e) ->
     {param} = @props
     # TODO controller
