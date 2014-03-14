@@ -23,9 +23,9 @@ MainCartesianGraphView = React.createClass
             styleOpts = _.clone(config.styles.spreadPositive)
           styleOpts.globalAlpha = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
           spreadOffset = spreadDistance * i * neg
-          graphViews.push(GraphView {apply: editor.root, styleOpts, spreadOffset})
+          graphViews.push(GraphView {apply: editor.root, key: editor.root.__id + (i*neg),styleOpts, spreadOffset})
 
-    graphViews.push(GraphView {apply: editor.root, styleOpts: config.styles.selectedApply})
+    graphViews.push(GraphView {apply: editor.root, key: editor.root.__id, styleOpts: config.styles.selectedApply})
 
     if apply = editor.hoveredApply
       if apply.params and !apply.isStart?()
@@ -34,11 +34,11 @@ MainCartesianGraphView = React.createClass
             styleOpts = config.styles.param
           else
             styleOpts = config.styles.apply
-          graphViews.push(GraphView {apply: param, styleOpts})
-      graphViews.push(GraphView {apply, styleOpts: config.styles.hoveredApply})
+          graphViews.push(GraphView {apply: param, key: param.__id, styleOpts})
+      graphViews.push(GraphView {apply, key: apply.__id, styleOpts: config.styles.hoveredApply})
 
     if param = editor.hoveredParam
-      graphViews.push(GraphView {apply: param, styleOpts: config.styles.hoveredParam})
+      graphViews.push(GraphView {apply: param, key: param.__id, styleOpts: config.styles.hoveredParam})
 
     R.span {},
       GridView {}

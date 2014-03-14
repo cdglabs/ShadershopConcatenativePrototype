@@ -80,7 +80,7 @@ ApplyInternalsView = React.createClass
         apply.fn.title
       apply.params.map (param, paramIndex) ->
         return null if paramIndex == 0
-        ParamSlotView {param, apply, paramIndex}
+        ParamSlotView {param, apply, paramIndex, key: paramIndex}
       ApplyThumbnailView {apply}
 
 
@@ -171,7 +171,7 @@ ProvisionalApplyView = React.createClass
     {apply} = @props
     R.div {className: "provisionalApply"},
       apply.possibleApplies.map (possibleApply) ->
-        PossibleApplyView {apply, possibleApply}
+        PossibleApplyView {apply, possibleApply, key: possibleApply.__id}
 
 
 
@@ -188,14 +188,13 @@ module.exports = ApplyRowView = React.createClass
 
   render: ->
     {apply} = @props
-    R.div {className: "applyRow"},
-      if apply instanceof ProvisionalApply
+    if apply instanceof ProvisionalApply
+      R.div {className: "applyRow"},
         ProvisionalApplyView {apply}
-      else
-        [
-          ApplyView {apply}
-          R.button {className: "addApplyButton", onClick: @toggleProvisionalApply}, "+"
-        ]
+    else
+      R.div {className: "applyRow"},
+        ApplyView {apply}
+        R.button {className: "addApplyButton", onClick: @toggleProvisionalApply}, "+"
 
 
 

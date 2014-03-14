@@ -975,7 +975,8 @@
         return ParamSlotView({
           param: param,
           apply: apply,
-          paramIndex: paramIndex
+          paramIndex: paramIndex,
+          key: paramIndex
         });
       }), ApplyThumbnailView({
         apply: apply
@@ -1105,7 +1106,8 @@
       }, apply.possibleApplies.map(function(possibleApply) {
         return PossibleApplyView({
           apply: apply,
-          possibleApply: possibleApply
+          possibleApply: possibleApply,
+          key: possibleApply.__id
         });
       }));
     }
@@ -1126,18 +1128,22 @@
     render: function() {
       var apply;
       apply = this.props.apply;
-      return R.div({
-        className: "applyRow"
-      }, apply instanceof ProvisionalApply ? ProvisionalApplyView({
-        apply: apply
-      }) : [
-        ApplyView({
+      if (apply instanceof ProvisionalApply) {
+        return R.div({
+          className: "applyRow"
+        }, ProvisionalApplyView({
+          apply: apply
+        }));
+      } else {
+        return R.div({
+          className: "applyRow"
+        }, ApplyView({
           apply: apply
         }), R.button({
           className: "addApplyButton",
           onClick: this.toggleProvisionalApply
-        }, "+")
-      ]);
+        }, "+"));
+      }
     }
   });
 
@@ -1273,6 +1279,7 @@
             spreadOffset = spreadDistance * i * neg;
             graphViews.push(GraphView({
               apply: editor.root,
+              key: editor.root.__id + (i * neg),
               styleOpts: styleOpts,
               spreadOffset: spreadOffset
             }));
@@ -1281,6 +1288,7 @@
       }
       graphViews.push(GraphView({
         apply: editor.root,
+        key: editor.root.__id,
         styleOpts: config.styles.selectedApply
       }));
       if (apply = editor.hoveredApply) {
@@ -1295,18 +1303,21 @@
             }
             graphViews.push(GraphView({
               apply: param,
+              key: param.__id,
               styleOpts: styleOpts
             }));
           }
         }
         graphViews.push(GraphView({
           apply: apply,
+          key: apply.__id,
           styleOpts: config.styles.hoveredApply
         }));
       }
       if (param = editor.hoveredParam) {
         graphViews.push(GraphView({
           apply: param,
+          key: param.__id,
           styleOpts: config.styles.hoveredParam
         }));
       }
