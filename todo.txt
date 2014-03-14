@@ -90,9 +90,9 @@ Bret - Glen feedback (28 Feb 2014)
 
 Principles (in progress)
   Visualize every intermediate step of a computation.
-  Construct a computation as a series of tranformations.
+  Construct a computation as a series of tranformations - calculator semantics
   Manipulate parameters as scrubbable geometry on the relevant dimension(s) of the visualization (direct manipulation).
-  Build the visualizations within the environment (Contour Map, raymarcher, etc)
+  Build the visualizations within the environment (Contour Map, raymarcher, animated vector field, etc)
 
 
 

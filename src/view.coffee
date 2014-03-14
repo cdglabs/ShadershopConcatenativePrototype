@@ -3,6 +3,7 @@ cx = React.addons.classSet
 
 OutputSwitchView = React.createClass
   handleChange: (e) ->
+    # TODO controller
     editor.outputSwitch = e.target.selectedOptions[0].value
     if editor.outputSwitch == "Cartesian"
       editor.shaderView = false

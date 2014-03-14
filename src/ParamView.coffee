@@ -66,8 +66,10 @@ ParamValueView = React.createClass
         dy = -(e.clientY - originalY)
         d = if param.axis == "x" then dx else dy
         multiplier = 0.1
+        # TODO controller
         param.value = originalValue + d * multiplier
       onUp: (e) =>
+        # TODO controller
         editor.hoveredParam = null
     }
 
@@ -76,6 +78,7 @@ ParamValueView = React.createClass
 
 
   handleInput: (e) ->
+    # TODO controller
     @props.param.value = +@cleanAndGetValue()
 
   render: ->
@@ -117,6 +120,7 @@ ParamTitleView = React.createClass
       @focusAndSelect()
 
   handleInput: ->
+    # TODO controller
     @props.param.title = @cleanAndGetValue()
 
   render: ->
@@ -135,6 +139,7 @@ ParamTitleView = React.createClass
 ParamView = React.createClass
   handleMouseDown: (e) ->
     {param} = @props
+    # TODO controller
     if key.command
       if param.axis == "result"
         param.axis = "x"
@@ -151,8 +156,10 @@ ParamView = React.createClass
       else
         editor.yParam = param
   handleMouseEnter: ->
+    # TODO controller
     editor.hoveredParam = @props.param
   handleMouseLeave: ->
+    # TODO controller
     editor.hoveredParam = null
   render: ->
     classNames = cx {

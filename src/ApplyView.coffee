@@ -28,7 +28,7 @@ ApplyView = React.createClass
         offset: offset
         apply: apply
         render: =>
-          R.div {style: {width: rect.width, height: rect.height}},
+          R.div {style: {"min-width": rect.width, height: rect.height}},
             ApplyView {apply, isDraggingCopy: true}
         onMove: (e) =>
           insertAfterEl = null
@@ -85,6 +85,7 @@ ParamSlotView = React.createClass
 
   handleTransclusionDrop: (p) ->
     {param, apply, paramIndex} = @props
+    # TODO controller
     apply.setParam(paramIndex, p)
 
   render: ->
@@ -105,8 +106,10 @@ ApplyThumbnailView = React.createClass
     @startTransclude(e, apply, render)
 
   handleMouseEnter: (e) ->
+    # TODO controller
     editor.hoveredApply = @props.apply
   handleMouseLeave: (e) ->
+    # TODO controller
     editor.hoveredApply = null
 
   render: ->
@@ -138,13 +141,16 @@ ApplyThumbnailView = React.createClass
 
 PossibleApplyView = React.createClass
   handleMouseEnter: ->
+    # TODO controller
     @props.apply.selectedApply = @props.possibleApply
     editor.hoveredParam = @props.possibleApply.params[1]
   handleMouseLeave: ->
+    # TODO controller
     @props.apply.selectedApply = null
     editor.hoveredParam = null
   handleClick: ->
     editor.replaceApply(@props.possibleApply, @props.apply)
+    # TODO controller
     editor.hoveredParam = null
   render: ->
     {apply, possibleApply} = @props
