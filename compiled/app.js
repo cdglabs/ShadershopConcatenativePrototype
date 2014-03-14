@@ -1282,7 +1282,7 @@
 
   MainCartesianGraphView = React.createClass({
     render: function() {
-      var apply, graphViews, i, neg, param, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1;
+      var apply, graphViews, i, neg, param, paramIndex, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1;
       graphViews = [];
       if (editor.spreadParam()) {
         spreadDistance = 0.5;
@@ -1315,8 +1315,8 @@
       if (apply = editor.hoveredApply) {
         if (apply.params && !(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {
           _ref1 = apply.params;
-          for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
-            param = _ref1[_k];
+          for (paramIndex = _k = 0, _len1 = _ref1.length; _k < _len1; paramIndex = ++_k) {
+            param = _ref1[paramIndex];
             if (param instanceof Param && param !== editor.xParam) {
               styleOpts = config.styles.param;
             } else {
@@ -1324,7 +1324,7 @@
             }
             graphViews.push(GraphView({
               apply: param,
-              key: param.__id,
+              key: "param" + paramIndex,
               styleOpts: styleOpts
             }));
           }

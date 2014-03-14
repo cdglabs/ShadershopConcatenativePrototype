@@ -86,6 +86,9 @@ Link
 .apply {
   background-color: #fff;
 }
+.apply:hover {
+  background-color: #eef;
+}
 .apply.hovered {
   background-color: #fee;
 }

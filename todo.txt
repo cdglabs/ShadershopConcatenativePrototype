@@ -1,5 +1,6 @@
 Code cleanup
   Should provisionalApply be an Apply?
+  Reordering measuring algorithm still isn't quite right (try dragging a "start" apply)
 
 
 Catch infinite loops with apply reordering and transclusion
@@ -8,6 +9,7 @@ Catch infinite loops with apply reordering and transclusion
 
 Add parameter inspector
   axis (get rid of command click hack)
+    time
   relative parameter to another parameter
   sweep
 
@@ -43,15 +45,6 @@ Pan and zoom the main graph
   generalize canvas graph methods
   input x, y bounds
   output bounds
-
-
-
-
-Long term:
-  Sweep, time, etc. in addition to x for parameters
-  Function abstraction
-  Higher-dimensional
-  Different types of vis (i.e. color map = shader)
 
 
 
