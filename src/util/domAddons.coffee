@@ -15,6 +15,21 @@ Element::closest = (selector) ->
     else
       return undefined
 
+Element::getMarginRect = ->
+  rect = @getBoundingClientRect()
+  style = window.getComputedStyle(this)
+  result = {
+    top: rect.top - parseInt(style["margin-top"], 10)
+    left: rect.left - parseInt(style["margin-left"], 10)
+    bottom: rect.bottom + parseInt(style["margin-bottom"], 10)
+    right: rect.right + parseInt(style["margin-right"], 10)
+  }
+  result.width = result.right - result.left
+  result.height = result.bottom - result.top
+  return result
+
+
+
 `
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating

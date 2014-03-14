@@ -35,10 +35,10 @@ MainCartesianGraphView = React.createClass
           else
             styleOpts = config.styles.apply
           graphViews.push(GraphView {apply: param, key: param.__id, styleOpts})
-      graphViews.push(GraphView {apply, key: apply.__id, styleOpts: config.styles.hoveredApply})
+      graphViews.push(GraphView {apply, key: "hoveredApply", styleOpts: config.styles.hoveredApply})
 
     if param = editor.hoveredParam
-      graphViews.push(GraphView {apply: param, key: param.__id, styleOpts: config.styles.hoveredParam})
+      graphViews.push(GraphView {apply: param, key: "hoveredParam", styleOpts: config.styles.hoveredParam})
 
     R.span {},
       GridView {}

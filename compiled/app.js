@@ -761,6 +761,21 @@
     }
   };
 
+  Element.prototype.getMarginRect = function() {
+    var rect, result, style;
+    rect = this.getBoundingClientRect();
+    style = window.getComputedStyle(this);
+    result = {
+      top: rect.top - parseInt(style["margin-top"], 10),
+      left: rect.left - parseInt(style["margin-left"], 10),
+      bottom: rect.bottom + parseInt(style["margin-bottom"], 10),
+      right: rect.right + parseInt(style["margin-right"], 10)
+    };
+    result.width = result.right - result.left;
+    result.height = result.bottom - result.top;
+    return result;
+  };
+
   
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
@@ -884,7 +899,7 @@
         return;
       }
       el = this.getDOMNode();
-      rect = el.getBoundingClientRect();
+      rect = el.getMarginRect();
       myWidth = rect.width;
       myHeight = rect.height;
       offset = {
@@ -900,11 +915,14 @@
             cursor: "-webkit-grabbing",
             offset: offset,
             apply: apply,
+            placeholderHeight: myHeight,
             render: function() {
               return R.div({
                 style: {
                   "min-width": myWidth,
-                  height: myHeight
+                  height: myHeight,
+                  overflow: "hidden",
+                  "background-color": "#fff"
                 }
               }, ApplyView({
                 apply: apply,
@@ -940,7 +958,10 @@
       _ref = this.props, apply = _ref.apply, isDraggingCopy = _ref.isDraggingCopy;
       if (!isDraggingCopy && apply === ((_ref1 = editor.dragging) != null ? _ref1.apply : void 0)) {
         return R.div({
-          className: "applyPlaceholder"
+          className: "applyPlaceholder",
+          style: {
+            height: editor.dragging.placeholderHeight
+          }
         });
       }
       classNames = cx({
@@ -1310,14 +1331,14 @@
         }
         graphViews.push(GraphView({
           apply: apply,
-          key: apply.__id,
+          key: "hoveredApply",
           styleOpts: config.styles.hoveredApply
         }));
       }
       if (param = editor.hoveredParam) {
         graphViews.push(GraphView({
           apply: param,
-          key: param.__id,
+          key: "hoveredParam",
           styleOpts: config.styles.hoveredParam
         }));
       }

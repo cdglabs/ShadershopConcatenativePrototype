@@ -21,7 +21,7 @@ ApplyView = React.createClass
     return unless apply.params[0]?
 
     el = @getDOMNode()
-    rect = el.getBoundingClientRect()
+    rect = el.getMarginRect()
     myWidth = rect.width
     myHeight = rect.height
     offset = {
@@ -38,8 +38,9 @@ ApplyView = React.createClass
         cursor: "-webkit-grabbing"
         offset: offset
         apply: apply
+        placeholderHeight: myHeight
         render: =>
-          R.div {style: {"min-width": myWidth, height: myHeight}},
+          R.div {style: {"min-width": myWidth, height: myHeight, overflow: "hidden", "background-color": "#fff"}},
             ApplyView {apply, isDraggingCopy: true}
         onMove: (e) =>
           insertAfterEl = null
@@ -61,7 +62,7 @@ ApplyView = React.createClass
     {apply, isDraggingCopy} = @props
 
     if !isDraggingCopy and apply == editor.dragging?.apply
-      return R.div {className: "applyPlaceholder"}
+      return R.div {className: "applyPlaceholder", style: {height: editor.dragging.placeholderHeight}}
 
     classNames = cx {
       apply: true

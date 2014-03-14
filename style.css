@@ -74,6 +74,7 @@ Steps palette
   top: 30px;
   right: 30px;
   min-width: 180px;
+  background-color: #fff;
   box-shadow: 0px 1px 3px rgba(0,0,0,0.5);
 }
 
@@ -84,19 +85,19 @@ Link
 
 .apply {
   background-color: #fff;
-  border-bottom: 1px solid #ccc;
 }
 .apply.hovered {
   background-color: #fee;
 }
 .apply.isStart {
-  border-top: 2px solid #333;
+  margin-top: 24px;
+}
+.applyRow:first-child .apply.isStart {
+  margin-top: 0;
 }
 .applyPlaceholder {
-  height: 37px;
   background-color: #bbb;
   box-shadow: inset 0px 1px 3px rgba(0,0,0,0.5);
-  /*border-bottom: 1px solid #ccc;*/
 }
 
 .applyInternals {
@@ -106,6 +107,9 @@ Link
 
 .applyInternals > .fnTitle {
   margin: auto 0px auto 6px;
+}
+.applyInternals > .fnTitle:empty {
+  margin: auto 0px auto 0px;
 }
 
 .applyInternals > .paramSlot {
@@ -125,12 +129,17 @@ Link
 }
 
 .applyInternals > .applyThumbnail {
-  margin: 0px 0px -1px auto;
+  margin: 0px 0px 0px auto;
   width: 36px;
   height: 36px;
-  border: 0;
-  border-left: 1px solid #ddd;
-  border-bottom: 1px solid #ccc;
+  border-top-width: 0;
+  border-right-width: 0;
+}
+.apply.isStart .applyInternals > .applyThumbnail {
+  border-top-width: 1px;
+}
+.applyRow:first-child .apply.isStart .applyInternals > .applyThumbnail {
+  border-top-width: 0;
 }
 
 .possibleApply {
