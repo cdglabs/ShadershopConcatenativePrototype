@@ -1,7 +1,7 @@
 editor = null
 
 window.init = ->
-  loadState()
+  Persistence.loadState()
   window.addEventListener("mousemove", handleWindowMouseMove)
   window.addEventListener("mouseup", handleWindowMouseUp)
 
@@ -13,7 +13,7 @@ window.init = ->
 refresh = ->
   requestAnimationFrame ->
     refreshView()
-    saveState()
+    Persistence.saveState()
 
 
 handleWindowMouseMove = (e) ->
