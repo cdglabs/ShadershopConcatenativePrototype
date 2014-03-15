@@ -27,12 +27,17 @@ OutputSwitchView = React.createClass
 
 
 module.exports = EditorView = React.createClass
+  handleMouseDown: ->
+    return if editor.dragging?
+    editor.selection1 = null
+    editor.selection2 = null
+
   render: ->
     classNames = cx {
       editor: true
       dragging: editor.dragging?
     }
-    R.div {className: classNames, style: {cursor: editor.dragging?.cursor ? ""}},
+    R.div {className: classNames, style: {cursor: editor.dragging?.cursor ? ""}, onMouseDown: @handleMouseDown},
       MainGraphView {}
       R.div {className: "manager"},
         editor.applies().map (apply) ->

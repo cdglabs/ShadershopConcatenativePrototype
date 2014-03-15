@@ -11,52 +11,64 @@ GraphView = require("./rendering/GraphView")
 
 ApplyView = React.createClass
   handleMouseDown: (e) ->
-    return if e.target.closest(".param")?
-    return if e.target.closest(".applyThumbnail")?
+    return if editor.dragging?
     return if @props.isProvisional
 
     {apply} = @props
     e.preventDefault()
 
-    return unless apply.params[0]?
+    # Deal with selection changing
+    if key.shift
+      editor.selection2 = apply
+    else
+      if editor.isApplySelected(apply)
+        onceDragConsummated e, null, =>
+          editor.selection1 = apply
+          editor.selection2 = null
+      else
+        editor.selection1 = apply
+        editor.selection2 = null
 
-    el = @getDOMNode()
-    rect = el.getMarginRect()
-    myWidth = rect.width
-    myHeight = rect.height
-    offset = {
-      x: e.clientX - rect.left
-      y: e.clientY - rect.top
-    }
+    if !apply.params[0]?
+      editor.dragging = {}
+    else # if reorderable...
+      el = @getDOMNode()
+      rect = el.getMarginRect()
+      myWidth = rect.width
+      myHeight = rect.height
+      offset = {
+        x: e.clientX - rect.left
+        y: e.clientY - rect.top
+      }
 
-    editor.dragging = {
-      cursor: "-webkit-grabbing"
-    }
-
-    onceDragConsummated e, =>
       editor.dragging = {
         cursor: "-webkit-grabbing"
-        offset: offset
-        apply: apply
-        placeholderHeight: myHeight
-        render: =>
-          R.div {style: {"min-width": myWidth, height: myHeight, overflow: "hidden", "background-color": "#fff"}},
-            ApplyView {apply, isDraggingCopy: true}
-        onMove: (e) =>
-          insertAfterEl = null
-
-          applyEls = document.querySelectorAll(".applyRow")
-          for applyEl in applyEls
-            continue if applyEl.querySelector(".applyPlaceholder")
-            rect = applyEl.getBoundingClientRect()
-            if rect.bottom + myHeight * 1.5 > e.clientY > rect.top + myHeight / 2 and rect.left < e.clientX < rect.right
-              insertAfterEl = applyEl
-
-          editor.removeApply(apply)
-          if insertAfterEl
-            refApply = insertAfterEl.dataFor.props.apply
-            editor.insertApplyAfter(apply, refApply)
       }
+
+      onceDragConsummated e, =>
+        editor.dragging = {
+          cursor: "-webkit-grabbing"
+          offset: offset
+          apply: apply
+          placeholderHeight: myHeight
+          render: =>
+            R.div {style: {"min-width": myWidth, height: myHeight, overflow: "hidden", "background-color": "#fff"}},
+              ApplyView {apply, isDraggingCopy: true}
+          onMove: (e) =>
+            insertAfterEl = null
+
+            applyEls = document.querySelectorAll(".applyRow")
+            for applyEl in applyEls
+              continue if applyEl.querySelector(".applyPlaceholder")
+              rect = applyEl.getBoundingClientRect()
+              if rect.bottom + myHeight * 1.5 > e.clientY > rect.top + myHeight / 2 and rect.left < e.clientX < rect.right
+                insertAfterEl = applyEl
+
+            editor.removeApply(apply)
+            if insertAfterEl
+              refApply = insertAfterEl.dataFor.props.apply
+              editor.insertApplyAfter(apply, refApply)
+        }
 
   render: ->
     {apply, isDraggingCopy} = @props
@@ -68,6 +80,7 @@ ApplyView = React.createClass
       apply: true
       hovered: apply == editor.hoveredApply
       isStart: apply.isStart?()
+      isSelected: editor.isApplySelected(apply)
     }
     R.div {className: classNames, style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown},
       ApplyInternalsView {apply}

@@ -12,6 +12,9 @@ module.exports = class Editor
     @hoveredParam = null
     @hoveredApply = null
 
+    @selection1 = null
+    @selection2 = null
+
     @cursor = null
     @mousePosition = {x: 0, y: 0}
     @dragging = null
@@ -70,3 +73,16 @@ module.exports = class Editor
   replaceApply: (apply, refApply) ->
     @insertApplyAfter(apply, refApply)
     @removeApply(refApply)
+
+  isApplySelected: (refApply) ->
+    if @selection1? and @selection2?
+      applies = @applies()
+      refIndex = applies.indexOf(refApply)
+      return false if refIndex == -1
+      selection1Index = applies.indexOf(@selection1)
+      selection2Index = applies.indexOf(@selection2)
+      return Math.min(selection1Index, selection2Index) <= refIndex <= Math.max(selection1Index, selection2Index)
+    else if @selection1?
+      return refApply == @selection1
+    else
+      return false

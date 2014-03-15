@@ -92,6 +92,9 @@ Link
 .apply.hovered {
   background-color: #fee;
 }
+.apply.isSelected {
+  background-color: #ccf;
+}
 .apply.isStart {
   margin-top: 24px;
 }

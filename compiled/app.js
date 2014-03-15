@@ -263,6 +263,8 @@
       this.yParam = null;
       this.hoveredParam = null;
       this.hoveredApply = null;
+      this.selection1 = null;
+      this.selection2 = null;
       this.cursor = null;
       this.mousePosition = {
         x: 0,
@@ -343,6 +345,24 @@
     Editor.prototype.replaceApply = function(apply, refApply) {
       this.insertApplyAfter(apply, refApply);
       return this.removeApply(refApply);
+    };
+
+    Editor.prototype.isApplySelected = function(refApply) {
+      var applies, refIndex, selection1Index, selection2Index;
+      if ((this.selection1 != null) && (this.selection2 != null)) {
+        applies = this.applies();
+        refIndex = applies.indexOf(refApply);
+        if (refIndex === -1) {
+          return false;
+        }
+        selection1Index = applies.indexOf(this.selection1);
+        selection2Index = applies.indexOf(this.selection2);
+        return (Math.min(selection1Index, selection2Index) <= refIndex && refIndex <= Math.max(selection1Index, selection2Index));
+      } else if (this.selection1 != null) {
+        return refApply === this.selection1;
+      } else {
+        return false;
+      }
     };
 
     return Editor;
@@ -884,10 +904,7 @@
   ApplyView = React.createClass({
     handleMouseDown: function(e) {
       var apply, el, myHeight, myWidth, offset, rect;
-      if (e.target.closest(".param") != null) {
-        return;
-      }
-      if (e.target.closest(".applyThumbnail") != null) {
+      if (editor.dragging != null) {
         return;
       }
       if (this.props.isProvisional) {
@@ -895,63 +912,79 @@
       }
       apply = this.props.apply;
       e.preventDefault();
-      if (apply.params[0] == null) {
-        return;
+      if (key.shift) {
+        editor.selection2 = apply;
+      } else {
+        if (editor.isApplySelected(apply)) {
+          onceDragConsummated(e, null, (function(_this) {
+            return function() {
+              editor.selection1 = apply;
+              return editor.selection2 = null;
+            };
+          })(this));
+        } else {
+          editor.selection1 = apply;
+          editor.selection2 = null;
+        }
       }
-      el = this.getDOMNode();
-      rect = el.getMarginRect();
-      myWidth = rect.width;
-      myHeight = rect.height;
-      offset = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-      editor.dragging = {
-        cursor: "-webkit-grabbing"
-      };
-      return onceDragConsummated(e, (function(_this) {
-        return function() {
-          return editor.dragging = {
-            cursor: "-webkit-grabbing",
-            offset: offset,
-            apply: apply,
-            placeholderHeight: myHeight,
-            render: function() {
-              return R.div({
-                style: {
-                  "min-width": myWidth,
-                  height: myHeight,
-                  overflow: "hidden",
-                  "background-color": "#fff"
-                }
-              }, ApplyView({
-                apply: apply,
-                isDraggingCopy: true
-              }));
-            },
-            onMove: function(e) {
-              var applyEl, applyEls, insertAfterEl, refApply, _i, _len, _ref, _ref1;
-              insertAfterEl = null;
-              applyEls = document.querySelectorAll(".applyRow");
-              for (_i = 0, _len = applyEls.length; _i < _len; _i++) {
-                applyEl = applyEls[_i];
-                if (applyEl.querySelector(".applyPlaceholder")) {
-                  continue;
-                }
-                rect = applyEl.getBoundingClientRect();
-                if ((rect.bottom + myHeight * 1.5 > (_ref = e.clientY) && _ref > rect.top + myHeight / 2) && (rect.left < (_ref1 = e.clientX) && _ref1 < rect.right)) {
-                  insertAfterEl = applyEl;
-                }
-              }
-              editor.removeApply(apply);
-              if (insertAfterEl) {
-                refApply = insertAfterEl.dataFor.props.apply;
-                return editor.insertApplyAfter(apply, refApply);
-              }
-            }
-          };
+      if (apply.params[0] == null) {
+        return editor.dragging = {};
+      } else {
+        el = this.getDOMNode();
+        rect = el.getMarginRect();
+        myWidth = rect.width;
+        myHeight = rect.height;
+        offset = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
         };
-      })(this));
+        editor.dragging = {
+          cursor: "-webkit-grabbing"
+        };
+        return onceDragConsummated(e, (function(_this) {
+          return function() {
+            return editor.dragging = {
+              cursor: "-webkit-grabbing",
+              offset: offset,
+              apply: apply,
+              placeholderHeight: myHeight,
+              render: function() {
+                return R.div({
+                  style: {
+                    "min-width": myWidth,
+                    height: myHeight,
+                    overflow: "hidden",
+                    "background-color": "#fff"
+                  }
+                }, ApplyView({
+                  apply: apply,
+                  isDraggingCopy: true
+                }));
+              },
+              onMove: function(e) {
+                var applyEl, applyEls, insertAfterEl, refApply, _i, _len, _ref, _ref1;
+                insertAfterEl = null;
+                applyEls = document.querySelectorAll(".applyRow");
+                for (_i = 0, _len = applyEls.length; _i < _len; _i++) {
+                  applyEl = applyEls[_i];
+                  if (applyEl.querySelector(".applyPlaceholder")) {
+                    continue;
+                  }
+                  rect = applyEl.getBoundingClientRect();
+                  if ((rect.bottom + myHeight * 1.5 > (_ref = e.clientY) && _ref > rect.top + myHeight / 2) && (rect.left < (_ref1 = e.clientX) && _ref1 < rect.right)) {
+                    insertAfterEl = applyEl;
+                  }
+                }
+                editor.removeApply(apply);
+                if (insertAfterEl) {
+                  refApply = insertAfterEl.dataFor.props.apply;
+                  return editor.insertApplyAfter(apply, refApply);
+                }
+              }
+            };
+          };
+        })(this));
+      }
     },
     render: function() {
       var apply, classNames, isDraggingCopy, _ref, _ref1;
@@ -967,7 +1000,8 @@
       classNames = cx({
         apply: true,
         hovered: apply === editor.hoveredApply,
-        isStart: typeof apply.isStart === "function" ? apply.isStart() : void 0
+        isStart: typeof apply.isStart === "function" ? apply.isStart() : void 0,
+        isSelected: editor.isApplySelected(apply)
       });
       return R.div({
         className: classNames,
@@ -1236,6 +1270,13 @@
   });
 
   module.exports = EditorView = React.createClass({
+    handleMouseDown: function() {
+      if (editor.dragging != null) {
+        return;
+      }
+      editor.selection1 = null;
+      return editor.selection2 = null;
+    },
     render: function() {
       var classNames, _ref, _ref1;
       classNames = cx({
@@ -1246,7 +1287,8 @@
         className: classNames,
         style: {
           cursor: (_ref = (_ref1 = editor.dragging) != null ? _ref1.cursor : void 0) != null ? _ref : ""
-        }
+        },
+        onMouseDown: this.handleMouseDown
       }, MainGraphView({}), R.div({
         className: "manager"
       }, editor.applies().map(function(apply) {
