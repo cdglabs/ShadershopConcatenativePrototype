@@ -929,7 +929,6 @@
         return;
       }
       apply = this.props.apply;
-      e.preventDefault();
       if (key.shift) {
         editor.setRangeSelection(apply);
       } else {
@@ -1286,11 +1285,14 @@
   });
 
   module.exports = EditorView = React.createClass({
-    handleMouseDown: function() {
+    handleMouseDown: function(e) {
+      var _ref;
       if (editor.dragging != null) {
-        return;
+        e.preventDefault();
+        return (_ref = document.activeElement) != null ? _ref.blur() : void 0;
+      } else {
+        return editor.unsetSelection();
       }
-      return editor.unsetSelection();
     },
     render: function() {
       var classNames, _ref, _ref1;
@@ -1493,9 +1495,7 @@
       if (this.isFocused()) {
         return;
       }
-      e.preventDefault();
       param = this.props.param;
-      e.preventDefault();
       originalX = e.clientX;
       originalY = e.clientY;
       originalValue = param.value;
@@ -1677,7 +1677,6 @@
   module.exports = StartTranscludeMixin = {
     startTransclude: function(e, apply, render) {
       var el, offset, rect;
-      e.preventDefault();
       el = this.getDOMNode();
       rect = el.getBoundingClientRect();
       offset = {

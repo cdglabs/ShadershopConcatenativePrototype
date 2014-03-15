@@ -15,7 +15,6 @@ ApplyView = React.createClass
     return if @props.isProvisional
 
     {apply} = @props
-    e.preventDefault()
 
     # Deal with selection changing
     if key.shift

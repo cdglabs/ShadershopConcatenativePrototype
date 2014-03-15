@@ -56,10 +56,7 @@ ParamValueView = React.createClass
   handleMouseDown: (e) ->
     return if @isFocused()
 
-    e.preventDefault()
-
     {param} = @props
-    e.preventDefault()
     originalX = e.clientX
     originalY = e.clientY
     originalValue = param.value

@@ -3,8 +3,6 @@ onceDragConsummated = require("../../util/onceDragConsummated")
 
 module.exports = StartTranscludeMixin = {
   startTransclude: (e, apply, render) ->
-    e.preventDefault()
-
     el = @getDOMNode()
     rect = el.getBoundingClientRect()
     offset = {
