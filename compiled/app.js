@@ -1288,8 +1288,13 @@
     handleMouseDown: function(e) {
       var _ref;
       if (editor.dragging != null) {
-        e.preventDefault();
-        return (_ref = document.activeElement) != null ? _ref.blur() : void 0;
+        if (!editor.dragging.text) {
+          e.preventDefault();
+          if ((_ref = document.activeElement) != null) {
+            _ref.blur();
+          }
+          return document.activeElement = document.body;
+        }
       } else {
         return editor.unsetSelection();
       }
@@ -1493,6 +1498,9 @@
     handleMouseDown: function(e) {
       var originalValue, originalX, originalY, param;
       if (this.isFocused()) {
+        editor.dragging = {
+          text: true
+        };
         return;
       }
       param = this.props.param;
@@ -1565,6 +1573,9 @@
     handleMouseDown: function(e) {
       var param, render;
       if (this.isFocused()) {
+        editor.dragging = {
+          text: true
+        };
         return;
       }
       param = this.props.param;

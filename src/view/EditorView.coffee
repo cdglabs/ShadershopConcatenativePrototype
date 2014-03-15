@@ -29,8 +29,10 @@ OutputSwitchView = React.createClass
 module.exports = EditorView = React.createClass
   handleMouseDown: (e) ->
     if editor.dragging?
-      e.preventDefault()
-      document.activeElement?.blur()
+      unless editor.dragging.text
+        e.preventDefault()
+        document.activeElement?.blur()
+        document.activeElement = document.body
     else
       editor.unsetSelection()
 

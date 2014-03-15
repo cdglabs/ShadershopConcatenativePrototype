@@ -54,7 +54,9 @@ ParamValueView = React.createClass
       "ns-resize"
 
   handleMouseDown: (e) ->
-    return if @isFocused()
+    if @isFocused()
+      editor.dragging = {text: true}
+      return
 
     {param} = @props
     originalX = e.clientX
@@ -114,7 +116,10 @@ ParamTitleView = React.createClass
       "-webkit-grab"
 
   handleMouseDown: (e) ->
-    return if @isFocused()
+    if @isFocused()
+      editor.dragging = {text: true}
+      return
+
     {param} = @props
     render = =>
       ParamView {param}

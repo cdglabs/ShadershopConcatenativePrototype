@@ -1,6 +1,7 @@
 Code cleanup
   Should provisionalApply be an Apply?
   Reordering measuring algorithm still isn't quite right (try dragging a "start" apply)
+  Text editing has some weirdness - flickering hover things and editing param value
 
 
 Catch infinite loops with apply reordering and transclusion
