@@ -30,6 +30,10 @@ module.exports = class Editor
     return @hoveredParam
 
 
+  # ===========================================================================
+  # Reordering Applies
+  # ===========================================================================
+
   applies: ->
     applies = []
     apply = @root
@@ -74,6 +78,11 @@ module.exports = class Editor
     @insertApplyAfter(apply, refApply)
     @removeApply(refApply)
 
+
+  # ===========================================================================
+  # Selecting Applies
+  # ===========================================================================
+
   isApplySelected: (refApply) ->
     if @selection1? and @selection2?
       applies = @applies()
@@ -86,3 +95,17 @@ module.exports = class Editor
       return refApply == @selection1
     else
       return false
+
+  unsetSelection: ->
+    @selection1 = null
+    @selection2 = null
+
+  setSingleSelection: (refApply) ->
+    @selection1 = refApply
+    @selection2 = null
+
+  setRangeSelection: (refApply) ->
+    if @selection1
+      @selection2 = refApply
+    else
+      @setSingleSelection(refApply)

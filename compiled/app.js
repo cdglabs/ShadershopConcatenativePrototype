@@ -365,6 +365,24 @@
       }
     };
 
+    Editor.prototype.unsetSelection = function() {
+      this.selection1 = null;
+      return this.selection2 = null;
+    };
+
+    Editor.prototype.setSingleSelection = function(refApply) {
+      this.selection1 = refApply;
+      return this.selection2 = null;
+    };
+
+    Editor.prototype.setRangeSelection = function(refApply) {
+      if (this.selection1) {
+        return this.selection2 = refApply;
+      } else {
+        return this.setSingleSelection(refApply);
+      }
+    };
+
     return Editor;
 
   })();
@@ -913,18 +931,16 @@
       apply = this.props.apply;
       e.preventDefault();
       if (key.shift) {
-        editor.selection2 = apply;
+        editor.setRangeSelection(apply);
       } else {
         if (editor.isApplySelected(apply)) {
           onceDragConsummated(e, null, (function(_this) {
             return function() {
-              editor.selection1 = apply;
-              return editor.selection2 = null;
+              return editor.setSingleSelection(apply);
             };
           })(this));
         } else {
-          editor.selection1 = apply;
-          editor.selection2 = null;
+          editor.setSingleSelection(apply);
         }
       }
       if (apply.params[0] == null) {
@@ -1274,8 +1290,7 @@
       if (editor.dragging != null) {
         return;
       }
-      editor.selection1 = null;
-      return editor.selection2 = null;
+      return editor.unsetSelection();
     },
     render: function() {
       var classNames, _ref, _ref1;

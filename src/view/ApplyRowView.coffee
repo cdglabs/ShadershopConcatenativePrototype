@@ -19,15 +19,13 @@ ApplyView = React.createClass
 
     # Deal with selection changing
     if key.shift
-      editor.selection2 = apply
+      editor.setRangeSelection(apply)
     else
       if editor.isApplySelected(apply)
         onceDragConsummated e, null, =>
-          editor.selection1 = apply
-          editor.selection2 = null
+          editor.setSingleSelection(apply)
       else
-        editor.selection1 = apply
-        editor.selection2 = null
+        editor.setSingleSelection(apply)
 
     if !apply.params[0]?
       editor.dragging = {}

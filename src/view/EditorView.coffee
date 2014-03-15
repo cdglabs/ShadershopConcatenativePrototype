@@ -29,8 +29,7 @@ OutputSwitchView = React.createClass
 module.exports = EditorView = React.createClass
   handleMouseDown: ->
     return if editor.dragging?
-    editor.selection1 = null
-    editor.selection2 = null
+    editor.unsetSelection()
 
   render: ->
     classNames = cx {
