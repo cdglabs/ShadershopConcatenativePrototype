@@ -435,41 +435,15 @@
       return this.removeApply(refApply);
     };
 
-    Editor.prototype.isApplySelected = function(refApply) {
-      var applies, refIndex, selection1Index, selection2Index;
-      if ((this.selection1 != null) && (this.selection2 != null)) {
-        applies = this.applies();
-        refIndex = applies.indexOf(refApply);
-        if (refIndex === -1) {
-          return false;
-        }
-        selection1Index = applies.indexOf(this.selection1);
-        selection2Index = applies.indexOf(this.selection2);
-        return (Math.min(selection1Index, selection2Index) <= refIndex && refIndex <= Math.max(selection1Index, selection2Index));
-      } else if (this.selection1 != null) {
-        return refApply === this.selection1;
-      } else {
-        return false;
-      }
+    Editor.prototype.isApplySelected = function() {
+      return false;
     };
 
-    Editor.prototype.unsetSelection = function() {
-      this.selection1 = null;
-      return this.selection2 = null;
-    };
+    Editor.prototype.unsetSelection = function() {};
 
-    Editor.prototype.setSingleSelection = function(refApply) {
-      this.selection1 = refApply;
-      return this.selection2 = null;
-    };
+    Editor.prototype.setSingleSelection = function() {};
 
-    Editor.prototype.setRangeSelection = function(refApply) {
-      if (this.selection1) {
-        return this.selection2 = refApply;
-      } else {
-        return this.setSingleSelection(refApply);
-      }
-    };
+    Editor.prototype.setRangeSelection = function() {};
 
     return Editor;
 

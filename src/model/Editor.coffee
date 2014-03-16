@@ -83,29 +83,35 @@ module.exports = class Editor
   # Selecting Applies
   # ===========================================================================
 
-  isApplySelected: (refApply) ->
-    if @selection1? and @selection2?
-      applies = @applies()
-      refIndex = applies.indexOf(refApply)
-      return false if refIndex == -1
-      selection1Index = applies.indexOf(@selection1)
-      selection2Index = applies.indexOf(@selection2)
-      return Math.min(selection1Index, selection2Index) <= refIndex <= Math.max(selection1Index, selection2Index)
-    else if @selection1?
-      return refApply == @selection1
-    else
-      return false
 
+  isApplySelected: -> false
   unsetSelection: ->
-    @selection1 = null
-    @selection2 = null
+  setSingleSelection: ->
+  setRangeSelection: ->
 
-  setSingleSelection: (refApply) ->
-    @selection1 = refApply
-    @selection2 = null
+  # isApplySelected: (refApply) ->
+  #   if @selection1? and @selection2?
+  #     applies = @applies()
+  #     refIndex = applies.indexOf(refApply)
+  #     return false if refIndex == -1
+  #     selection1Index = applies.indexOf(@selection1)
+  #     selection2Index = applies.indexOf(@selection2)
+  #     return Math.min(selection1Index, selection2Index) <= refIndex <= Math.max(selection1Index, selection2Index)
+  #   else if @selection1?
+  #     return refApply == @selection1
+  #   else
+  #     return false
 
-  setRangeSelection: (refApply) ->
-    if @selection1
-      @selection2 = refApply
-    else
-      @setSingleSelection(refApply)
+  # unsetSelection: ->
+  #   @selection1 = null
+  #   @selection2 = null
+
+  # setSingleSelection: (refApply) ->
+  #   @selection1 = refApply
+  #   @selection2 = null
+
+  # setRangeSelection: (refApply) ->
+  #   if @selection1
+  #     @selection2 = refApply
+  #   else
+  #     @setSingleSelection(refApply)
