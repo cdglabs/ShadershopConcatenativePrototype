@@ -209,6 +209,18 @@
       }
     }
 
+    Apply.prototype.headParam = function() {
+      return this.params[0];
+    };
+
+    Apply.prototype.tailParams = function() {
+      return _.tail(this.params);
+    };
+
+    Apply.prototype.allParams = function() {
+      return this.params;
+    };
+
     Apply.prototype.initializeDefaultParams = function() {
       return this.params = this.fn.defaultParams.map(function(paramValue) {
         var param;
@@ -454,7 +466,9 @@
 
 }).call(this);
 }, "model/ProvisionalApply": function(exports, require, module) {(function() {
-  var Apply, ObjectManager, ProvisionalApply, builtInFns;
+  var Apply, ObjectManager, ProvisionalApply, builtInFns,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   ObjectManager = require("../persistence/ObjectManager");
 
@@ -462,7 +476,9 @@
 
   builtInFns = require("./builtInFns");
 
-  module.exports = ProvisionalApply = (function() {
+  module.exports = ProvisionalApply = (function(_super) {
+    __extends(ProvisionalApply, _super);
+
     function ProvisionalApply() {
       ObjectManager.assignId(this);
       this.params = [null];
@@ -499,7 +515,7 @@
 
     return ProvisionalApply;
 
-  })();
+  })(Apply);
 
 }).call(this);
 }, "model/builtInFns": function(exports, require, module) {(function() {
@@ -942,7 +958,7 @@
           editor.setSingleSelection(apply);
         }
       }
-      if (apply.params[0] == null) {
+      if (apply.headParam() == null) {
         return editor.dragging = {};
       } else {
         el = this.getDOMNode();
@@ -1038,10 +1054,7 @@
         className: "applyInternals"
       }, R.div({
         className: "fnTitle"
-      }, apply.fn.title), apply.params.map(function(param, paramIndex) {
-        if (paramIndex === 0) {
-          return null;
-        }
+      }, apply.fn.title), apply.tailParams().map(function(param, paramIndex) {
         return ParamSlotView({
           param: param,
           apply: apply,
@@ -1098,8 +1111,8 @@
       var apply, graphViews, i, param, styleOpts, _i, _len, _ref;
       apply = this.props.apply;
       graphViews = [];
-      if (apply.params && !(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {
-        _ref = apply.params;
+      if (!(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {
+        _ref = apply.allParams();
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
           param = _ref[i];
           if (param instanceof Param && param !== editor.xParam) {
@@ -1139,7 +1152,7 @@
   PossibleApplyView = React.createClass({
     handleMouseEnter: function() {
       this.props.apply.selectedApply = this.props.possibleApply;
-      return editor.hoveredParam = this.props.possibleApply.params[1];
+      return editor.hoveredParam = this.props.possibleApply.tailParams()[0];
     },
     handleMouseLeave: function() {
       this.props.apply.selectedApply = null;
@@ -1377,8 +1390,8 @@
         styleOpts: config.styles.selectedApply
       }));
       if (apply = editor.hoveredApply) {
-        if (apply.params && !(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {
-          _ref1 = apply.params;
+        if (!(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {
+          _ref1 = apply.allParams();
           for (paramIndex = _k = 0, _len1 = _ref1.length; _k < _len1; paramIndex = ++_k) {
             param = _ref1[paramIndex];
             if (param instanceof Param && param !== editor.xParam) {

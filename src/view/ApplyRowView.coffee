@@ -26,7 +26,8 @@ ApplyView = React.createClass
       else
         editor.setSingleSelection(apply)
 
-    if !apply.params[0]?
+    if !apply.headParam()?
+      # start of the block... TODO but should be reorderable in some cases.
       editor.dragging = {}
     else # if reorderable...
       el = @getDOMNode()
@@ -89,8 +90,7 @@ ApplyInternalsView = React.createClass
     R.div {className: "applyInternals"},
       R.div {className: "fnTitle"},
         apply.fn.title
-      apply.params.map (param, paramIndex) ->
-        return null if paramIndex == 0
+      apply.tailParams().map (param, paramIndex) ->
         ParamSlotView {param, apply, paramIndex, key: paramIndex}
       ApplyThumbnailView {apply}
 
@@ -132,8 +132,8 @@ ApplyThumbnailView = React.createClass
 
     graphViews = []
 
-    if apply.params and !apply.isStart?()
-      for param, i in apply.params
+    if !apply.isStart?()
+      for param, i in apply.allParams()
         if param instanceof Param and param != editor.xParam
           styleOpts = config.styles.param
         else
@@ -158,7 +158,7 @@ PossibleApplyView = React.createClass
   handleMouseEnter: ->
     # TODO controller
     @props.apply.selectedApply = @props.possibleApply
-    editor.hoveredParam = @props.possibleApply.params[1]
+    editor.hoveredParam = @props.possibleApply.tailParams()[0]
   handleMouseLeave: ->
     # TODO controller
     @props.apply.selectedApply = null

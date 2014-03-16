@@ -28,8 +28,8 @@ MainCartesianGraphView = React.createClass
     graphViews.push(GraphView {apply: editor.root, key: editor.root.__id, styleOpts: config.styles.selectedApply})
 
     if apply = editor.hoveredApply
-      if apply.params and !apply.isStart?()
-        for param, paramIndex in apply.params
+      if !apply.isStart?()
+        for param, paramIndex in apply.allParams()
           if param instanceof Param and param != editor.xParam
             styleOpts = config.styles.param
           else

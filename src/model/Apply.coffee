@@ -9,6 +9,15 @@ module.exports = class Apply
     @params = []
     @initializeDefaultParams() if @fn
 
+  headParam: ->
+    @params[0]
+
+  tailParams: ->
+    _.tail(@params)
+
+  allParams: ->
+    @params
+
   initializeDefaultParams: ->
     @params = @fn.defaultParams.map (paramValue) ->
       if paramValue?

@@ -1,4 +1,18 @@
+Switch to a named parameter system
+  Fns have title, defaults, order, jsString, glslString:
+    title: "min"
+    defaults: {p1: 0, p2: 0}
+    order: [p1, p2]
+    jsString: "Math.min({{p1}}, {{p2}})"
+    glslString: "min({{p1}}, {{p2}})"
+  Make a Block model
+    move apply reordering stuff from Editor to Block
+
+
+
 Code cleanup
+  Maybe unify MainGraphView and ApplyThumbnailView
+    Each will need to take an "environment" in addition to just the apply
   Should provisionalApply be an Apply?
   Reordering measuring algorithm still isn't quite right (try dragging a "start" apply)
   Text editing has some weirdness - flickering hover things and editing param value

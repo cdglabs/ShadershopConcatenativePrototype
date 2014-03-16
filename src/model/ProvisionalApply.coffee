@@ -3,7 +3,7 @@ Apply = require("./Apply")
 builtInFns = require("./builtInFns")
 
 
-module.exports = class ProvisionalApply
+module.exports = class ProvisionalApply extends Apply
   constructor: ->
     ObjectManager.assignId(this)
     @params = [null]
