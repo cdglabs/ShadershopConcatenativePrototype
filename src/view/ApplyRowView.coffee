@@ -11,10 +11,9 @@ GraphView = require("./rendering/GraphView")
 
 ApplyView = React.createClass
   handleMouseDown: (e) ->
-    return if editor.dragging?
-    return if @props.isProvisional
+    {apply, block, isDraggingCopy} = @props
 
-    {apply} = @props
+    return if editor.dragging?
 
     # Deal with selection changing
     if key.shift
@@ -62,14 +61,15 @@ ApplyView = React.createClass
               if rect.bottom + myHeight * 1.5 > e.clientY > rect.top + myHeight / 2 and rect.left < e.clientX < rect.right
                 insertAfterEl = applyEl
 
-            editor.removeApply(apply)
+            block.removeApply(apply)
             if insertAfterEl
               refApply = insertAfterEl.dataFor.props.apply
-              editor.insertApplyAfter(apply, refApply)
+              refBlock = insertAfterEl.dataFor.props.block
+              refBlock.insertApplyAfter(apply, refApply)
         }
 
   render: ->
-    {apply, isDraggingCopy} = @props
+    {apply, block, isDraggingCopy} = @props
 
     if !isDraggingCopy and apply == editor.dragging?.apply
       return R.div {className: "applyPlaceholder", style: {height: editor.dragging.placeholderHeight}}
@@ -157,19 +157,22 @@ ApplyThumbnailView = React.createClass
 
 PossibleApplyView = React.createClass
   handleMouseEnter: ->
+    {apply, block, possibleApply} = @props
     # TODO controller
-    @props.apply.selectedApply = @props.possibleApply
-    editor.hoveredParam = @props.possibleApply.allParams()[1]
+    apply.selectedApply = possibleApply
+    editor.hoveredParam = possibleApply.allParams()[1]
   handleMouseLeave: ->
+    {apply, block, possibleApply} = @props
     # TODO controller
-    @props.apply.selectedApply = null
+    apply.selectedApply = null
     editor.hoveredParam = null
   handleClick: ->
-    editor.replaceApply(@props.possibleApply, @props.apply)
+    {apply, block, possibleApply} = @props
+    block.replaceApply(possibleApply, apply)
     # TODO controller
     editor.hoveredParam = null
   render: ->
-    {apply, possibleApply} = @props
+    {apply, block, possibleApply} = @props
     classNames = cx {
       possibleApply: true
       selectedPossibleApply: apply.selectedApply == possibleApply
@@ -180,10 +183,10 @@ PossibleApplyView = React.createClass
 
 ProvisionalApplyView = React.createClass
   render: ->
-    {apply} = @props
+    {apply, block} = @props
     R.div {className: "provisionalApply"},
       apply.possibleApplies.map (possibleApply) ->
-        PossibleApplyView {apply, possibleApply, key: possibleApply.__id}
+        PossibleApplyView {apply, block, possibleApply, key: possibleApply.__id}
 
 
 
@@ -194,21 +197,21 @@ module.exports = ApplyRowView = React.createClass
     # TODO: This eventually wants to just be add, not toggle. As if you
     # pressed enter. You should remove it by dragging it out or pressing
     # delete.
-    {apply} = @props
-    nextApply = editor.nextApply(apply)
+    {apply, block} = @props
+    nextApply = block.nextApply(apply)
     if nextApply instanceof ProvisionalApply
-      editor.removeApply(nextApply)
+      block.removeApply(nextApply)
     else
-      editor.insertNewApplyAfter(apply)
+      block.insertNewApplyAfter(apply)
 
   render: ->
-    {apply} = @props
+    {apply, block} = @props
     if apply instanceof ProvisionalApply
       R.div {className: "applyRow"},
-        ProvisionalApplyView {apply}
+        ProvisionalApplyView {apply, block}
     else
       R.div {className: "applyRow"},
-        ApplyView {apply}
+        ApplyView {apply, block}
         R.button {className: "addApplyButton", onClick: @toggleProvisionalApply}, "+"
 
 

@@ -1,8 +1,10 @@
+ObjectManager = require("../persistence/ObjectManager")
 ProvisionalApply = require("./ProvisionalApply")
 
 
-class Block
+module.exports = class Block
   constructor: ->
+    ObjectManager.assignId(this)
     @root = null
 
   applies: ->
@@ -18,10 +20,7 @@ class Block
     nextApply = @root
     while nextApply && nextApply.params[0] != refApply
       nextApply = nextApply.params[0]
-    if nextApply instanceof Param
-      return undefined
-    else
-      return nextApply
+    return nextApply
 
   removeApply: (apply) ->
     if @root == apply

@@ -12,6 +12,8 @@ MainCartesianGraphView = React.createClass
   render: ->
     graphViews = []
 
+    resultApply = editor.rootBlock.root
+
     if editor.spreadParam()
       spreadDistance = 0.5
       spreadNum = 5
@@ -23,9 +25,9 @@ MainCartesianGraphView = React.createClass
             styleOpts = _.clone(config.styles.spreadPositive)
           styleOpts.globalAlpha = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
           spreadOffset = spreadDistance * i * neg
-          graphViews.push(GraphView {apply: editor.root, key: editor.root.__id + (i*neg),styleOpts, spreadOffset})
+          graphViews.push(GraphView {apply: resultApply, key: "spread" + (i*neg),styleOpts, spreadOffset})
 
-    graphViews.push(GraphView {apply: editor.root, key: editor.root.__id, styleOpts: config.styles.selectedApply})
+    graphViews.push(GraphView {apply: resultApply, key: "result", styleOpts: config.styles.selectedApply})
 
     if apply = editor.hoveredApply
       if !apply.isStart?()
@@ -48,7 +50,7 @@ MainCartesianGraphView = React.createClass
 MainShaderGraphView = React.createClass
   render: ->
     R.span {style: {opacity: config.shaderOpacity}},
-      ShaderGraphView {apply: editor.hoveredApply ? editor.root}
+      ShaderGraphView {apply: editor.hoveredApply ? editor.rootBlock.root}
       GridView {}
 
 

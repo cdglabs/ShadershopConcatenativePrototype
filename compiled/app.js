@@ -95,13 +95,15 @@
 
 }).call(this);
 }, "editor": function(exports, require, module) {(function() {
-  var Apply, Editor, Param, Persistence, builtInFns, editor, startApply;
+  var Apply, Block, Editor, Param, Persistence, builtInFns, editor, startApply;
 
   require("./model/register");
 
   Persistence = require("./persistence/Persistence");
 
   Editor = require("./model/Editor");
+
+  Block = require("./model/Block");
 
   Apply = require("./model/Apply");
 
@@ -113,8 +115,9 @@
 
   if (!editor) {
     editor = new Editor();
+    editor.rootBlock = new Block();
     startApply = new Apply(builtInFns[0]);
-    editor.root = startApply;
+    editor.rootBlock.root = startApply;
   }
 
   window.editor = editor;
@@ -262,12 +265,15 @@
 
 }).call(this);
 }, "model/Block": function(exports, require, module) {(function() {
-  var Block, ProvisionalApply;
+  var Block, ObjectManager, ProvisionalApply;
+
+  ObjectManager = require("../persistence/ObjectManager");
 
   ProvisionalApply = require("./ProvisionalApply");
 
-  Block = (function() {
+  module.exports = Block = (function() {
     function Block() {
+      ObjectManager.assignId(this);
       this.root = null;
     }
 
@@ -288,11 +294,7 @@
       while (nextApply && nextApply.params[0] !== refApply) {
         nextApply = nextApply.params[0];
       }
-      if (nextApply instanceof Param) {
-        return void 0;
-      } else {
-        return nextApply;
-      }
+      return nextApply;
     };
 
     Block.prototype.removeApply = function(apply) {
@@ -346,7 +348,7 @@
 
   module.exports = Editor = (function() {
     function Editor() {
-      this.root = null;
+      this.rootBlock = null;
       this.xParam = null;
       this.yParam = null;
       this.hoveredParam = null;
@@ -372,67 +374,6 @@
         return null;
       }
       return this.hoveredParam;
-    };
-
-    Editor.prototype.applies = function() {
-      var applies, apply;
-      applies = [];
-      apply = this.root;
-      while (apply != null) {
-        applies.unshift(apply);
-        apply = apply.params[0];
-      }
-      return applies;
-    };
-
-    Editor.prototype.nextApply = function(refApply) {
-      var nextApply;
-      nextApply = this.root;
-      while (nextApply && nextApply.params[0] !== refApply) {
-        nextApply = nextApply.params[0];
-      }
-      if (nextApply instanceof Param) {
-        return void 0;
-      } else {
-        return nextApply;
-      }
-    };
-
-    Editor.prototype.removeApply = function(apply) {
-      var nextApply;
-      if (this.root === apply) {
-        return this.root = apply.params[0];
-      } else {
-        nextApply = this.nextApply(apply);
-        if (nextApply) {
-          return nextApply.setParam(0, apply.params[0]);
-        }
-      }
-    };
-
-    Editor.prototype.insertApplyAfter = function(apply, refApply) {
-      var nextApply;
-      if (this.root === refApply) {
-        this.root = apply;
-        return apply.setParam(0, refApply);
-      } else {
-        nextApply = this.nextApply(refApply);
-        if (nextApply) {
-          nextApply.setParam(0, apply);
-          return apply.setParam(0, refApply);
-        }
-      }
-    };
-
-    Editor.prototype.insertNewApplyAfter = function(refApply) {
-      var apply;
-      apply = new ProvisionalApply();
-      return this.insertApplyAfter(apply, refApply);
-    };
-
-    Editor.prototype.replaceApply = function(apply, refApply) {
-      this.insertApplyAfter(apply, refApply);
-      return this.removeApply(refApply);
     };
 
     Editor.prototype.isApplySelected = function() {
@@ -639,7 +580,7 @@
 
 }).call(this);
 }, "model/register": function(exports, require, module) {(function() {
-  var Apply, Editor, ObjectManager, Param, ProvisionalApply;
+  var Apply, Block, Editor, ObjectManager, Param, ProvisionalApply;
 
   ObjectManager = require("../persistence/ObjectManager");
 
@@ -649,6 +590,8 @@
 
   ProvisionalApply = require("model/ProvisionalApply");
 
+  Block = require("model/Block");
+
   Editor = require("model/Editor");
 
   ObjectManager.registerClass("Param", Param);
@@ -656,6 +599,8 @@
   ObjectManager.registerClass("Apply", Apply);
 
   ObjectManager.registerClass("ProvisionalApply", ProvisionalApply);
+
+  ObjectManager.registerClass("Block", Block);
 
   ObjectManager.registerClass("Editor", Editor);
 
@@ -987,14 +932,11 @@
 
   ApplyView = React.createClass({
     handleMouseDown: function(e) {
-      var apply, el, myHeight, myWidth, offset, rect;
+      var apply, block, el, isDraggingCopy, myHeight, myWidth, offset, rect, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block, isDraggingCopy = _ref.isDraggingCopy;
       if (editor.dragging != null) {
         return;
       }
-      if (this.props.isProvisional) {
-        return;
-      }
-      apply = this.props.apply;
       if (key.shift) {
         editor.setRangeSelection(apply);
       } else {
@@ -1043,7 +985,7 @@
                 }));
               },
               onMove: function(e) {
-                var applyEl, applyEls, insertAfterEl, refApply, _i, _len, _ref, _ref1;
+                var applyEl, applyEls, insertAfterEl, refApply, refBlock, _i, _len, _ref1, _ref2;
                 insertAfterEl = null;
                 applyEls = document.querySelectorAll(".applyRow");
                 for (_i = 0, _len = applyEls.length; _i < _len; _i++) {
@@ -1052,14 +994,15 @@
                     continue;
                   }
                   rect = applyEl.getBoundingClientRect();
-                  if ((rect.bottom + myHeight * 1.5 > (_ref = e.clientY) && _ref > rect.top + myHeight / 2) && (rect.left < (_ref1 = e.clientX) && _ref1 < rect.right)) {
+                  if ((rect.bottom + myHeight * 1.5 > (_ref1 = e.clientY) && _ref1 > rect.top + myHeight / 2) && (rect.left < (_ref2 = e.clientX) && _ref2 < rect.right)) {
                     insertAfterEl = applyEl;
                   }
                 }
-                editor.removeApply(apply);
+                block.removeApply(apply);
                 if (insertAfterEl) {
                   refApply = insertAfterEl.dataFor.props.apply;
-                  return editor.insertApplyAfter(apply, refApply);
+                  refBlock = insertAfterEl.dataFor.props.block;
+                  return refBlock.insertApplyAfter(apply, refApply);
                 }
               }
             };
@@ -1068,8 +1011,8 @@
       }
     },
     render: function() {
-      var apply, classNames, isDraggingCopy, _ref, _ref1;
-      _ref = this.props, apply = _ref.apply, isDraggingCopy = _ref.isDraggingCopy;
+      var apply, block, classNames, isDraggingCopy, _ref, _ref1;
+      _ref = this.props, apply = _ref.apply, block = _ref.block, isDraggingCopy = _ref.isDraggingCopy;
       if (!isDraggingCopy && apply === ((_ref1 = editor.dragging) != null ? _ref1.apply : void 0)) {
         return R.div({
           className: "applyPlaceholder",
@@ -1204,20 +1147,26 @@
 
   PossibleApplyView = React.createClass({
     handleMouseEnter: function() {
-      this.props.apply.selectedApply = this.props.possibleApply;
-      return editor.hoveredParam = this.props.possibleApply.allParams()[1];
+      var apply, block, possibleApply, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
+      apply.selectedApply = possibleApply;
+      return editor.hoveredParam = possibleApply.allParams()[1];
     },
     handleMouseLeave: function() {
-      this.props.apply.selectedApply = null;
+      var apply, block, possibleApply, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
+      apply.selectedApply = null;
       return editor.hoveredParam = null;
     },
     handleClick: function() {
-      editor.replaceApply(this.props.possibleApply, this.props.apply);
+      var apply, block, possibleApply, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
+      block.replaceApply(possibleApply, apply);
       return editor.hoveredParam = null;
     },
     render: function() {
-      var apply, classNames, possibleApply, _ref;
-      _ref = this.props, apply = _ref.apply, possibleApply = _ref.possibleApply;
+      var apply, block, classNames, possibleApply, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
       classNames = cx({
         possibleApply: true,
         selectedPossibleApply: apply.selectedApply === possibleApply
@@ -1235,13 +1184,14 @@
 
   ProvisionalApplyView = React.createClass({
     render: function() {
-      var apply;
-      apply = this.props.apply;
+      var apply, block, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block;
       return R.div({
         className: "provisionalApply"
       }, apply.possibleApplies.map(function(possibleApply) {
         return PossibleApplyView({
           apply: apply,
+          block: block,
           possibleApply: possibleApply,
           key: possibleApply.__id
         });
@@ -1252,34 +1202,62 @@
   module.exports = ApplyRowView = React.createClass({
     mixins: [DataForMixin],
     toggleProvisionalApply: function() {
-      var apply, nextApply;
-      apply = this.props.apply;
-      nextApply = editor.nextApply(apply);
+      var apply, block, nextApply, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block;
+      nextApply = block.nextApply(apply);
       if (nextApply instanceof ProvisionalApply) {
-        return editor.removeApply(nextApply);
+        return block.removeApply(nextApply);
       } else {
-        return editor.insertNewApplyAfter(apply);
+        return block.insertNewApplyAfter(apply);
       }
     },
     render: function() {
-      var apply;
-      apply = this.props.apply;
+      var apply, block, _ref;
+      _ref = this.props, apply = _ref.apply, block = _ref.block;
       if (apply instanceof ProvisionalApply) {
         return R.div({
           className: "applyRow"
         }, ProvisionalApplyView({
-          apply: apply
+          apply: apply,
+          block: block
         }));
       } else {
         return R.div({
           className: "applyRow"
         }, ApplyView({
-          apply: apply
+          apply: apply,
+          block: block
         }), R.button({
           className: "addApplyButton",
           onClick: this.toggleProvisionalApply
         }, "+"));
       }
+    }
+  });
+
+}).call(this);
+}, "view/BlockView": function(exports, require, module) {(function() {
+  var ApplyRowView, BlockView, R, cx;
+
+  R = React.DOM;
+
+  cx = React.addons.classSet;
+
+  ApplyRowView = require("./ApplyRowView");
+
+  module.exports = BlockView = React.createClass({
+    render: function() {
+      var block;
+      block = this.props.block;
+      return R.div({
+        className: "block"
+      }, block.applies().map(function(apply) {
+        return ApplyRowView({
+          apply: apply,
+          block: block,
+          key: apply.__id
+        });
+      }));
     }
   });
 
@@ -1308,13 +1286,13 @@
 
 }).call(this);
 }, "view/EditorView": function(exports, require, module) {(function() {
-  var ApplyRowView, DraggingView, EditorView, MainGraphView, OutputSwitchView, R, cx;
+  var BlockView, DraggingView, EditorView, MainGraphView, OutputSwitchView, R, cx;
 
   R = React.DOM;
 
   cx = React.addons.classSet;
 
-  ApplyRowView = require("./ApplyRowView");
+  BlockView = require("./BlockView");
 
   MainGraphView = require("./MainGraphView");
 
@@ -1379,11 +1357,8 @@
         onMouseDown: this.handleMouseDown
       }, MainGraphView({}), R.div({
         className: "manager"
-      }, editor.applies().map(function(apply) {
-        return ApplyRowView({
-          apply: apply,
-          key: apply.__id
-        });
+      }, BlockView({
+        block: editor.rootBlock
       })), OutputSwitchView({}), R.div({
         className: "dragging"
       }, DraggingView({})));
@@ -1412,8 +1387,9 @@
 
   MainCartesianGraphView = React.createClass({
     render: function() {
-      var apply, graphViews, i, neg, param, paramIndex, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1;
+      var apply, graphViews, i, neg, param, paramIndex, resultApply, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1;
       graphViews = [];
+      resultApply = editor.rootBlock.root;
       if (editor.spreadParam()) {
         spreadDistance = 0.5;
         spreadNum = 5;
@@ -1429,8 +1405,8 @@
             styleOpts.globalAlpha = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin);
             spreadOffset = spreadDistance * i * neg;
             graphViews.push(GraphView({
-              apply: editor.root,
-              key: editor.root.__id + (i * neg),
+              apply: resultApply,
+              key: "spread" + (i * neg),
               styleOpts: styleOpts,
               spreadOffset: spreadOffset
             }));
@@ -1438,8 +1414,8 @@
         }
       }
       graphViews.push(GraphView({
-        apply: editor.root,
-        key: editor.root.__id,
+        apply: resultApply,
+        key: "result",
         styleOpts: config.styles.selectedApply
       }));
       if (apply = editor.hoveredApply) {
@@ -1484,7 +1460,7 @@
           opacity: config.shaderOpacity
         }
       }, ShaderGraphView({
-        apply: (_ref = editor.hoveredApply) != null ? _ref : editor.root
+        apply: (_ref = editor.hoveredApply) != null ? _ref : editor.rootBlock.root
       }), GridView({}));
     }
   });

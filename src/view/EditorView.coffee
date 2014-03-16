@@ -1,6 +1,6 @@
 R = React.DOM
 cx = React.addons.classSet
-ApplyRowView = require("./ApplyRowView")
+BlockView = require("./BlockView")
 MainGraphView = require("./MainGraphView")
 DraggingView = require("./DraggingView")
 
@@ -44,8 +44,7 @@ module.exports = EditorView = React.createClass
     R.div {className: classNames, style: {cursor: editor.dragging?.cursor ? ""}, onMouseDown: @handleMouseDown},
       MainGraphView {}
       R.div {className: "manager"},
-        editor.applies().map (apply) ->
-          ApplyRowView {apply, key: apply.__id}
+        BlockView {block: editor.rootBlock}
       OutputSwitchView {}
       R.div {className: "dragging"},
         DraggingView {}

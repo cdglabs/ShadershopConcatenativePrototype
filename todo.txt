@@ -5,8 +5,7 @@ Switch to a named parameter system
     order: [p1, p2]
     jsString: "Math.min({{p1}}, {{p2}})"
     glslString: "min({{p1}}, {{p2}})"
-  Make a Block model
-    move apply reordering stuff from Editor to Block
+  Get select stuff working again, figure out semantics w.r.t. Block model
 
 
 
