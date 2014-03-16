@@ -90,7 +90,8 @@ ApplyInternalsView = React.createClass
     R.div {className: "applyInternals"},
       R.div {className: "fnTitle"},
         apply.fn.title
-      apply.tailParams().map (param, paramIndex) ->
+      apply.allParams().map (param, paramIndex) ->
+        return null if paramIndex == 0
         ParamSlotView {param, apply, paramIndex, key: paramIndex}
       ApplyThumbnailView {apply}
 
@@ -158,7 +159,7 @@ PossibleApplyView = React.createClass
   handleMouseEnter: ->
     # TODO controller
     @props.apply.selectedApply = @props.possibleApply
-    editor.hoveredParam = @props.possibleApply.tailParams()[0]
+    editor.hoveredParam = @props.possibleApply.allParams()[1]
   handleMouseLeave: ->
     # TODO controller
     @props.apply.selectedApply = null
@@ -190,6 +191,9 @@ module.exports = ApplyRowView = React.createClass
   mixins: [DataForMixin]
 
   toggleProvisionalApply: ->
+    # TODO: This eventually wants to just be add, not toggle. As if you
+    # pressed enter. You should remove it by dragging it out or pressing
+    # delete.
     {apply} = @props
     nextApply = editor.nextApply(apply)
     if nextApply instanceof ProvisionalApply

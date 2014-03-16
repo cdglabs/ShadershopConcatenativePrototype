@@ -261,6 +261,82 @@
   })();
 
 }).call(this);
+}, "model/Block": function(exports, require, module) {(function() {
+  var Block, ProvisionalApply;
+
+  ProvisionalApply = require("./ProvisionalApply");
+
+  Block = (function() {
+    function Block() {
+      this.root = null;
+    }
+
+    Block.prototype.applies = function() {
+      var applies, apply;
+      applies = [];
+      apply = this.root;
+      while (apply != null) {
+        applies.unshift(apply);
+        apply = apply.params[0];
+      }
+      return applies;
+    };
+
+    Block.prototype.nextApply = function(refApply) {
+      var nextApply;
+      nextApply = this.root;
+      while (nextApply && nextApply.params[0] !== refApply) {
+        nextApply = nextApply.params[0];
+      }
+      if (nextApply instanceof Param) {
+        return void 0;
+      } else {
+        return nextApply;
+      }
+    };
+
+    Block.prototype.removeApply = function(apply) {
+      var nextApply;
+      if (this.root === apply) {
+        return this.root = apply.params[0];
+      } else {
+        nextApply = this.nextApply(apply);
+        if (nextApply) {
+          return nextApply.setParam(0, apply.params[0]);
+        }
+      }
+    };
+
+    Block.prototype.insertApplyAfter = function(apply, refApply) {
+      var nextApply;
+      if (this.root === refApply) {
+        this.root = apply;
+        return apply.setParam(0, refApply);
+      } else {
+        nextApply = this.nextApply(refApply);
+        if (nextApply) {
+          nextApply.setParam(0, apply);
+          return apply.setParam(0, refApply);
+        }
+      }
+    };
+
+    Block.prototype.insertNewApplyAfter = function(refApply) {
+      var apply;
+      apply = new ProvisionalApply();
+      return this.insertApplyAfter(apply, refApply);
+    };
+
+    Block.prototype.replaceApply = function(apply, refApply) {
+      this.insertApplyAfter(apply, refApply);
+      return this.removeApply(refApply);
+    };
+
+    return Block;
+
+  })();
+
+}).call(this);
 }, "model/Editor": function(exports, require, module) {(function() {
   var Editor, Param, ProvisionalApply;
 
@@ -1054,7 +1130,10 @@
         className: "applyInternals"
       }, R.div({
         className: "fnTitle"
-      }, apply.fn.title), apply.tailParams().map(function(param, paramIndex) {
+      }, apply.fn.title), apply.allParams().map(function(param, paramIndex) {
+        if (paramIndex === 0) {
+          return null;
+        }
         return ParamSlotView({
           param: param,
           apply: apply,
@@ -1152,7 +1231,7 @@
   PossibleApplyView = React.createClass({
     handleMouseEnter: function() {
       this.props.apply.selectedApply = this.props.possibleApply;
-      return editor.hoveredParam = this.props.possibleApply.tailParams()[0];
+      return editor.hoveredParam = this.props.possibleApply.allParams()[1];
     },
     handleMouseLeave: function() {
       this.props.apply.selectedApply = null;
