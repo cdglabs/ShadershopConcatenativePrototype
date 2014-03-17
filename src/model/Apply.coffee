@@ -59,15 +59,5 @@ module.exports = class Apply
     @possibleApplies?
 
 
-  compileString: ->
-    paramCompileStrings = @params.map (param) ->
-      param?.compileString()
-    @fn.compileString(paramCompileStrings...)
-
-  compileGlslString: ->
-    paramCompileStrings = @params.map (param) ->
-      param?.compileGlslString()
-    @fn.compileGlslString(paramCompileStrings...)
-
   isStart: ->
     @fn == builtInFns.constantFn
