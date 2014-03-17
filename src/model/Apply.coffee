@@ -39,4 +39,4 @@ module.exports = class Apply
     @fn.compileGlslString(paramCompileStrings...)
 
   isStart: ->
-    @fn == builtInFns[0]
+    @fn == builtInFns.constantFn

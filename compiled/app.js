@@ -256,7 +256,7 @@
     };
 
     Apply.prototype.isStart = function() {
-      return this.fn === builtInFns[0];
+      return this.fn === builtInFns.constantFn;
     };
 
     return Apply;
@@ -539,16 +539,24 @@
 
 }).call(this);
 }, "model/builtInFns": function(exports, require, module) {(function() {
-  var Fn;
+  var Fn, builtInFns, constantFn, identityFn;
 
   Fn = require("./Fn");
 
-  module.exports = [
-    new Fn("", [null, 0], function(a, b) {
-      return "" + b;
-    }, function(a, b) {
-      return "" + b;
-    }), new Fn("+", [0, 0], function(a, b) {
+  constantFn = new Fn("", [null, 0], function(a, b) {
+    return "" + b;
+  }, function(a, b) {
+    return "" + b;
+  });
+
+  identityFn = new Fn("identity", [0], function(a) {
+    return "" + a;
+  }, function(a) {
+    return "" + a;
+  });
+
+  builtInFns = [
+    constantFn, new Fn("+", [0, 0], function(a, b) {
       return "(" + a + " + " + b + ")";
     }, function(a, b) {
       return "(" + a + " + " + b + ")";
@@ -606,6 +614,12 @@
       return "max(" + a + ", " + b + ")";
     })
   ];
+
+  builtInFns.constantFn = constantFn;
+
+  builtInFns.identityFn = identityFn;
+
+  module.exports = builtInFns;
 
 }).call(this);
 }, "model/register": function(exports, require, module) {(function() {

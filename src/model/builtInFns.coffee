@@ -1,10 +1,16 @@
 Fn = require("./Fn")
 
+constantFn = new Fn "", [null, 0],
+  (a, b) -> "#{b}"
+  (a, b) -> "#{b}"
 
-module.exports = [
-  new Fn "", [null, 0],
-    (a, b) -> "#{b}"
-    (a, b) -> "#{b}"
+identityFn = new Fn "identity", [0],
+  (a) -> "#{a}"
+  (a) -> "#{a}"
+
+
+builtInFns = [
+  constantFn
   new Fn "+", [0, 0],
     (a, b) -> "(#{a} + #{b})"
     (a, b) -> "(#{a} + #{b})"
@@ -48,3 +54,9 @@ module.exports = [
     (a, b) -> "Math.max(#{a}, #{b})"
     (a, b) -> "max(#{a}, #{b})"
 ]
+
+
+builtInFns.constantFn = constantFn
+builtInFns.identityFn = identityFn
+
+module.exports = builtInFns
