@@ -1,5 +1,5 @@
 ObjectManager = require("../persistence/ObjectManager")
-ProvisionalApply = require("./ProvisionalApply")
+Apply = require("./Apply")
 
 
 module.exports = class Block
@@ -41,7 +41,8 @@ module.exports = class Block
         apply.setParam(0, refApply)
 
   insertNewApplyAfter: (refApply) ->
-    apply = new ProvisionalApply()
+    apply = new Apply()
+    apply.initializePossibleApplies()
     @insertApplyAfter(apply, refApply)
 
   replaceApply: (apply, refApply) ->

@@ -1,7 +1,6 @@
 R = React.DOM
 cx = React.addons.classSet
 Param = require("../model/Param")
-ProvisionalApply = require("../model/ProvisionalApply")
 onceDragConsummated = require("../util/onceDragConsummated")
 DataForMixin = require("./mixins/DataForMixin")
 StartTranscludeMixin = require("./mixins/StartTranscludeMixin")
@@ -159,23 +158,23 @@ PossibleApplyView = React.createClass
   handleMouseEnter: ->
     {apply, block, possibleApply} = @props
     # TODO controller
-    apply.stagedApply = possibleApply
+    apply.choosePossibleApply(possibleApply)
     editor.hoveredParam = possibleApply.allParams()[1]
   handleMouseLeave: ->
     {apply, block, possibleApply} = @props
     # TODO controller
-    apply.stagedApply = null
+    apply.choosePossibleApply(null)
     editor.hoveredParam = null
   handleClick: ->
     {apply, block, possibleApply} = @props
-    block.replaceApply(possibleApply, apply)
+    apply.removePossibleApplies()
     # TODO controller
     editor.hoveredParam = null
   render: ->
     {apply, block, possibleApply} = @props
     classNames = cx {
       possibleApply: true
-      stagedPossibleApply: apply.stagedApply == possibleApply
+      stagedPossibleApply: apply.isPossibleApplyChosen(possibleApply)
     }
     R.div {className: classNames, onClick: @handleClick, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
       ApplyInternalsView {apply: possibleApply}
@@ -199,14 +198,14 @@ module.exports = ApplyRowView = React.createClass
     # delete.
     {apply, block} = @props
     nextApply = block.nextApply(apply)
-    if nextApply instanceof ProvisionalApply
+    if nextApply?.hasPossibleApplies()
       block.removeApply(nextApply)
     else
       block.insertNewApplyAfter(apply)
 
   render: ->
     {apply, block} = @props
-    if apply instanceof ProvisionalApply
+    if apply.hasPossibleApplies()
       R.div {className: "applyRow"},
         ProvisionalApplyView {apply, block}
     else

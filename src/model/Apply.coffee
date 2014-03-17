@@ -4,10 +4,17 @@ builtInFns = require("./builtInFns")
 
 
 module.exports = class Apply
-  constructor: (@fn) ->
+  constructor: (@fn = builtInFns.identityFn) ->
     ObjectManager.assignId(this)
-    @params = []
-    @initializeDefaultParams() if @fn
+
+    @params = @fn.defaultParams.map (paramValue) ->
+      if paramValue?
+        param = new Param(paramValue)
+      else
+        param = null
+
+    @possibleApplies = null
+
 
   headParam: ->
     @params[0]
@@ -18,15 +25,39 @@ module.exports = class Apply
   allParams: ->
     @params
 
-  initializeDefaultParams: ->
-    @params = @fn.defaultParams.map (paramValue) ->
-      if paramValue?
-        param = new Param(paramValue)
-      else
-        param = null
-
   setParam: (index, param) ->
     @params[index] = param
+    @setPossibleAppliesHeads()
+
+
+  initializePossibleApplies: ->
+    @possibleApplies = builtInFns.map (fn) ->
+      new Apply(fn)
+    @setPossibleAppliesHeads()
+
+  setPossibleAppliesHeads: ->
+    return unless @possibleApplies?
+    headParam = @headParam()
+    for possibleApply in @possibleApplies
+      possibleApply.setParam(0, headParam)
+
+  choosePossibleApply: (possibleApply) ->
+    if possibleApply?
+      @fn = possibleApply.fn
+      @params = possibleApply.params
+    else
+      @fn = builtInFns.identityFn
+      @params = [@headParam()]
+
+  isPossibleApplyChosen: (possibleApply) ->
+    possibleApply.fn == @fn
+
+  removePossibleApplies: ->
+    @possibleApplies = null
+
+  hasPossibleApplies: ->
+    @possibleApplies?
+
 
   compileString: ->
     paramCompileStrings = @params.map (param) ->

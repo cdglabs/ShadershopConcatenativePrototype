@@ -116,7 +116,7 @@
   if (!editor) {
     editor = new Editor();
     editor.rootBlock = new Block();
-    startApply = new Apply(builtInFns[0]);
+    startApply = new Apply(builtInFns.constantFn);
     editor.rootBlock.root = startApply;
   }
 
@@ -204,12 +204,17 @@
 
   module.exports = Apply = (function() {
     function Apply(fn) {
-      this.fn = fn;
+      this.fn = fn != null ? fn : builtInFns.identityFn;
       ObjectManager.assignId(this);
-      this.params = [];
-      if (this.fn) {
-        this.initializeDefaultParams();
-      }
+      this.params = this.fn.defaultParams.map(function(paramValue) {
+        var param;
+        if (paramValue != null) {
+          return param = new Param(paramValue);
+        } else {
+          return param = null;
+        }
+      });
+      this.possibleApplies = null;
     }
 
     Apply.prototype.headParam = function() {
@@ -224,19 +229,53 @@
       return this.params;
     };
 
-    Apply.prototype.initializeDefaultParams = function() {
-      return this.params = this.fn.defaultParams.map(function(paramValue) {
-        var param;
-        if (paramValue != null) {
-          return param = new Param(paramValue);
-        } else {
-          return param = null;
-        }
-      });
+    Apply.prototype.setParam = function(index, param) {
+      this.params[index] = param;
+      return this.setPossibleAppliesHeads();
     };
 
-    Apply.prototype.setParam = function(index, param) {
-      return this.params[index] = param;
+    Apply.prototype.initializePossibleApplies = function() {
+      this.possibleApplies = builtInFns.map(function(fn) {
+        return new Apply(fn);
+      });
+      return this.setPossibleAppliesHeads();
+    };
+
+    Apply.prototype.setPossibleAppliesHeads = function() {
+      var headParam, possibleApply, _i, _len, _ref, _results;
+      if (this.possibleApplies == null) {
+        return;
+      }
+      headParam = this.headParam();
+      _ref = this.possibleApplies;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        possibleApply = _ref[_i];
+        _results.push(possibleApply.setParam(0, headParam));
+      }
+      return _results;
+    };
+
+    Apply.prototype.choosePossibleApply = function(possibleApply) {
+      if (possibleApply != null) {
+        this.fn = possibleApply.fn;
+        return this.params = possibleApply.params;
+      } else {
+        this.fn = builtInFns.identityFn;
+        return this.params = [this.headParam()];
+      }
+    };
+
+    Apply.prototype.isPossibleApplyChosen = function(possibleApply) {
+      return possibleApply.fn === this.fn;
+    };
+
+    Apply.prototype.removePossibleApplies = function() {
+      return this.possibleApplies = null;
+    };
+
+    Apply.prototype.hasPossibleApplies = function() {
+      return this.possibleApplies != null;
     };
 
     Apply.prototype.compileString = function() {
@@ -265,11 +304,11 @@
 
 }).call(this);
 }, "model/Block": function(exports, require, module) {(function() {
-  var Block, ObjectManager, ProvisionalApply;
+  var Apply, Block, ObjectManager;
 
   ObjectManager = require("../persistence/ObjectManager");
 
-  ProvisionalApply = require("./ProvisionalApply");
+  Apply = require("./Apply");
 
   module.exports = Block = (function() {
     function Block() {
@@ -325,7 +364,8 @@
 
     Block.prototype.insertNewApplyAfter = function(refApply) {
       var apply;
-      apply = new ProvisionalApply();
+      apply = new Apply();
+      apply.initializePossibleApplies();
       return this.insertApplyAfter(apply, refApply);
     };
 
@@ -340,11 +380,9 @@
 
 }).call(this);
 }, "model/Editor": function(exports, require, module) {(function() {
-  var Editor, Param, ProvisionalApply;
+  var Editor, Param;
 
   Param = require("./Param");
-
-  ProvisionalApply = require("./ProvisionalApply");
 
   module.exports = Editor = (function() {
     function Editor() {
@@ -485,59 +523,6 @@
   })();
 
 }).call(this);
-}, "model/ProvisionalApply": function(exports, require, module) {(function() {
-  var Apply, ObjectManager, ProvisionalApply, builtInFns,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  ObjectManager = require("../persistence/ObjectManager");
-
-  Apply = require("./Apply");
-
-  builtInFns = require("./builtInFns");
-
-  module.exports = ProvisionalApply = (function(_super) {
-    __extends(ProvisionalApply, _super);
-
-    function ProvisionalApply() {
-      ObjectManager.assignId(this);
-      this.params = [null];
-      this.possibleApplies = builtInFns.map(function(fn) {
-        return new Apply(fn);
-      });
-      this.stagedApply = null;
-    }
-
-    ProvisionalApply.prototype.setParam = function(index, param) {
-      var possibleApply, _i, _len, _ref, _results;
-      this.params[index] = param;
-      _ref = this.possibleApplies;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        possibleApply = _ref[_i];
-        _results.push(possibleApply.setParam(index, param));
-      }
-      return _results;
-    };
-
-    ProvisionalApply.prototype.effectiveApply = function() {
-      var _ref;
-      return (_ref = this.stagedApply) != null ? _ref : this.params[0];
-    };
-
-    ProvisionalApply.prototype.compileString = function() {
-      return this.effectiveApply().compileString();
-    };
-
-    ProvisionalApply.prototype.compileGlslString = function() {
-      return this.effectiveApply().compileGlslString();
-    };
-
-    return ProvisionalApply;
-
-  })(Apply);
-
-}).call(this);
 }, "model/builtInFns": function(exports, require, module) {(function() {
   var Fn, builtInFns, constantFn, identityFn;
 
@@ -623,15 +608,13 @@
 
 }).call(this);
 }, "model/register": function(exports, require, module) {(function() {
-  var Apply, Block, Editor, ObjectManager, Param, ProvisionalApply;
+  var Apply, Block, Editor, ObjectManager, Param;
 
   ObjectManager = require("../persistence/ObjectManager");
 
   Param = require("model/Param");
 
   Apply = require("model/Apply");
-
-  ProvisionalApply = require("model/ProvisionalApply");
 
   Block = require("model/Block");
 
@@ -640,8 +623,6 @@
   ObjectManager.registerClass("Param", Param);
 
   ObjectManager.registerClass("Apply", Apply);
-
-  ObjectManager.registerClass("ProvisionalApply", ProvisionalApply);
 
   ObjectManager.registerClass("Block", Block);
 
@@ -953,15 +934,13 @@
 
 }).call(this);
 }, "view/ApplyRowView": function(exports, require, module) {(function() {
-  var ApplyInternalsView, ApplyRowView, ApplyThumbnailView, ApplyView, DataForMixin, GraphView, Param, ParamSlotView, ParamView, PossibleApplyView, ProvisionalApply, ProvisionalApplyView, R, StartTranscludeMixin, cx, onceDragConsummated;
+  var ApplyInternalsView, ApplyRowView, ApplyThumbnailView, ApplyView, DataForMixin, GraphView, Param, ParamSlotView, ParamView, PossibleApplyView, ProvisionalApplyView, R, StartTranscludeMixin, cx, onceDragConsummated;
 
   R = React.DOM;
 
   cx = React.addons.classSet;
 
   Param = require("../model/Param");
-
-  ProvisionalApply = require("../model/ProvisionalApply");
 
   onceDragConsummated = require("../util/onceDragConsummated");
 
@@ -1192,19 +1171,19 @@
     handleMouseEnter: function() {
       var apply, block, possibleApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
-      apply.stagedApply = possibleApply;
+      apply.choosePossibleApply(possibleApply);
       return editor.hoveredParam = possibleApply.allParams()[1];
     },
     handleMouseLeave: function() {
       var apply, block, possibleApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
-      apply.stagedApply = null;
+      apply.choosePossibleApply(null);
       return editor.hoveredParam = null;
     },
     handleClick: function() {
       var apply, block, possibleApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
-      block.replaceApply(possibleApply, apply);
+      apply.removePossibleApplies();
       return editor.hoveredParam = null;
     },
     render: function() {
@@ -1212,7 +1191,7 @@
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
       classNames = cx({
         possibleApply: true,
-        stagedPossibleApply: apply.stagedApply === possibleApply
+        stagedPossibleApply: apply.isPossibleApplyChosen(possibleApply)
       });
       return R.div({
         className: classNames,
@@ -1248,7 +1227,7 @@
       var apply, block, nextApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block;
       nextApply = block.nextApply(apply);
-      if (nextApply instanceof ProvisionalApply) {
+      if (nextApply != null ? nextApply.hasPossibleApplies() : void 0) {
         return block.removeApply(nextApply);
       } else {
         return block.insertNewApplyAfter(apply);
@@ -1257,7 +1236,7 @@
     render: function() {
       var apply, block, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block;
-      if (apply instanceof ProvisionalApply) {
+      if (apply.hasPossibleApplies()) {
         return R.div({
           className: "applyRow"
         }, ProvisionalApplyView({

@@ -15,7 +15,7 @@ if !editor
   editor = new Editor()
   editor.rootBlock = new Block()
 
-  startApply = new Apply(builtInFns[0])
+  startApply = new Apply(builtInFns.constantFn)
 
   editor.rootBlock.root = startApply
 

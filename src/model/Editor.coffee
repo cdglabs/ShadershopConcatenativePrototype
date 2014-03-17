@@ -1,5 +1,4 @@
 Param = require("./Param")
-ProvisionalApply = require("./ProvisionalApply")
 
 
 module.exports = class Editor
