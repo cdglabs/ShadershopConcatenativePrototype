@@ -12,8 +12,9 @@ module.exports = class Editor
     @hoveredParam = null
     @hoveredApply = null
 
-    @selection1 = null
-    @selection2 = null
+    @selectedBlock = null
+    @selectedApply1 = null
+    @selectedApply2 = null
 
     @cursor = null
     @mousePosition = {x: 0, y: 0}
@@ -34,35 +35,32 @@ module.exports = class Editor
   # Selecting Applies
   # ===========================================================================
 
+  isApplySelected: (block, apply) ->
+    return false unless @selectedBlock == block
 
-  isApplySelected: -> false
+    if @selectedApply1? and @selectedApply2?
+      applies = block.applies()
+      refIndex = applies.indexOf(apply)
+      index1 = applies.indexOf(@selectedApply1)
+      index2 = applies.indexOf(@selectedApply2)
+      return Math.min(index1, index2) <= refIndex <= Math.max(index1, index2)
+    else if @selectedApply1?
+      return apply == @selectedApply1
+    else
+      return false
+
   unsetSelection: ->
-  setSingleSelection: ->
-  setRangeSelection: ->
+    @selectedBlock = null
+    @selectedApply1 = null
+    @selectedApply2 = null
 
-  # isApplySelected: (refApply) ->
-  #   if @selection1? and @selection2?
-  #     applies = @applies()
-  #     refIndex = applies.indexOf(refApply)
-  #     return false if refIndex == -1
-  #     selection1Index = applies.indexOf(@selection1)
-  #     selection2Index = applies.indexOf(@selection2)
-  #     return Math.min(selection1Index, selection2Index) <= refIndex <= Math.max(selection1Index, selection2Index)
-  #   else if @selection1?
-  #     return refApply == @selection1
-  #   else
-  #     return false
+  setSingleSelection: (block, apply) ->
+    @selectedBlock = block
+    @selectedApply1 = apply
+    @selectedApply2 = null
 
-  # unsetSelection: ->
-  #   @selection1 = null
-  #   @selection2 = null
-
-  # setSingleSelection: (refApply) ->
-  #   @selection1 = refApply
-  #   @selection2 = null
-
-  # setRangeSelection: (refApply) ->
-  #   if @selection1
-  #     @selection2 = refApply
-  #   else
-  #     @setSingleSelection(refApply)
+  setRangeSelection: (block, apply) ->
+    if @selectedApply1 and @selectedBlock == block
+      @selectedApply2 = apply
+    else
+      @setSingleSelection(block, apply)

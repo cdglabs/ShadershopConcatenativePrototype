@@ -17,13 +17,13 @@ ApplyView = React.createClass
 
     # Deal with selection changing
     if key.shift
-      editor.setRangeSelection(apply)
+      editor.setRangeSelection(block, apply)
     else
-      if editor.isApplySelected(apply)
+      if editor.isApplySelected(block, apply)
         onceDragConsummated e, null, =>
-          editor.setSingleSelection(apply)
+          editor.setSingleSelection(block, apply)
       else
-        editor.setSingleSelection(apply)
+        editor.setSingleSelection(block, apply)
 
     if !apply.headParam()?
       # start of the block... TODO but should be reorderable in some cases.
@@ -78,7 +78,7 @@ ApplyView = React.createClass
       apply: true
       hovered: apply == editor.hoveredApply
       isStart: apply.isStart?()
-      isSelected: editor.isApplySelected(apply)
+      isSelected: editor.isApplySelected(block, apply)
     }
     R.div {className: classNames, style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown},
       ApplyInternalsView {apply}

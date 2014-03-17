@@ -6,9 +6,11 @@ Switch to a named parameter system
     jsString: "Math.min({{p1}}, {{p2}})"
     glslString: "min({{p1}}, {{p2}})"
 
+  Apply has
+    fn
+    params: {p1: ---, p2: ---}
 
-Get select stuff working again
-  You should only be able to select Apply's within the same Block
+
 
 
 Code cleanup
@@ -16,6 +18,7 @@ Code cleanup
     Each will need to take an "environment" in addition to just the apply
   Should provisionalApply be an Apply?
   Reordering measuring algorithm still isn't quite right (try dragging a "start" apply)
+  Make reordering move entire selection
   Text editing has some weirdness - flickering hover things and editing param value
 
 

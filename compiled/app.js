@@ -353,8 +353,9 @@
       this.yParam = null;
       this.hoveredParam = null;
       this.hoveredApply = null;
-      this.selection1 = null;
-      this.selection2 = null;
+      this.selectedBlock = null;
+      this.selectedApply1 = null;
+      this.selectedApply2 = null;
       this.cursor = null;
       this.mousePosition = {
         x: 0,
@@ -376,15 +377,43 @@
       return this.hoveredParam;
     };
 
-    Editor.prototype.isApplySelected = function() {
-      return false;
+    Editor.prototype.isApplySelected = function(block, apply) {
+      var applies, index1, index2, refIndex;
+      if (this.selectedBlock !== block) {
+        return false;
+      }
+      if ((this.selectedApply1 != null) && (this.selectedApply2 != null)) {
+        applies = block.applies();
+        refIndex = applies.indexOf(apply);
+        index1 = applies.indexOf(this.selectedApply1);
+        index2 = applies.indexOf(this.selectedApply2);
+        return (Math.min(index1, index2) <= refIndex && refIndex <= Math.max(index1, index2));
+      } else if (this.selectedApply1 != null) {
+        return apply === this.selectedApply1;
+      } else {
+        return false;
+      }
     };
 
-    Editor.prototype.unsetSelection = function() {};
+    Editor.prototype.unsetSelection = function() {
+      this.selectedBlock = null;
+      this.selectedApply1 = null;
+      return this.selectedApply2 = null;
+    };
 
-    Editor.prototype.setSingleSelection = function() {};
+    Editor.prototype.setSingleSelection = function(block, apply) {
+      this.selectedBlock = block;
+      this.selectedApply1 = apply;
+      return this.selectedApply2 = null;
+    };
 
-    Editor.prototype.setRangeSelection = function() {};
+    Editor.prototype.setRangeSelection = function(block, apply) {
+      if (this.selectedApply1 && this.selectedBlock === block) {
+        return this.selectedApply2 = apply;
+      } else {
+        return this.setSingleSelection(block, apply);
+      }
+    };
 
     return Editor;
 
@@ -938,16 +967,16 @@
         return;
       }
       if (key.shift) {
-        editor.setRangeSelection(apply);
+        editor.setRangeSelection(block, apply);
       } else {
-        if (editor.isApplySelected(apply)) {
+        if (editor.isApplySelected(block, apply)) {
           onceDragConsummated(e, null, (function(_this) {
             return function() {
-              return editor.setSingleSelection(apply);
+              return editor.setSingleSelection(block, apply);
             };
           })(this));
         } else {
-          editor.setSingleSelection(apply);
+          editor.setSingleSelection(block, apply);
         }
       }
       if (apply.headParam() == null) {
@@ -1025,7 +1054,7 @@
         apply: true,
         hovered: apply === editor.hoveredApply,
         isStart: typeof apply.isStart === "function" ? apply.isStart() : void 0,
-        isSelected: editor.isApplySelected(apply)
+        isSelected: editor.isApplySelected(block, apply)
       });
       return R.div({
         className: classNames,
