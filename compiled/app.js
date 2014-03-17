@@ -81,7 +81,7 @@
       hoveredApply: {
         strokeStyle: "#900"
       },
-      selectedApply: {
+      resultApply: {
         strokeStyle: "#000"
       },
       spreadPositive: {
@@ -476,7 +476,7 @@
       this.possibleApplies = builtInFns.map(function(fn) {
         return new Apply(fn);
       });
-      this.selectedApply = null;
+      this.stagedApply = null;
     }
 
     ProvisionalApply.prototype.setParam = function(index, param) {
@@ -493,7 +493,7 @@
 
     ProvisionalApply.prototype.effectiveApply = function() {
       var _ref;
-      return (_ref = this.selectedApply) != null ? _ref : this.params[0];
+      return (_ref = this.stagedApply) != null ? _ref : this.params[0];
     };
 
     ProvisionalApply.prototype.compileString = function() {
@@ -1126,7 +1126,7 @@
       if (apply === editor.hoveredApply) {
         styleOpts = config.styles.hoveredApply;
       } else {
-        styleOpts = config.styles.selectedApply;
+        styleOpts = config.styles.resultApply;
       }
       graphViews.push(GraphView({
         apply: apply,
@@ -1149,13 +1149,13 @@
     handleMouseEnter: function() {
       var apply, block, possibleApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
-      apply.selectedApply = possibleApply;
+      apply.stagedApply = possibleApply;
       return editor.hoveredParam = possibleApply.allParams()[1];
     },
     handleMouseLeave: function() {
       var apply, block, possibleApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
-      apply.selectedApply = null;
+      apply.stagedApply = null;
       return editor.hoveredParam = null;
     },
     handleClick: function() {
@@ -1169,7 +1169,7 @@
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
       classNames = cx({
         possibleApply: true,
-        selectedPossibleApply: apply.selectedApply === possibleApply
+        stagedPossibleApply: apply.stagedApply === possibleApply
       });
       return R.div({
         className: classNames,
@@ -1416,7 +1416,7 @@
       graphViews.push(GraphView({
         apply: resultApply,
         key: "result",
-        styleOpts: config.styles.selectedApply
+        styleOpts: config.styles.resultApply
       }));
       if (apply = editor.hoveredApply) {
         if (!(typeof apply.isStart === "function" ? apply.isStart() : void 0)) {

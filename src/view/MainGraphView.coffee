@@ -14,6 +14,7 @@ MainCartesianGraphView = React.createClass
 
     resultApply = editor.rootBlock.root
 
+    # Spread
     if editor.spreadParam()
       spreadDistance = 0.5
       spreadNum = 5
@@ -27,8 +28,10 @@ MainCartesianGraphView = React.createClass
           spreadOffset = spreadDistance * i * neg
           graphViews.push(GraphView {apply: resultApply, key: "spread" + (i*neg),styleOpts, spreadOffset})
 
-    graphViews.push(GraphView {apply: resultApply, key: "result", styleOpts: config.styles.selectedApply})
+    # Result
+    graphViews.push(GraphView {apply: resultApply, key: "result", styleOpts: config.styles.resultApply})
 
+    # Hovered Apply
     if apply = editor.hoveredApply
       if !apply.isStart?()
         for param, paramIndex in apply.allParams()
@@ -39,6 +42,7 @@ MainCartesianGraphView = React.createClass
           graphViews.push(GraphView {apply: param, key: "param"+paramIndex, styleOpts})
       graphViews.push(GraphView {apply, key: "hoveredApply", styleOpts: config.styles.hoveredApply})
 
+    # Hovered Param
     if param = editor.hoveredParam
       graphViews.push(GraphView {apply: param, key: "hoveredParam", styleOpts: config.styles.hoveredParam})
 

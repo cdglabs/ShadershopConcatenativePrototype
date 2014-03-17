@@ -144,7 +144,7 @@ ApplyThumbnailView = React.createClass
     if apply == editor.hoveredApply
       styleOpts = config.styles.hoveredApply
     else
-      styleOpts = config.styles.selectedApply
+      styleOpts = config.styles.resultApply
     graphViews.push(GraphView {apply, styleOpts, key: "result"})
 
     R.div {className: "applyThumbnail", style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
@@ -159,12 +159,12 @@ PossibleApplyView = React.createClass
   handleMouseEnter: ->
     {apply, block, possibleApply} = @props
     # TODO controller
-    apply.selectedApply = possibleApply
+    apply.stagedApply = possibleApply
     editor.hoveredParam = possibleApply.allParams()[1]
   handleMouseLeave: ->
     {apply, block, possibleApply} = @props
     # TODO controller
-    apply.selectedApply = null
+    apply.stagedApply = null
     editor.hoveredParam = null
   handleClick: ->
     {apply, block, possibleApply} = @props
@@ -175,7 +175,7 @@ PossibleApplyView = React.createClass
     {apply, block, possibleApply} = @props
     classNames = cx {
       possibleApply: true
-      selectedPossibleApply: apply.selectedApply == possibleApply
+      stagedPossibleApply: apply.stagedApply == possibleApply
     }
     R.div {className: classNames, onClick: @handleClick, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
       ApplyInternalsView {apply: possibleApply}

@@ -5,8 +5,10 @@ Switch to a named parameter system
     order: [p1, p2]
     jsString: "Math.min({{p1}}, {{p2}})"
     glslString: "min({{p1}}, {{p2}})"
-  Get select stuff working again, figure out semantics w.r.t. Block model
 
+
+Get select stuff working again
+  You should only be able to select Apply's within the same Block
 
 
 Code cleanup

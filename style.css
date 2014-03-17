@@ -151,7 +151,7 @@ Link
 .possibleApply {
   border-bottom: 1px solid #ccc;
 }
-.selectedPossibleApply {
+.stagedPossibleApply {
   background-color: rgba(127, 200, 255, 0.7);
 }
 

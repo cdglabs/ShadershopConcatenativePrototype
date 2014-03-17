@@ -9,7 +9,7 @@ module.exports = class ProvisionalApply extends Apply
     @params = [null]
     @possibleApplies = builtInFns.map (fn) ->
       new Apply(fn)
-    @selectedApply = null
+    @stagedApply = null
 
   setParam: (index, param) ->
     @params[index] = param
@@ -17,7 +17,7 @@ module.exports = class ProvisionalApply extends Apply
       possibleApply.setParam(index, param)
 
   effectiveApply: ->
-    @selectedApply ? @params[0]
+    @stagedApply ? @params[0]
 
   compileString: ->
     @effectiveApply().compileString()

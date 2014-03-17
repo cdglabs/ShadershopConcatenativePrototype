@@ -19,7 +19,7 @@ module.exports = window.config = config = {
     hoveredParam: {strokeStyle: "green", globalAlpha: 1}
     apply: {strokeStyle: "#000", globalAlpha: 0.1}
     hoveredApply: {strokeStyle: "#900"}
-    selectedApply: {strokeStyle: "#000"}
+    resultApply: {strokeStyle: "#000"}
     spreadPositive: {strokeStyle: "#900"}
     spreadNegative: {strokeStyle: "#009"}
   }
