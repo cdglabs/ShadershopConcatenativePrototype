@@ -125,6 +125,66 @@
   module.exports = editor;
 
 }).call(this);
+}, "execute/Compiler": function(exports, require, module) {(function() {
+  var Apply, Compiler, Param, toFloatString;
+
+  Apply = require("../model/Apply");
+
+  Param = require("../model/Param");
+
+  module.exports = Compiler = (function() {
+    function Compiler() {
+      this.substitutions = {};
+    }
+
+    Compiler.prototype.substitute = function(param, value) {
+      if (!param) {
+        return;
+      }
+      return this.substitutions[param.__id] = value;
+    };
+
+    Compiler.prototype.compile = function(apply, lang) {
+      var fn, param, paramCompileStrings, params, _ref;
+      if (lang == null) {
+        lang = "js";
+      }
+      if (apply instanceof Apply) {
+        fn = apply.fn;
+        params = apply.allParams();
+        paramCompileStrings = params.map((function(_this) {
+          return function(param) {
+            if (param == null) {
+              return null;
+            }
+            return _this.compile(param, lang);
+          };
+        })(this));
+        if (lang === "js") {
+          return fn.compileString.apply(fn, paramCompileStrings);
+        } else if (lang === "glsl") {
+          return fn.compileGlslString.apply(fn, paramCompileStrings);
+        }
+      } else if (apply instanceof Param) {
+        param = apply;
+        return (_ref = this.substitutions[param.__id]) != null ? _ref : toFloatString(param.value);
+      }
+    };
+
+    return Compiler;
+
+  })();
+
+  toFloatString = function(v) {
+    var floatString;
+    floatString = "" + v;
+    if (floatString.indexOf(".") === -1) {
+      floatString += ".";
+    }
+    return floatString;
+  };
+
+}).call(this);
 }, "main": function(exports, require, module) {(function() {
   var EditorView, Persistence, editor, eventName, handleWindowMouseMove, handleWindowMouseUp, refresh, refreshView, willRefreshNextFrame, _i, _len, _ref;
 
@@ -561,79 +621,6 @@
   builtInFns.identityFn = identityFn;
 
   module.exports = builtInFns;
-
-}).call(this);
-}, "model/compile": function(exports, require, module) {
-/*
-Intermediate Form
-
-
-IExpr = IApply | IParam
-
-IApply
-  {
-    type: "apply"
-    original: Apply
-    fn: Fn
-    params: [IExpr]
-  }
-
-IParam
-  {
-    type: "param"
-    original: Param
-  }
- */
-
-(function() {
-  var Apply, Param, compile, editor;
-
-  Apply = require("./Apply");
-
-  Param = require("./Param");
-
-  editor = require("../editor");
-
-  module.exports = compile = function(apply, lang) {
-    var floatString, fn, param, paramCompileStrings, params;
-    if (lang == null) {
-      lang = "js";
-    }
-    if (apply instanceof Apply) {
-      fn = apply.fn;
-      params = apply.allParams();
-      paramCompileStrings = params.map(function(param) {
-        if (param == null) {
-          return null;
-        }
-        return compile(param, lang);
-      });
-      if (lang === "js") {
-        return fn.compileString.apply(fn, paramCompileStrings);
-      } else if (lang === "glsl") {
-        return fn.compileGlslString.apply(fn, paramCompileStrings);
-      }
-    } else if (apply instanceof Param) {
-      param = apply;
-      if (param === editor.xParam) {
-        return "x";
-      } else if (param === editor.yParam && lang === "glsl") {
-        return "y";
-      } else if (param === editor.spreadParam() && lang === "js") {
-        return "(" + param.value + " + spreadOffset)";
-      } else {
-        if (lang === "js") {
-          return "" + param.value;
-        } else {
-          floatString = "" + param.value;
-          if (floatString.indexOf(".") === -1) {
-            floatString += ".";
-          }
-          return floatString;
-        }
-      }
-    }
-  };
 
 }).call(this);
 }, "model/register": function(exports, require, module) {(function() {
@@ -2167,7 +2154,7 @@ IParam
 
 }).call(this);
 }, "view/rendering/GraphView": function(exports, require, module) {(function() {
-  var CanvasView, Graph, GraphView, Param, R, compile, cx;
+  var CanvasView, Compiler, Graph, GraphView, Param, R, cx, editor;
 
   R = React.DOM;
 
@@ -2179,7 +2166,9 @@ IParam
 
   Param = require("../../model/Param");
 
-  compile = require("../../model/compile");
+  editor = require("../../editor");
+
+  Compiler = require("../../execute/Compiler");
 
   module.exports = GraphView = React.createClass({
     getDefaultProps: function() {
@@ -2187,13 +2176,23 @@ IParam
         spreadOffset: 0
       };
     },
+    compile: function() {
+      var apply, compiler, spreadOffset, spreadParam, styleOpts, _ref;
+      _ref = this.props, apply = _ref.apply, spreadOffset = _ref.spreadOffset, styleOpts = _ref.styleOpts;
+      compiler = new Compiler();
+      compiler.substitute(editor.xParam, "x");
+      if (spreadParam = editor.spreadParam()) {
+        compiler.substitute(spreadParam, spreadParam.value + spreadOffset);
+      }
+      return compiler.compile(apply, "js");
+    },
     drawFn: function(canvas) {
       var apply, graph, graphFn, s, spreadOffset, styleOpts, _ref, _ref1;
       _ref = this.props, apply = _ref.apply, spreadOffset = _ref.spreadOffset, styleOpts = _ref.styleOpts;
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
       graph.clear();
-      s = (_ref1 = this.compileString_) != null ? _ref1 : compile(apply, "js");
-      graphFn = eval("(function (x) { var spreadOffset = " + spreadOffset + "; return " + s + "; })");
+      s = (_ref1 = this.compileString_) != null ? _ref1 : this.compile();
+      graphFn = eval("(function (x) { return " + s + "; })");
       if (apply instanceof Param && apply !== editor.xParam) {
         if (apply.axis === "x") {
           return graph.drawVerticalLine(graphFn(0), styleOpts);
@@ -2213,7 +2212,7 @@ IParam
     componentDidUpdate: function() {
       var apply, drawOptions, spreadOffset, styleOpts, _ref;
       _ref = this.props, apply = _ref.apply, spreadOffset = _ref.spreadOffset, styleOpts = _ref.styleOpts;
-      this.compileString_ = compile(apply, "js");
+      this.compileString_ = this.compile();
       drawOptions = _.extend({
         compileString_: this.compileString_,
         spreadOffset: spreadOffset,
@@ -2394,7 +2393,7 @@ to set uniforms,
 
 }).call(this);
 }, "view/rendering/ShaderGraphView": function(exports, require, module) {(function() {
-  var CanvasView, R, Shader, ShaderGraphView, compile, cx;
+  var CanvasView, Compiler, R, Shader, ShaderGraphView, cx, editor;
 
   R = React.DOM;
 
@@ -2404,14 +2403,19 @@ to set uniforms,
 
   Shader = require("./Shader");
 
-  compile = require("../../model/compile");
+  editor = require("../../editor");
+
+  Compiler = require("../../execute/Compiler");
 
   module.exports = ShaderGraphView = React.createClass({
     drawFn: function(canvas) {
-      var apply, colorMap, contourMap, fragmentSrc, s, shader, vertexSrc;
+      var apply, colorMap, compiler, contourMap, fragmentSrc, s, shader, vertexSrc;
       apply = this.props.apply;
       shader = canvas.shader != null ? canvas.shader : canvas.shader = new Shader(canvas);
-      s = compile(apply, "glsl");
+      compiler = new Compiler();
+      compiler.substitute(editor.xParam, "x");
+      compiler.substitute(editor.yParam, "y");
+      s = compiler.compile(apply, "glsl");
       vertexSrc = "precision mediump float;\n\nattribute vec3 vertexPosition;\n\nvoid main() {\n  gl_Position = vec4(vertexPosition, 1.0);\n}";
       colorMap = "float outputValue = compute(x, y);\ngl_FragColor = vec4(vec3(outputValue), 1);";
       contourMap = "float outputValue = contourMap(vec2(x, y));\ngl_FragColor = vec4(vec3(0.), outputValue);";

@@ -3,12 +3,22 @@ cx = React.addons.classSet
 CanvasView = require("./CanvasView")
 Graph = require("./Graph")
 Param = require("../../model/Param")
-compile = require("../../model/compile")
+
+editor = require("../../editor")
+Compiler = require("../../execute/Compiler")
 
 
 module.exports = GraphView = React.createClass
   getDefaultProps: ->
     {spreadOffset: 0}
+
+  compile: ->
+    {apply, spreadOffset, styleOpts} = @props
+    compiler = new Compiler()
+    compiler.substitute(editor.xParam, "x")
+    if spreadParam = editor.spreadParam()
+      compiler.substitute(spreadParam, spreadParam.value + spreadOffset)
+    return compiler.compile(apply, "js")
 
   drawFn: (canvas) ->
     {apply, spreadOffset, styleOpts} = @props
@@ -17,8 +27,8 @@ module.exports = GraphView = React.createClass
 
     graph.clear()
 
-    s = @compileString_ ? compile(apply, "js")
-    graphFn = eval("(function (x) { var spreadOffset = #{spreadOffset}; return #{s}; })")
+    s = @compileString_ ? @compile()
+    graphFn = eval("(function (x) { return #{s}; })")
 
     if apply instanceof Param && apply != editor.xParam
       if apply.axis == "x"
@@ -35,7 +45,7 @@ module.exports = GraphView = React.createClass
     {apply, spreadOffset, styleOpts} = @props
 
     # Optimization: Check if we need to redraw
-    @compileString_ = compile(apply, "js")
+    @compileString_ = @compile()
     drawOptions = _.extend {@compileString_, spreadOffset, axis: apply.axis}, styleOpts
     if _.isEqual drawOptions, @lastDrawOptions_
       return

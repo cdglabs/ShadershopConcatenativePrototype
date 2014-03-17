@@ -2,7 +2,9 @@ R = React.DOM
 cx = React.addons.classSet
 CanvasView = require("./CanvasView")
 Shader = require("./Shader")
-compile = require("../../model/compile")
+
+editor = require("../../editor")
+Compiler = require("../../execute/Compiler")
 
 
 module.exports = ShaderGraphView = React.createClass
@@ -11,7 +13,10 @@ module.exports = ShaderGraphView = React.createClass
 
     shader = canvas.shader ?= new Shader(canvas)
 
-    s = compile(apply, "glsl")
+    compiler = new Compiler()
+    compiler.substitute(editor.xParam, "x")
+    compiler.substitute(editor.yParam, "y")
+    s = compiler.compile(apply, "glsl")
 
     vertexSrc = """
       precision mediump float;
