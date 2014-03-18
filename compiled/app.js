@@ -252,6 +252,20 @@
 
   refresh();
 
+  key("d", function(e) {
+    var el, _results;
+    el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y);
+    _results = [];
+    while (el) {
+      if (el.dataFor) {
+        window.debug = el.dataFor;
+        break;
+      }
+      _results.push(el = el.parentNode);
+    }
+    return _results;
+  });
+
 }).call(this);
 }, "model/Apply": function(exports, require, module) {(function() {
   var Apply, ObjectManager, Param, builtInFns;

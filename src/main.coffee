@@ -41,3 +41,12 @@ for eventName in ["mousedown", "mousemove", "mouseup", "keydown", "scroll", "cha
 
 refresh()
 
+
+key "d", (e) ->
+  el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y)
+  while el
+    if el.dataFor
+      window.debug = el.dataFor
+      break
+    el = el.parentNode
+
