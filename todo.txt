@@ -2,7 +2,7 @@ Compiler needs to take a context: series of Apply's
   A "Step" is a series of Apply's
 
 Start work on Block.createFn(applies)
-  Figure out referenced Params
+  X Figure out referenced Params
   Remove applies
   Figure out where to put the new Fn
   Make new Params for referenced Params

@@ -38,16 +38,8 @@ module.exports = class Editor
   isApplySelected: (block, apply) ->
     return false unless @selectedBlock == block
 
-    if @selectedApply1? and @selectedApply2?
-      applies = block.applies()
-      refIndex = applies.indexOf(apply)
-      index1 = applies.indexOf(@selectedApply1)
-      index2 = applies.indexOf(@selectedApply2)
-      return Math.min(index1, index2) <= refIndex <= Math.max(index1, index2)
-    else if @selectedApply1?
-      return apply == @selectedApply1
-    else
-      return false
+    applies = @selectedBlock.appliesRange(@selectedApply1, @selectedApply2)
+    return _.contains(applies, apply)
 
   unsetSelection: ->
     @selectedBlock = null
@@ -64,3 +56,6 @@ module.exports = class Editor
       @selectedApply2 = apply
     else
       @setSingleSelection(block, apply)
+
+    # TEMP
+    @selectedBlock.createFn(@selectedApply1, @selectedApply2)

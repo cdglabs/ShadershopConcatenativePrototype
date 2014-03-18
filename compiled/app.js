@@ -593,6 +593,41 @@
       return this.removeApply(refApply);
     };
 
+    Block.prototype.appliesRange = function(apply1, apply2) {
+      var applies, endIndex, index1, index2, startIndex;
+      if ((apply1 != null) && (apply2 != null)) {
+        applies = this.applies();
+        index1 = applies.indexOf(apply1);
+        index2 = applies.indexOf(apply2);
+        startIndex = Math.min(index1, index2);
+        endIndex = Math.max(index1, index2);
+        return applies.slice(startIndex, endIndex + 1);
+      } else if (apply1 != null) {
+        return [apply1];
+      } else {
+        return [];
+      }
+    };
+
+    Block.prototype.createFn = function(apply1, apply2) {
+      var applies, apply, dependencies, dependentParam, _i, _j, _len, _len1, _ref;
+      console.log(apply1, apply2);
+      applies = this.appliesRange(apply1, apply2);
+      console.log("applies", applies);
+      dependencies = [];
+      for (_i = 0, _len = applies.length; _i < _len; _i++) {
+        apply = applies[_i];
+        _ref = apply.dependentParams();
+        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+          dependentParam = _ref[_j];
+          dependencies.push(dependentParam);
+        }
+      }
+      dependencies = _.unique(dependencies);
+      dependencies = _.difference(dependencies, applies);
+      return console.log("dependencies", dependencies);
+    };
+
     return Block;
 
   })();
@@ -636,21 +671,12 @@
     };
 
     Editor.prototype.isApplySelected = function(block, apply) {
-      var applies, index1, index2, refIndex;
+      var applies;
       if (this.selectedBlock !== block) {
         return false;
       }
-      if ((this.selectedApply1 != null) && (this.selectedApply2 != null)) {
-        applies = block.applies();
-        refIndex = applies.indexOf(apply);
-        index1 = applies.indexOf(this.selectedApply1);
-        index2 = applies.indexOf(this.selectedApply2);
-        return (Math.min(index1, index2) <= refIndex && refIndex <= Math.max(index1, index2));
-      } else if (this.selectedApply1 != null) {
-        return apply === this.selectedApply1;
-      } else {
-        return false;
-      }
+      applies = this.selectedBlock.appliesRange(this.selectedApply1, this.selectedApply2);
+      return _.contains(applies, apply);
     };
 
     Editor.prototype.unsetSelection = function() {
@@ -667,10 +693,11 @@
 
     Editor.prototype.setRangeSelection = function(block, apply) {
       if (this.selectedApply1 && this.selectedBlock === block) {
-        return this.selectedApply2 = apply;
+        this.selectedApply2 = apply;
       } else {
-        return this.setSingleSelection(block, apply);
+        this.setSingleSelection(block, apply);
       }
+      return this.selectedBlock.createFn(this.selectedApply1, this.selectedApply2);
     };
 
     return Editor;

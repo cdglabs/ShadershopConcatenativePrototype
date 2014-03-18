@@ -50,3 +50,36 @@ module.exports = class Block
     @removeApply(refApply)
 
 
+  # ===========================================================================
+  # Extracting out new Fn's
+  # ===========================================================================
+
+  appliesRange: (apply1, apply2) ->
+    if apply1? and apply2?
+      applies = @applies()
+      index1 = applies.indexOf(apply1)
+      index2 = applies.indexOf(apply2)
+      startIndex = Math.min(index1, index2)
+      endIndex = Math.max(index1, index2)
+      return applies.slice(startIndex, endIndex + 1)
+    else if apply1?
+      return [apply1]
+    else
+      return []
+
+  createFn: (apply1, apply2) ->
+    console.log apply1, apply2
+
+    applies = @appliesRange(apply1, apply2)
+    console.log "applies", applies
+
+    dependencies = []
+    for apply in applies
+      for dependentParam in apply.dependentParams()
+        dependencies.push(dependentParam)
+
+    dependencies = _.unique(dependencies)
+    dependencies = _.difference(dependencies, applies)
+
+    console.log "dependencies", dependencies
+
