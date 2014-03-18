@@ -42,6 +42,10 @@ for eventName in ["mousedown", "mousemove", "mouseup", "keydown", "scroll", "cha
 refresh()
 
 
+# =============================================================================
+# Temporary Debugging
+# =============================================================================
+
 key "d", (e) ->
   el = document.elementFromPoint(editor.mousePosition.x, editor.mousePosition.y)
   while el
@@ -49,4 +53,13 @@ key "d", (e) ->
       window.debug = el.dataFor
       break
     el = el.parentNode
+
+
+
+do ->
+  apply = editor.rootBlock.root
+  Compiler = require("./execute/Compiler")
+  compiler = new Compiler()
+  console.log compiler.compile2(apply)
+
 

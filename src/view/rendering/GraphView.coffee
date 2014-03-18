@@ -3,6 +3,7 @@ Param = require("../../model/Param")
 
 editor = require("../../editor")
 Compiler = require("../../execute/Compiler")
+evaluate = require("../../execute/evaluate")
 
 
 R.create "GraphView",
@@ -25,7 +26,7 @@ R.create "GraphView",
     graph.clear()
 
     s = @compileString_ ? @compile()
-    graphFn = eval("(function (x) { return #{s}; })")
+    graphFn = evaluate("(function (x) { return #{s}; })")
 
     if apply instanceof Param && apply != editor.xParam
       if apply.axis == "x"

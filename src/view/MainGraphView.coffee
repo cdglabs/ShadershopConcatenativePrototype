@@ -34,7 +34,7 @@ R.create "MainCartesianGraphView",
             styleOpts = config.styles.param
           else
             styleOpts = config.styles.apply
-          graphViews.push(GraphView {apply: param, key: "param"+paramIndex, styleOpts})
+          graphViews.push(R.GraphView {apply: param, key: "param"+paramIndex, styleOpts})
       graphViews.push(R.GraphView {apply, key: "hoveredApply", styleOpts: config.styles.hoveredApply})
 
     # Hovered Param

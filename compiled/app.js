@@ -160,15 +160,61 @@
             return _this.compile(param, lang);
           };
         })(this));
-        if (lang === "js") {
-          return fn.compileString.apply(fn, paramCompileStrings);
-        } else if (lang === "glsl") {
-          return fn.compileGlslString.apply(fn, paramCompileStrings);
-        }
+        return fn.compileString.apply(fn, paramCompileStrings);
       } else if (apply instanceof Param) {
         param = apply;
         return (_ref = this.substitutions[param.__id]) != null ? _ref : toFloatString(param.value);
       }
+    };
+
+    Compiler.prototype.compileLine = function(expr) {
+      var fn, paramIds, params, _ref;
+      if (expr instanceof Apply) {
+        fn = expr.fn;
+        params = expr.allParams();
+        paramIds = params.map(function(param) {
+          return param != null ? param.__id : void 0;
+        });
+        return fn.compileString.apply(fn, paramIds);
+      } else if (expr instanceof Param) {
+        return (_ref = this.substitutions[expr.__id]) != null ? _ref : expr.value;
+      }
+    };
+
+    Compiler.prototype.compile2 = function(expr) {
+      var alreadyCompiledIds, lines, recurse;
+      lines = [];
+      alreadyCompiledIds = {};
+      recurse = (function(_this) {
+        return function(expr) {
+          var id, line, param, _i, _len, _ref, _results;
+          if (expr == null) {
+            return;
+          }
+          id = expr.__id;
+          if (alreadyCompiledIds[id]) {
+            return;
+          }
+          line = _this.compileLine(expr);
+          line = {
+            name: id,
+            value: line
+          };
+          lines.unshift(line);
+          alreadyCompiledIds[id] = true;
+          if (expr instanceof Apply) {
+            _ref = expr.allParams();
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              param = _ref[_i];
+              _results.push(recurse(param));
+            }
+            return _results;
+          }
+        };
+      })(this);
+      recurse(expr);
+      return lines;
     };
 
     return Compiler;
@@ -182,6 +228,38 @@
       floatString += ".";
     }
     return floatString;
+  };
+
+}).call(this);
+}, "execute/evaluate": function(exports, require, module) {(function() {
+  var abs, ceil, cos, evaluate, floor, fract, max, min, pow, sin, sqrt;
+
+  module.exports = evaluate = function(jsString) {
+    return eval(jsString);
+  };
+
+  sin = Math.sin;
+
+  cos = Math.cos;
+
+  abs = Math.abs;
+
+  sqrt = Math.sqrt;
+
+  pow = function(a, b) {
+    return Math.pow(Math.abs(a), b);
+  };
+
+  floor = Math.floor;
+
+  ceil = Math.ceil;
+
+  min = Math.min;
+
+  max = Math.max;
+
+  fract = function(a) {
+    return a - Math.floor(a);
   };
 
 }).call(this);
@@ -265,6 +343,14 @@
     }
     return _results;
   });
+
+  (function() {
+    var Compiler, apply, compiler;
+    apply = editor.rootBlock.root;
+    Compiler = require("./execute/Compiler");
+    compiler = new Compiler();
+    return console.log(compiler.compile2(apply));
+  })();
 
 }).call(this);
 }, "model/Apply": function(exports, require, module) {(function() {
@@ -522,11 +608,10 @@
   ObjectManager = require("../persistence/ObjectManager");
 
   module.exports = Fn = (function() {
-    function Fn(title, defaultParams, compileString, compileGlslString) {
+    function Fn(title, defaultParams, compileString) {
       this.title = title;
       this.defaultParams = defaultParams;
       this.compileString = compileString;
-      this.compileGlslString = compileGlslString;
       ObjectManager.registerBuiltInObject("fn-" + this.title, this);
     }
 
@@ -560,72 +645,40 @@
 
   constantFn = new Fn("", [null, 0], function(a, b) {
     return "" + b;
-  }, function(a, b) {
-    return "" + b;
   });
 
   identityFn = new Fn("identity", [0], function(a) {
-    return "" + a;
-  }, function(a) {
     return "" + a;
   });
 
   builtInFns = [
     constantFn, new Fn("+", [0, 0], function(a, b) {
       return "(" + a + " + " + b + ")";
-    }, function(a, b) {
-      return "(" + a + " + " + b + ")";
     }), new Fn("-", [0, 0], function(a, b) {
-      return "(" + a + " - " + b + ")";
-    }, function(a, b) {
       return "(" + a + " - " + b + ")";
     }), new Fn("*", [1, 1], function(a, b) {
       return "(" + a + " * " + b + ")";
-    }, function(a, b) {
-      return "(" + a + " * " + b + ")";
     }), new Fn("/", [1, 1], function(a, b) {
       return "(" + a + " / " + b + ")";
-    }, function(a, b) {
-      return "(" + a + " / " + b + ")";
     }), new Fn("abs", [0], function(a) {
-      return "Math.abs(" + a + ")";
-    }, function(a) {
       return "abs(" + a + ")";
     }), new Fn("sqrt", [0], function(a) {
-      return "Math.sqrt(" + a + ")";
-    }, function(a) {
       return "sqrt(" + a + ")";
     }), new Fn("pow", [1, 1], function(a, b) {
-      return "Math.pow(Math.abs(" + a + "), " + b + ")";
-    }, function(a, b) {
       return "pow(" + a + ", " + b + ")";
     }), new Fn("sin", [0], function(a) {
-      return "Math.sin(" + a + ")";
-    }, function(a) {
       return "sin(" + a + ")";
     }), new Fn("cos", [0], function(a) {
-      return "Math.cos(" + a + ")";
-    }, function(a) {
       return "cos(" + a + ")";
     }), new Fn("fract", [0], function(a) {
-      return "(" + a + " - Math.floor(" + a + "))";
-    }, function(a) {
       return "fract(" + a + ")";
     }), new Fn("floor", [0], function(a) {
-      return "Math.floor(" + a + ")";
-    }, function(a) {
       return "floor(" + a + ")";
     }), new Fn("ceil", [0], function(a) {
-      return "Math.ceil(" + a + ")";
-    }, function(a) {
       return "ceil(" + a + ")";
     }), new Fn("min", [0, 0], function(a, b) {
-      return "Math.min(" + a + ", " + b + ")";
-    }, function(a, b) {
       return "min(" + a + ", " + b + ")";
     }), new Fn("max", [0, 0], function(a, b) {
-      return "Math.max(" + a + ", " + b + ")";
-    }, function(a, b) {
       return "max(" + a + ", " + b + ")";
     })
   ];
@@ -675,7 +728,7 @@
     _Class.prototype.assignId = function(object) {
       var id;
       this.idCounter_++;
-      id = "id-" + this.idCounter_ + Date.now() + Math.floor(1e9 * Math.random());
+      id = "id" + this.idCounter_ + Date.now() + Math.floor(1e9 * Math.random());
       return object.__id = id;
     };
 
@@ -1432,7 +1485,7 @@
             } else {
               styleOpts = config.styles.apply;
             }
-            graphViews.push(GraphView({
+            graphViews.push(R.GraphView({
               apply: param,
               key: "param" + paramIndex,
               styleOpts: styleOpts
@@ -2153,7 +2206,7 @@
 
 }).call(this);
 }, "view/rendering/GraphView": function(exports, require, module) {(function() {
-  var Compiler, Graph, Param, editor;
+  var Compiler, Graph, Param, editor, evaluate;
 
   Graph = require("./Graph");
 
@@ -2162,6 +2215,8 @@
   editor = require("../../editor");
 
   Compiler = require("../../execute/Compiler");
+
+  evaluate = require("../../execute/evaluate");
 
   R.create("GraphView", {
     getDefaultProps: function() {
@@ -2185,7 +2240,7 @@
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
       graph.clear();
       s = (_ref1 = this.compileString_) != null ? _ref1 : this.compile();
-      graphFn = eval("(function (x) { return " + s + "; })");
+      graphFn = evaluate("(function (x) { return " + s + "; })");
       if (apply instanceof Param && apply !== editor.xParam) {
         if (apply.axis === "x") {
           return graph.drawVerticalLine(graphFn(0), styleOpts);

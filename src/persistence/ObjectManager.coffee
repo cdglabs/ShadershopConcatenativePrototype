@@ -6,7 +6,7 @@ module.exports = ObjectManager = new class
 
   assignId: (object) ->
     @idCounter_++
-    id = "id-" + @idCounter_ + Date.now() + Math.floor(1e9 * Math.random())
+    id = "id" + @idCounter_ + Date.now() + Math.floor(1e9 * Math.random())
     object.__id = id
 
 
