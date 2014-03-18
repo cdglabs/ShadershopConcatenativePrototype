@@ -41,7 +41,7 @@ R.create "ShaderGraphView",
       uniform vec2 resolution;
 
       float compute(float x, float y) {
-        return #{s};
+        #{s}
       }
 
       float contourMap(vec2 pos) {

@@ -1,8 +1,3 @@
-Build an evaluate thing
-"line by line" compiling - don't recompute apply's
-
-
-
 
 
 Code cleanup

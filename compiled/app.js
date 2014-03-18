@@ -126,11 +126,13 @@
 
 }).call(this);
 }, "execute/Compiler": function(exports, require, module) {(function() {
-  var Apply, Compiler, Param, toFloatString;
+  var Apply, Compiler, Param, evaluate;
 
   Apply = require("../model/Apply");
 
   Param = require("../model/Param");
+
+  evaluate = require("./evaluate");
 
   module.exports = Compiler = (function() {
     function Compiler() {
@@ -144,91 +146,157 @@
       return this.substitutions[param.__id] = value;
     };
 
-    Compiler.prototype.compile = function(apply, lang) {
-      var fn, param, paramCompileStrings, params, _ref;
-      if (lang == null) {
-        lang = "js";
-      }
-      if (apply instanceof Apply) {
-        fn = apply.fn;
-        params = apply.allParams();
-        paramCompileStrings = params.map((function(_this) {
-          return function(param) {
-            if (param == null) {
-              return null;
-            }
-            return _this.compile(param, lang);
-          };
-        })(this));
-        return fn.compileString.apply(fn, paramCompileStrings);
-      } else if (apply instanceof Param) {
-        param = apply;
-        return (_ref = this.substitutions[param.__id]) != null ? _ref : toFloatString(param.value);
+    Compiler.prototype.getParamValue = function(param) {
+      var _ref;
+      return (_ref = this.substitutions[param.__id]) != null ? _ref : param.value;
+    };
+
+    Compiler.prototype.ensureString = function(value) {
+      var floatString;
+      if (_.isNumber(value)) {
+        floatString = "" + value;
+        if (floatString.indexOf(".") === -1) {
+          floatString += ".";
+        }
+        return floatString;
+      } else if (_.isString(value)) {
+        return value;
       }
     };
 
-    Compiler.prototype.compileLine = function(expr) {
-      var fn, paramIds, params, _ref;
-      if (expr instanceof Apply) {
+    Compiler.prototype.getId = function(expr) {
+      return expr != null ? expr.__id : void 0;
+    };
+
+    Compiler.prototype.getDependencies = function(expr) {
+      var defaultParam, dependencies, fn, i, params, _i, _len, _ref;
+      if (expr instanceof Param) {
+        return [];
+      } else if (expr instanceof Apply) {
         fn = expr.fn;
         params = expr.allParams();
-        paramIds = params.map(function(param) {
-          return param != null ? param.__id : void 0;
-        });
-        return fn.compileString.apply(fn, paramIds);
-      } else if (expr instanceof Param) {
-        return (_ref = this.substitutions[expr.__id]) != null ? _ref : expr.value;
+        dependencies = [];
+        _ref = fn.defaultParams;
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          defaultParam = _ref[i];
+          if (defaultParam != null) {
+            dependencies.push(params[i]);
+          }
+        }
+        return dependencies;
       }
     };
 
-    Compiler.prototype.compile2 = function(expr) {
-      var alreadyCompiledIds, lines, recurse;
-      lines = [];
-      alreadyCompiledIds = {};
+    Compiler.prototype.computeOrdering = function(expr) {
+      var alreadyIncludedIds, ordering, recurse;
+      ordering = [];
+      alreadyIncludedIds = {};
       recurse = (function(_this) {
         return function(expr) {
-          var id, line, param, _i, _len, _ref, _results;
-          if (expr == null) {
+          var dependency, id, _i, _len, _ref;
+          _ref = _this.getDependencies(expr);
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            dependency = _ref[_i];
+            recurse(dependency);
+          }
+          id = _this.getId(expr);
+          if (alreadyIncludedIds[id]) {
             return;
           }
-          id = expr.__id;
-          if (alreadyCompiledIds[id]) {
-            return;
-          }
-          line = _this.compileLine(expr);
-          line = {
-            name: id,
-            value: line
-          };
-          lines.unshift(line);
-          alreadyCompiledIds[id] = true;
-          if (expr instanceof Apply) {
-            _ref = expr.allParams();
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              param = _ref[_i];
-              _results.push(recurse(param));
-            }
-            return _results;
-          }
+          ordering.push(expr);
+          return alreadyIncludedIds[id] = true;
         };
       })(this);
       recurse(expr);
+      return ordering;
+    };
+
+    Compiler.prototype.computeConstants = function(ordering) {
+      var allConstants, compiled, constants, dependencies, expr, fn, id, paramValues, params, value, _i, _len;
+      constants = {};
+      for (_i = 0, _len = ordering.length; _i < _len; _i++) {
+        expr = ordering[_i];
+        id = this.getId(expr);
+        if (expr instanceof Param) {
+          value = this.getParamValue(expr);
+          if (_.isNumber(value)) {
+            constants[id] = value;
+          }
+        } else {
+          dependencies = this.getDependencies(expr);
+          allConstants = _.all(dependencies, function(dependency) {
+            return constants[dependency.__id] != null;
+          });
+          if (allConstants) {
+            fn = expr.fn;
+            params = expr.allParams();
+            paramValues = params.map(function(param) {
+              return constants[param != null ? param.__id : void 0];
+            });
+            compiled = fn.compileString.apply(fn, paramValues);
+            value = evaluate(compiled);
+            constants[id] = value;
+          }
+        }
+      }
+      return constants;
+    };
+
+    Compiler.prototype.generateLines = function(ordering, constants) {
+      var compiled, expr, fn, id, lines, paramIds, params, _i, _len;
+      lines = [];
+      for (_i = 0, _len = ordering.length; _i < _len; _i++) {
+        expr = ordering[_i];
+        id = this.getId(expr);
+        if (constants[id] != null) {
+          compiled = constants[id];
+        } else if (expr instanceof Param) {
+          compiled = this.getParamValue(expr);
+        } else if (expr instanceof Apply) {
+          fn = expr.fn;
+          params = expr.allParams();
+          paramIds = params.map((function(_this) {
+            return function(param) {
+              return _this.getId(param);
+            };
+          })(this));
+          compiled = fn.compileString.apply(fn, paramIds);
+        }
+        compiled = this.ensureString(compiled);
+        lines.push({
+          id: id,
+          compiled: compiled
+        });
+      }
       return lines;
+    };
+
+    Compiler.prototype.convertLineToLang = function(line, lang) {
+      if (lang === "js") {
+        return "var " + line.id + " = " + line.compiled + ";\n";
+      } else if (lang === "glsl") {
+        return "float " + line.id + " = " + line.compiled + ";\n";
+      }
+    };
+
+    Compiler.prototype.compile = function(expr, lang) {
+      var constants, lines, ordering, string, strings;
+      ordering = this.computeOrdering(expr);
+      constants = this.computeConstants(ordering);
+      lines = this.generateLines(ordering, constants);
+      strings = lines.map((function(_this) {
+        return function(line) {
+          return _this.convertLineToLang(line, lang);
+        };
+      })(this));
+      strings.push("return " + (this.getId(expr)) + ";\n");
+      string = strings.join("");
+      return string;
     };
 
     return Compiler;
 
   })();
-
-  toFloatString = function(v) {
-    var floatString;
-    floatString = "" + v;
-    if (floatString.indexOf(".") === -1) {
-      floatString += ".";
-    }
-    return floatString;
-  };
 
 }).call(this);
 }, "execute/evaluate": function(exports, require, module) {(function() {
@@ -349,7 +417,8 @@
     apply = editor.rootBlock.root;
     Compiler = require("./execute/Compiler");
     compiler = new Compiler();
-    return console.log(compiler.compile2(apply));
+    compiler.substitute(editor.xParam, "x");
+    return console.log(compiler.compile(apply, "glsl"));
   })();
 
 }).call(this);
@@ -2240,7 +2309,7 @@
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
       graph.clear();
       s = (_ref1 = this.compileString_) != null ? _ref1 : this.compile();
-      graphFn = evaluate("(function (x) { return " + s + "; })");
+      graphFn = evaluate("(function (x) { " + s + " })");
       if (apply instanceof Param && apply !== editor.xParam) {
         if (apply.axis === "x") {
           return graph.drawVerticalLine(graphFn(0), styleOpts);
@@ -2455,7 +2524,7 @@ to set uniforms,
       vertexSrc = "precision mediump float;\n\nattribute vec3 vertexPosition;\n\nvoid main() {\n  gl_Position = vec4(vertexPosition, 1.0);\n}";
       colorMap = "float outputValue = compute(x, y);\ngl_FragColor = vec4(vec3(outputValue), 1);";
       contourMap = "float outputValue = contourMap(vec2(x, y));\ngl_FragColor = vec4(vec3(0.), outputValue);";
-      fragmentSrc = "precision mediump float;\n\nuniform vec2 resolution;\n\nfloat compute(float x, float y) {\n  return " + s + ";\n}\n\nfloat contourMap(vec2 pos) {\n  float samples = 5.;\n  float numSamples = samples * samples;\n  vec2 step = ((40. / resolution)) / samples;\n\n  float count = 0.;\n  float min = 0.;\n  float processed = 0.;\n\n  for (float i = 0.0; i < 5.; i++) {\n    for (float  j = 0.0; j < 5.; j++) {\n      float f = compute(pos.x + i*step.x, pos.y + j*step.y);\n      float ff = floor(f);\n      if (processed == 0.) {\n        min = ff;\n      } else {\n        if (ff > min) {\n          count++;\n        } else if (ff < min) {\n          min = ff;\n          count = processed;\n        }\n      }\n      processed++;\n    }\n  }\n\n  float ns2 = numSamples / 2.;\n  return (ns2 - abs(count - ns2)) / ns2;\n}\n\nvoid main() {\n  vec2 p = gl_FragCoord.xy / resolution;\n  float x = mix(-10., 10., p.x);\n  float y = mix(-10., 10., p.y);\n\n  " + (editor.contourView ? contourMap : colorMap) + "\n}";
+      fragmentSrc = "precision mediump float;\n\nuniform vec2 resolution;\n\nfloat compute(float x, float y) {\n  " + s + "\n}\n\nfloat contourMap(vec2 pos) {\n  float samples = 5.;\n  float numSamples = samples * samples;\n  vec2 step = ((40. / resolution)) / samples;\n\n  float count = 0.;\n  float min = 0.;\n  float processed = 0.;\n\n  for (float i = 0.0; i < 5.; i++) {\n    for (float  j = 0.0; j < 5.; j++) {\n      float f = compute(pos.x + i*step.x, pos.y + j*step.y);\n      float ff = floor(f);\n      if (processed == 0.) {\n        min = ff;\n      } else {\n        if (ff > min) {\n          count++;\n        } else if (ff < min) {\n          min = ff;\n          count = processed;\n        }\n      }\n      processed++;\n    }\n  }\n\n  float ns2 = numSamples / 2.;\n  return (ns2 - abs(count - ns2)) / ns2;\n}\n\nvoid main() {\n  vec2 p = gl_FragCoord.xy / resolution;\n  float x = mix(-10., 10., p.x);\n  float y = mix(-10., 10., p.y);\n\n  " + (editor.contourView ? contourMap : colorMap) + "\n}";
       shader.setVertexSrc(vertexSrc);
       shader.setFragmentSrc(fragmentSrc);
       shader.setUniforms({

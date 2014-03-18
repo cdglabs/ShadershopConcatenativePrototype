@@ -60,6 +60,7 @@ do ->
   apply = editor.rootBlock.root
   Compiler = require("./execute/Compiler")
   compiler = new Compiler()
-  console.log compiler.compile2(apply)
+  compiler.substitute(editor.xParam, "x")
+  console.log compiler.compile(apply, "glsl")
 
 
