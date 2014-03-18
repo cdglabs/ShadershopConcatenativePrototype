@@ -35,12 +35,7 @@ module.exports = class Compiler
     if expr instanceof Param
       return []
     else if expr instanceof Apply
-      fn = expr.fn
-      params = expr.allParams()
-      dependencies = []
-      for defaultParam, i in fn.defaultParams
-        dependencies.push(params[i]) if defaultParam?
-      return dependencies
+      return expr.dependentParams()
 
   computeOrdering: (expr) ->
     ordering = []

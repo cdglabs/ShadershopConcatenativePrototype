@@ -1,8 +1,6 @@
 Compiler needs to take a context: series of Apply's
   A "Step" is a series of Apply's
 
-Make xParam, etc. use handleTransclusionDrop
-
 Start work on Block.createFn(applies)
   Figure out referenced Params
   Remove applies
@@ -12,6 +10,8 @@ Start work on Block.createFn(applies)
 Differentiate between a BuiltInFn and a CreatedFn
 
 
+
+Make xParam, etc. use handleTransclusionDrop
 
 
 

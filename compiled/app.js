@@ -169,21 +169,10 @@
     };
 
     Compiler.prototype.getDependencies = function(expr) {
-      var defaultParam, dependencies, fn, i, params, _i, _len, _ref;
       if (expr instanceof Param) {
         return [];
       } else if (expr instanceof Apply) {
-        fn = expr.fn;
-        params = expr.allParams();
-        dependencies = [];
-        _ref = fn.defaultParams;
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          defaultParam = _ref[i];
-          if (defaultParam != null) {
-            dependencies.push(params[i]);
-          }
-        }
-        return dependencies;
+        return expr.dependentParams();
       }
     };
 
@@ -459,6 +448,20 @@
 
     Apply.prototype.allParams = function() {
       return this.params;
+    };
+
+    Apply.prototype.dependentParams = function() {
+      var defaultParam, dependencies, i, params, _i, _len, _ref;
+      params = this.allParams();
+      dependencies = [];
+      _ref = this.fn.defaultParams;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        defaultParam = _ref[i];
+        if (defaultParam != null) {
+          dependencies.push(params[i]);
+        }
+      }
+      return dependencies;
     };
 
     Apply.prototype.setParam = function(index, param) {

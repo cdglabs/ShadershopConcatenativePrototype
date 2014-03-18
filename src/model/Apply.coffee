@@ -25,6 +25,13 @@ module.exports = class Apply
   allParams: ->
     @params
 
+  dependentParams: ->
+    params = @allParams()
+    dependencies = []
+    for defaultParam, i in @fn.defaultParams
+      dependencies.push(params[i]) if defaultParam?
+    return dependencies
+
   setParam: (index, param) ->
     @params[index] = param
     @setPossibleAppliesHeads()
