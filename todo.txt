@@ -1,22 +1,6 @@
 Build an evaluate thing
-Get all the compile stuff into one place
 "line by line" compiling - don't recompute apply's
 
-
-Apply/Param -> Intermediate Form -> JS/GLSL
-
-
-Switch to a named parameter system
-  Fns have title, defaults, order, jsString, glslString:
-    title: "min"
-    defaults: {p1: 0, p2: 0}
-    order: [p1, p2]
-    jsString: "Math.min({{p1}}, {{p2}})"
-    glslString: "min({{p1}}, {{p2}})"
-
-  Apply has
-    fn
-    params: {p1: ---, p2: ---}
 
 
 
@@ -72,6 +56,19 @@ Pan and zoom the main graph
   generalize canvas graph methods
   input x, y bounds
   output bounds
+
+
+Switch to a named parameter system
+  Fns have title, defaults, order, jsString, glslString:
+    title: "min"
+    defaults: {p1: 0, p2: 0}
+    order: [p1, p2]
+    jsString: "Math.min({{p1}}, {{p2}})"
+    glslString: "min({{p1}}, {{p2}})"
+
+  Apply has
+    fn
+    params: {p1: ---, p2: ---}
 
 
 
