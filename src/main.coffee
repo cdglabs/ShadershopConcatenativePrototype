@@ -1,7 +1,7 @@
 require("./util/domAddons")
 editor = require("./editor")
 Persistence = require("./persistence/Persistence")
-EditorView = require("./view/EditorView")
+R = require("view/R")
 
 
 window.reset = ->
@@ -21,7 +21,7 @@ refresh = ->
 
 refreshView = ->
   editorEl = document.querySelector("#editor")
-  React.renderComponent(EditorView(), editorEl)
+  React.renderComponent(R.EditorView(), editorEl)
 
 
 handleWindowMouseMove = (e) ->

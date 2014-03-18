@@ -1,11 +1,6 @@
-R = React.DOM
-cx = React.addons.classSet
-ApplyRowView = require("./ApplyRowView")
-
-
-module.exports = BlockView = React.createClass
+R.create "BlockView",
   render: ->
     {block} = @props
     R.div {className: "block"},
       block.applies().map (apply) ->
-        ApplyRowView {apply, block, key: apply.__id}
+        R.ApplyRowView {apply, block, key: apply.__id}

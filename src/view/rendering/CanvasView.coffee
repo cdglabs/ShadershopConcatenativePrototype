@@ -1,8 +1,4 @@
-R = React.DOM
-cx = React.addons.classSet
-
-
-module.exports = CanvasView = React.createClass
+R.create "CanvasView",
   draw: ->
     canvas = @getDOMNode()
     @props.drawFn(canvas)

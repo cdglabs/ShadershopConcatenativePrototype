@@ -1,6 +1,3 @@
-R = React.DOM
-cx = React.addons.classSet
-CanvasView = require("./CanvasView")
 Graph = require("./Graph")
 Param = require("../../model/Param")
 
@@ -8,7 +5,7 @@ editor = require("../../editor")
 Compiler = require("../../execute/Compiler")
 
 
-module.exports = GraphView = React.createClass
+R.create "GraphView",
   getDefaultProps: ->
     {spreadOffset: 0}
 
@@ -39,7 +36,7 @@ module.exports = GraphView = React.createClass
       graph.drawGraph(graphFn, styleOpts)
 
   render: ->
-    CanvasView {drawFn: @drawFn, ref: "canvas"}
+    R.CanvasView {drawFn: @drawFn, ref: "canvas"}
 
   componentDidUpdate: ->
     {apply, spreadOffset, styleOpts} = @props

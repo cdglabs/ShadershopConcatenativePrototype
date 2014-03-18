@@ -1,4 +1,4 @@
-module.exports = DataForMixin = {
+R.DataForMixin = {
   componentDidMount: -> @updateDataForAnnotation()
   componentDidUpdate: -> @updateDataForAnnotation()
   updateDataForAnnotation: ->

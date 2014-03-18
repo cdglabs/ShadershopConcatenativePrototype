@@ -1,14 +1,8 @@
-R = React.DOM
-cx = React.addons.classSet
 Param = require("../model/Param")
 onceDragConsummated = require("../util/onceDragConsummated")
-DataForMixin = require("./mixins/DataForMixin")
-StartTranscludeMixin = require("./mixins/StartTranscludeMixin")
-ParamView = require("./ParamView")
-GraphView = require("./rendering/GraphView")
 
 
-ApplyView = React.createClass
+R.create "ApplyView",
   handleMouseDown: (e) ->
     {apply, block, isDraggingCopy} = @props
 
@@ -49,7 +43,7 @@ ApplyView = React.createClass
           placeholderHeight: myHeight
           render: =>
             R.div {style: {"min-width": myWidth, height: myHeight, overflow: "hidden", "background-color": "#fff"}},
-              ApplyView {apply, isDraggingCopy: true}
+              R.ApplyView {apply, isDraggingCopy: true}
           onMove: (e) =>
             insertAfterEl = null
 
@@ -73,17 +67,17 @@ ApplyView = React.createClass
     if !isDraggingCopy and apply == editor.dragging?.apply
       return R.div {className: "applyPlaceholder", style: {height: editor.dragging.placeholderHeight}}
 
-    classNames = cx {
+    classNames = R.cx {
       apply: true
       hovered: apply == editor.hoveredApply
       isStart: apply.isStart?()
       isSelected: editor.isApplySelected(block, apply)
     }
     R.div {className: classNames, style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown},
-      ApplyInternalsView {apply}
+      R.ApplyInternalsView {apply}
 
 
-ApplyInternalsView = React.createClass
+R.create "ApplyInternalsView",
   render: ->
     {apply} = @props
     R.div {className: "applyInternals"},
@@ -91,12 +85,12 @@ ApplyInternalsView = React.createClass
         apply.fn.title
       apply.allParams().map (param, paramIndex) ->
         return null if paramIndex == 0
-        ParamSlotView {param, apply, paramIndex, key: paramIndex}
-      ApplyThumbnailView {apply}
+        R.ParamSlotView {param, apply, paramIndex, key: paramIndex}
+      R.ApplyThumbnailView {apply}
 
 
-ParamSlotView = React.createClass
-  mixins: [DataForMixin]
+R.create "ParamSlotView",
+  mixins: [R.DataForMixin]
 
   handleTransclusionDrop: (p) ->
     {param, apply, paramIndex} = @props
@@ -107,17 +101,17 @@ ParamSlotView = React.createClass
     {param, apply, paramIndex} = @props
     R.div {className: "paramSlot"},
       if param instanceof Param
-        ParamView {param: param}
+        R.ParamView {param: param}
       else
-        ApplyThumbnailView {apply: param}
+        R.ApplyThumbnailView {apply: param}
 
 
-ApplyThumbnailView = React.createClass
-  mixins: [StartTranscludeMixin]
+R.create "ApplyThumbnailView",
+  mixins: [R.StartTranscludeMixin]
   handleMouseDown: (e) ->
     {apply} = @props
     render = =>
-      ApplyThumbnailView {apply}
+      R.ApplyThumbnailView {apply}
     @startTransclude(e, apply, render)
 
   handleMouseEnter: (e) ->
@@ -138,13 +132,13 @@ ApplyThumbnailView = React.createClass
           styleOpts = config.styles.param
         else
           styleOpts = config.styles.apply
-        graphViews.push(GraphView {apply: param, styleOpts, key: i})
+        graphViews.push(R.GraphView {apply: param, styleOpts, key: i})
 
     if apply == editor.hoveredApply
       styleOpts = config.styles.hoveredApply
     else
       styleOpts = config.styles.resultApply
-    graphViews.push(GraphView {apply, styleOpts, key: "result"})
+    graphViews.push(R.GraphView {apply, styleOpts, key: "result"})
 
     R.div {className: "applyThumbnail", style: {cursor: "-webkit-grab"}, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
       # if editor.shaderView
@@ -154,7 +148,7 @@ ApplyThumbnailView = React.createClass
       graphViews
 
 
-PossibleApplyView = React.createClass
+R.create "PossibleApplyView",
   handleMouseEnter: ->
     {apply, block, possibleApply} = @props
     # TODO controller
@@ -172,25 +166,25 @@ PossibleApplyView = React.createClass
     editor.hoveredParam = null
   render: ->
     {apply, block, possibleApply} = @props
-    classNames = cx {
+    classNames = R.cx {
       possibleApply: true
       stagedPossibleApply: apply.isPossibleApplyChosen(possibleApply)
     }
     R.div {className: classNames, onClick: @handleClick, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
-      ApplyInternalsView {apply: possibleApply}
+      R.ApplyInternalsView {apply: possibleApply}
 
 
-ProvisionalApplyView = React.createClass
+R.create "ProvisionalApplyView",
   render: ->
     {apply, block} = @props
     R.div {className: "provisionalApply"},
       apply.possibleApplies.map (possibleApply) ->
-        PossibleApplyView {apply, block, possibleApply, key: possibleApply.__id}
+        R.PossibleApplyView {apply, block, possibleApply, key: possibleApply.__id}
 
 
 
-module.exports = ApplyRowView = React.createClass
-  mixins: [DataForMixin]
+R.create "ApplyRowView",
+  mixins: [R.DataForMixin]
 
   toggleProvisionalApply: ->
     # TODO: This eventually wants to just be add, not toggle. As if you
@@ -207,10 +201,10 @@ module.exports = ApplyRowView = React.createClass
     {apply, block} = @props
     if apply.hasPossibleApplies()
       R.div {className: "applyRow"},
-        ProvisionalApplyView {apply, block}
+        R.ProvisionalApplyView {apply, block}
     else
       R.div {className: "applyRow"},
-        ApplyView {apply, block}
+        R.ApplyView {apply, block}
         R.button {className: "addApplyButton", onClick: @toggleProvisionalApply}, "+"
 
 

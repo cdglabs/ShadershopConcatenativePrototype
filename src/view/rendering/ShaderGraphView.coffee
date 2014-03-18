@@ -1,13 +1,10 @@
-R = React.DOM
-cx = React.addons.classSet
-CanvasView = require("./CanvasView")
 Shader = require("./Shader")
 
 editor = require("../../editor")
 Compiler = require("../../execute/Compiler")
 
 
-module.exports = ShaderGraphView = React.createClass
+R.create "ShaderGraphView",
   drawFn: (canvas) ->
     {apply} = @props
 
@@ -97,7 +94,7 @@ module.exports = ShaderGraphView = React.createClass
     shader.draw()
 
   render: ->
-    CanvasView {drawFn: @drawFn, ref: "canvas"}
+    R.CanvasView {drawFn: @drawFn, ref: "canvas"}
 
   componentDidUpdate: ->
     @refs.canvas.draw()

@@ -1,7 +1,7 @@
 onceDragConsummated = require("../../util/onceDragConsummated")
 
 
-module.exports = StartTranscludeMixin = {
+R.StartTranscludeMixin = {
   startTransclude: (e, apply, render) ->
     el = @getDOMNode()
     rect = el.getBoundingClientRect()

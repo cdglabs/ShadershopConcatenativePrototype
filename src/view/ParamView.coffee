@@ -1,7 +1,4 @@
-R = React.DOM
-cx = React.addons.classSet
 onceDragConsummated = require("../util/onceDragConsummated")
-StartTranscludeMixin = require("./mixins/StartTranscludeMixin")
 
 
 truncate = (value) ->
@@ -13,7 +10,7 @@ truncate = (value) ->
 
 
 
-ContentEditableMixin = {
+R.ContentEditableMixin = {
   isFocused: ->
     return false unless @isMounted()
     @getDOMNode() == document.activeElement
@@ -39,8 +36,8 @@ ContentEditableMixin = {
 
 
 
-ParamValueView = React.createClass
-  mixins: [ContentEditableMixin]
+R.create "ParamValueView",
+  mixins: [R.ContentEditableMixin]
 
   shouldComponentUpdate: ->
     return !@isFocused()
@@ -106,8 +103,8 @@ ParamValueView = React.createClass
 
 
 
-ParamTitleView = React.createClass
-  mixins: [ContentEditableMixin, StartTranscludeMixin]
+R.create "ParamTitleView",
+  mixins: [R.ContentEditableMixin, R.StartTranscludeMixin]
 
   cursor: ->
     if @isFocused()
@@ -122,7 +119,7 @@ ParamTitleView = React.createClass
 
     {param} = @props
     render = =>
-      ParamView {param}
+      R.ParamView {param}
     @startTransclude(e, param, render)
     onceDragConsummated e, null, =>
       @focusAndSelect()
@@ -144,7 +141,7 @@ ParamTitleView = React.createClass
 
 
 
-module.exports = ParamView = React.createClass
+R.create "ParamView",
   handleMouseDown: (e) ->
     {param} = @props
     # TODO controller
@@ -170,10 +167,10 @@ module.exports = ParamView = React.createClass
     # TODO controller
     editor.hoveredParam = null
   render: ->
-    classNames = cx {
+    classNames = R.cx {
       param: true
       hovered: editor.hoveredParam == @props.param
     }
     R.div {className: classNames, onMouseDown: @handleMouseDown, onMouseEnter: @handleMouseEnter, onMouseLeave: @handleMouseLeave},
-      ParamTitleView {param: @props.param}
-      ParamValueView {param: @props.param}
+      R.ParamTitleView {param: @props.param}
+      R.ParamValueView {param: @props.param}

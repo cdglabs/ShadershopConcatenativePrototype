@@ -186,7 +186,7 @@
 
 }).call(this);
 }, "main": function(exports, require, module) {(function() {
-  var EditorView, Persistence, editor, eventName, handleWindowMouseMove, handleWindowMouseUp, refresh, refreshView, willRefreshNextFrame, _i, _len, _ref;
+  var Persistence, R, editor, eventName, handleWindowMouseMove, handleWindowMouseUp, refresh, refreshView, willRefreshNextFrame, _i, _len, _ref;
 
   require("./util/domAddons");
 
@@ -194,7 +194,7 @@
 
   Persistence = require("./persistence/Persistence");
 
-  EditorView = require("./view/EditorView");
+  R = require("view/R");
 
   window.reset = function() {
     Persistence.reset();
@@ -218,7 +218,7 @@
   refreshView = function() {
     var editorEl;
     editorEl = document.querySelector("#editor");
-    return React.renderComponent(EditorView(), editorEl);
+    return React.renderComponent(R.EditorView(), editorEl);
   };
 
   handleWindowMouseMove = function(e) {
@@ -950,25 +950,13 @@
 
 }).call(this);
 }, "view/ApplyRowView": function(exports, require, module) {(function() {
-  var ApplyInternalsView, ApplyRowView, ApplyThumbnailView, ApplyView, DataForMixin, GraphView, Param, ParamSlotView, ParamView, PossibleApplyView, ProvisionalApplyView, R, StartTranscludeMixin, cx, onceDragConsummated;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
+  var Param, onceDragConsummated;
 
   Param = require("../model/Param");
 
   onceDragConsummated = require("../util/onceDragConsummated");
 
-  DataForMixin = require("./mixins/DataForMixin");
-
-  StartTranscludeMixin = require("./mixins/StartTranscludeMixin");
-
-  ParamView = require("./ParamView");
-
-  GraphView = require("./rendering/GraphView");
-
-  ApplyView = React.createClass({
+  R.create("ApplyView", {
     handleMouseDown: function(e) {
       var apply, block, el, isDraggingCopy, myHeight, myWidth, offset, rect, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, isDraggingCopy = _ref.isDraggingCopy;
@@ -1017,7 +1005,7 @@
                     overflow: "hidden",
                     "background-color": "#fff"
                   }
-                }, ApplyView({
+                }, R.ApplyView({
                   apply: apply,
                   isDraggingCopy: true
                 }));
@@ -1059,7 +1047,7 @@
           }
         });
       }
-      classNames = cx({
+      classNames = R.cx({
         apply: true,
         hovered: apply === editor.hoveredApply,
         isStart: typeof apply.isStart === "function" ? apply.isStart() : void 0,
@@ -1071,13 +1059,13 @@
           cursor: "-webkit-grab"
         },
         onMouseDown: this.handleMouseDown
-      }, ApplyInternalsView({
+      }, R.ApplyInternalsView({
         apply: apply
       }));
     }
   });
 
-  ApplyInternalsView = React.createClass({
+  R.create("ApplyInternalsView", {
     render: function() {
       var apply;
       apply = this.props.apply;
@@ -1089,20 +1077,20 @@
         if (paramIndex === 0) {
           return null;
         }
-        return ParamSlotView({
+        return R.ParamSlotView({
           param: param,
           apply: apply,
           paramIndex: paramIndex,
           key: paramIndex
         });
-      }), ApplyThumbnailView({
+      }), R.ApplyThumbnailView({
         apply: apply
       }));
     }
   });
 
-  ParamSlotView = React.createClass({
-    mixins: [DataForMixin],
+  R.create("ParamSlotView", {
+    mixins: [R.DataForMixin],
     handleTransclusionDrop: function(p) {
       var apply, param, paramIndex, _ref;
       _ref = this.props, param = _ref.param, apply = _ref.apply, paramIndex = _ref.paramIndex;
@@ -1113,22 +1101,22 @@
       _ref = this.props, param = _ref.param, apply = _ref.apply, paramIndex = _ref.paramIndex;
       return R.div({
         className: "paramSlot"
-      }, param instanceof Param ? ParamView({
+      }, param instanceof Param ? R.ParamView({
         param: param
-      }) : ApplyThumbnailView({
+      }) : R.ApplyThumbnailView({
         apply: param
       }));
     }
   });
 
-  ApplyThumbnailView = React.createClass({
-    mixins: [StartTranscludeMixin],
+  R.create("ApplyThumbnailView", {
+    mixins: [R.StartTranscludeMixin],
     handleMouseDown: function(e) {
       var apply, render;
       apply = this.props.apply;
       render = (function(_this) {
         return function() {
-          return ApplyThumbnailView({
+          return R.ApplyThumbnailView({
             apply: apply
           });
         };
@@ -1154,7 +1142,7 @@
           } else {
             styleOpts = config.styles.apply;
           }
-          graphViews.push(GraphView({
+          graphViews.push(R.GraphView({
             apply: param,
             styleOpts: styleOpts,
             key: i
@@ -1166,7 +1154,7 @@
       } else {
         styleOpts = config.styles.resultApply;
       }
-      graphViews.push(GraphView({
+      graphViews.push(R.GraphView({
         apply: apply,
         styleOpts: styleOpts,
         key: "result"
@@ -1183,7 +1171,7 @@
     }
   });
 
-  PossibleApplyView = React.createClass({
+  R.create("PossibleApplyView", {
     handleMouseEnter: function() {
       var apply, block, possibleApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
@@ -1205,7 +1193,7 @@
     render: function() {
       var apply, block, classNames, possibleApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block, possibleApply = _ref.possibleApply;
-      classNames = cx({
+      classNames = R.cx({
         possibleApply: true,
         stagedPossibleApply: apply.isPossibleApplyChosen(possibleApply)
       });
@@ -1214,20 +1202,20 @@
         onClick: this.handleClick,
         onMouseEnter: this.handleMouseEnter,
         onMouseLeave: this.handleMouseLeave
-      }, ApplyInternalsView({
+      }, R.ApplyInternalsView({
         apply: possibleApply
       }));
     }
   });
 
-  ProvisionalApplyView = React.createClass({
+  R.create("ProvisionalApplyView", {
     render: function() {
       var apply, block, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block;
       return R.div({
         className: "provisionalApply"
       }, apply.possibleApplies.map(function(possibleApply) {
-        return PossibleApplyView({
+        return R.PossibleApplyView({
           apply: apply,
           block: block,
           possibleApply: possibleApply,
@@ -1237,8 +1225,8 @@
     }
   });
 
-  module.exports = ApplyRowView = React.createClass({
-    mixins: [DataForMixin],
+  R.create("ApplyRowView", {
+    mixins: [R.DataForMixin],
     toggleProvisionalApply: function() {
       var apply, block, nextApply, _ref;
       _ref = this.props, apply = _ref.apply, block = _ref.block;
@@ -1255,14 +1243,14 @@
       if (apply.hasPossibleApplies()) {
         return R.div({
           className: "applyRow"
-        }, ProvisionalApplyView({
+        }, R.ProvisionalApplyView({
           apply: apply,
           block: block
         }));
       } else {
         return R.div({
           className: "applyRow"
-        }, ApplyView({
+        }, R.ApplyView({
           apply: apply,
           block: block
         }), R.button({
@@ -1275,22 +1263,14 @@
 
 }).call(this);
 }, "view/BlockView": function(exports, require, module) {(function() {
-  var ApplyRowView, BlockView, R, cx;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
-
-  ApplyRowView = require("./ApplyRowView");
-
-  module.exports = BlockView = React.createClass({
+  R.create("BlockView", {
     render: function() {
       var block;
       block = this.props.block;
       return R.div({
         className: "block"
       }, block.applies().map(function(apply) {
-        return ApplyRowView({
+        return R.ApplyRowView({
           apply: apply,
           block: block,
           key: apply.__id
@@ -1301,13 +1281,7 @@
 
 }).call(this);
 }, "view/DraggingView": function(exports, require, module) {(function() {
-  var DraggingView, R, cx;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
-
-  module.exports = DraggingView = React.createClass({
+  R.create("DraggingView", {
     render: function() {
       var _ref;
       return R.div({}, ((_ref = editor.dragging) != null ? _ref.render : void 0) ? R.div({
@@ -1324,19 +1298,7 @@
 
 }).call(this);
 }, "view/EditorView": function(exports, require, module) {(function() {
-  var BlockView, DraggingView, EditorView, MainGraphView, OutputSwitchView, R, cx;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
-
-  BlockView = require("./BlockView");
-
-  MainGraphView = require("./MainGraphView");
-
-  DraggingView = require("./DraggingView");
-
-  OutputSwitchView = React.createClass({
+  R.create("OutputSwitchView", {
     handleChange: function(e) {
       editor.outputSwitch = e.target.selectedOptions[0].value;
       if (editor.outputSwitch === "Cartesian") {
@@ -1366,7 +1328,7 @@
     }
   });
 
-  module.exports = EditorView = React.createClass({
+  R.create("EditorView", {
     handleMouseDown: function(e) {
       var _ref;
       if (editor.dragging != null) {
@@ -1383,7 +1345,7 @@
     },
     render: function() {
       var classNames, _ref, _ref1;
-      classNames = cx({
+      classNames = R.cx({
         editor: true,
         dragging: editor.dragging != null
       });
@@ -1393,37 +1355,27 @@
           cursor: (_ref = (_ref1 = editor.dragging) != null ? _ref1.cursor : void 0) != null ? _ref : ""
         },
         onMouseDown: this.handleMouseDown
-      }, MainGraphView({}), R.div({
+      }, R.MainGraphView({}), R.div({
         className: "manager"
-      }, BlockView({
+      }, R.BlockView({
         block: editor.rootBlock
-      })), OutputSwitchView({}), R.div({
+      })), R.OutputSwitchView({}), R.div({
         className: "dragging"
-      }, DraggingView({})));
+      }, R.DraggingView({})));
     }
   });
 
 }).call(this);
 }, "view/MainGraphView": function(exports, require, module) {(function() {
-  var GraphView, GridView, MainCartesianGraphView, MainGraphView, MainShaderGraphView, Param, R, ShaderGraphView, config, cx, lerp;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
+  var Param, config, lerp;
 
   lerp = require("../util/lerp");
 
   Param = require("../model/Param");
 
-  GridView = require("./rendering/GridView");
-
-  GraphView = require("./rendering/GraphView");
-
-  ShaderGraphView = require("./rendering/ShaderGraphView");
-
   config = require("../config");
 
-  MainCartesianGraphView = React.createClass({
+  R.create("MainCartesianGraphView", {
     render: function() {
       var apply, graphViews, i, neg, param, paramIndex, resultApply, spreadDistance, spreadNum, spreadOffset, styleOpts, _i, _j, _k, _len, _len1, _ref, _ref1;
       graphViews = [];
@@ -1442,7 +1394,7 @@
             }
             styleOpts.globalAlpha = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin);
             spreadOffset = spreadDistance * i * neg;
-            graphViews.push(GraphView({
+            graphViews.push(R.GraphView({
               apply: resultApply,
               key: "spread" + (i * neg),
               styleOpts: styleOpts,
@@ -1451,7 +1403,7 @@
           }
         }
       }
-      graphViews.push(GraphView({
+      graphViews.push(R.GraphView({
         apply: resultApply,
         key: "result",
         styleOpts: config.styles.resultApply
@@ -1473,55 +1425,49 @@
             }));
           }
         }
-        graphViews.push(GraphView({
+        graphViews.push(R.GraphView({
           apply: apply,
           key: "hoveredApply",
           styleOpts: config.styles.hoveredApply
         }));
       }
       if (param = editor.hoveredParam) {
-        graphViews.push(GraphView({
+        graphViews.push(R.GraphView({
           apply: param,
           key: "hoveredParam",
           styleOpts: config.styles.hoveredParam
         }));
       }
-      return R.span({}, GridView({}), graphViews);
+      return R.span({}, R.GridView({}), graphViews);
     }
   });
 
-  MainShaderGraphView = React.createClass({
+  R.create("MainShaderGraphView", {
     render: function() {
       var _ref;
       return R.span({
         style: {
           opacity: config.shaderOpacity
         }
-      }, ShaderGraphView({
+      }, R.ShaderGraphView({
         apply: (_ref = editor.hoveredApply) != null ? _ref : editor.rootBlock.root
-      }), GridView({}));
+      }), R.GridView({}));
     }
   });
 
-  module.exports = MainGraphView = React.createClass({
+  R.create("MainGraphView", {
     render: function() {
       return R.div({
         className: "main"
-      }, editor.shaderView ? MainShaderGraphView({}) : MainCartesianGraphView({}));
+      }, editor.shaderView ? R.MainShaderGraphView({}) : R.MainCartesianGraphView({}));
     }
   });
 
 }).call(this);
 }, "view/ParamView": function(exports, require, module) {(function() {
-  var ContentEditableMixin, ParamTitleView, ParamValueView, ParamView, R, StartTranscludeMixin, cx, onceDragConsummated, truncate;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
+  var onceDragConsummated, truncate;
 
   onceDragConsummated = require("../util/onceDragConsummated");
-
-  StartTranscludeMixin = require("./mixins/StartTranscludeMixin");
 
   truncate = function(value) {
     var s;
@@ -1535,7 +1481,7 @@
     return s;
   };
 
-  ContentEditableMixin = {
+  R.ContentEditableMixin = {
     isFocused: function() {
       if (!this.isMounted()) {
         return false;
@@ -1561,8 +1507,8 @@
     }
   };
 
-  ParamValueView = React.createClass({
-    mixins: [ContentEditableMixin],
+  R.create("ParamValueView", {
+    mixins: [R.ContentEditableMixin],
     shouldComponentUpdate: function() {
       return !this.isFocused();
     },
@@ -1641,8 +1587,8 @@
     }
   });
 
-  ParamTitleView = React.createClass({
-    mixins: [ContentEditableMixin, StartTranscludeMixin],
+  R.create("ParamTitleView", {
+    mixins: [R.ContentEditableMixin, R.StartTranscludeMixin],
     cursor: function() {
       if (this.isFocused()) {
         return "text";
@@ -1661,7 +1607,7 @@
       param = this.props.param;
       render = (function(_this) {
         return function() {
-          return ParamView({
+          return R.ParamView({
             param: param
           });
         };
@@ -1692,7 +1638,7 @@
     }
   });
 
-  module.exports = ParamView = React.createClass({
+  R.create("ParamView", {
     handleMouseDown: function(e) {
       var param;
       param = this.props.param;
@@ -1724,7 +1670,7 @@
     },
     render: function() {
       var classNames;
-      classNames = cx({
+      classNames = R.cx({
         param: true,
         hovered: editor.hoveredParam === this.props.param
       });
@@ -1733,19 +1679,64 @@
         onMouseDown: this.handleMouseDown,
         onMouseEnter: this.handleMouseEnter,
         onMouseLeave: this.handleMouseLeave
-      }, ParamTitleView({
+      }, R.ParamTitleView({
         param: this.props.param
-      }), ParamValueView({
+      }), R.ParamValueView({
         param: this.props.param
       }));
     }
   });
 
 }).call(this);
-}, "view/mixins/DataForMixin": function(exports, require, module) {(function() {
-  var DataForMixin;
+}, "view/R": function(exports, require, module) {(function() {
+  var R, key, value, _ref,
+    __hasProp = {}.hasOwnProperty;
 
-  module.exports = DataForMixin = {
+  module.exports = R = {};
+
+  _ref = React.DOM;
+  for (key in _ref) {
+    if (!__hasProp.call(_ref, key)) continue;
+    value = _ref[key];
+    R[key] = value;
+  }
+
+  R.cx = React.addons.classSet;
+
+  R.create = function(name, opts) {
+    opts.displayName = name;
+    return R[name] = React.createClass(opts);
+  };
+
+  window.R = R;
+
+  require("./mixins/DataForMixin");
+
+  require("./mixins/StartTranscludeMixin");
+
+  require("./rendering/CanvasView");
+
+  require("./rendering/GraphView");
+
+  require("./rendering/GridView");
+
+  require("./rendering/ShaderGraphView");
+
+  require("./ApplyRowView");
+
+  require("./BlockView");
+
+  require("./DraggingView");
+
+  require("./EditorView");
+
+  require("./MainGraphView");
+
+  require("./ParamView");
+
+}).call(this);
+}, "view/mixins/DataForMixin": function(exports, require, module) {(function() {
+  R.DataForMixin = {
     componentDidMount: function() {
       return this.updateDataForAnnotation();
     },
@@ -1761,11 +1752,11 @@
 
 }).call(this);
 }, "view/mixins/StartTranscludeMixin": function(exports, require, module) {(function() {
-  var StartTranscludeMixin, onceDragConsummated;
+  var onceDragConsummated;
 
   onceDragConsummated = require("../../util/onceDragConsummated");
 
-  module.exports = StartTranscludeMixin = {
+  R.StartTranscludeMixin = {
     startTransclude: function(e, apply, render) {
       var el, offset, rect;
       el = this.getDOMNode();
@@ -1804,13 +1795,7 @@
 
 }).call(this);
 }, "view/rendering/CanvasView": function(exports, require, module) {(function() {
-  var CanvasView, R, cx;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
-
-  module.exports = CanvasView = React.createClass({
+  R.create("CanvasView", {
     draw: function() {
       var canvas;
       canvas = this.getDOMNode();
@@ -2154,13 +2139,7 @@
 
 }).call(this);
 }, "view/rendering/GraphView": function(exports, require, module) {(function() {
-  var CanvasView, Compiler, Graph, GraphView, Param, R, cx, editor;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
-
-  CanvasView = require("./CanvasView");
+  var Compiler, Graph, Param, editor;
 
   Graph = require("./Graph");
 
@@ -2170,7 +2149,7 @@
 
   Compiler = require("../../execute/Compiler");
 
-  module.exports = GraphView = React.createClass({
+  R.create("GraphView", {
     getDefaultProps: function() {
       return {
         spreadOffset: 0
@@ -2204,7 +2183,7 @@
       }
     },
     render: function() {
-      return CanvasView({
+      return R.CanvasView({
         drawFn: this.drawFn,
         ref: "canvas"
       });
@@ -2228,17 +2207,11 @@
 
 }).call(this);
 }, "view/rendering/GridView": function(exports, require, module) {(function() {
-  var CanvasView, Graph, GridView, R, cx;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
-
-  CanvasView = require("./CanvasView");
+  var Graph;
 
   Graph = require("./Graph");
 
-  module.exports = GridView = React.createClass({
+  R.create("GridView", {
     drawFn: function(canvas) {
       var graph;
       graph = canvas.graph != null ? canvas.graph : canvas.graph = new Graph(canvas, -10, 10, -10, 10);
@@ -2246,7 +2219,7 @@
       return graph.drawGrid();
     },
     render: function() {
-      return CanvasView({
+      return R.CanvasView({
         drawFn: this.drawFn
       });
     }
@@ -2393,13 +2366,7 @@ to set uniforms,
 
 }).call(this);
 }, "view/rendering/ShaderGraphView": function(exports, require, module) {(function() {
-  var CanvasView, Compiler, R, Shader, ShaderGraphView, cx, editor;
-
-  R = React.DOM;
-
-  cx = React.addons.classSet;
-
-  CanvasView = require("./CanvasView");
+  var Compiler, Shader, editor;
 
   Shader = require("./Shader");
 
@@ -2407,7 +2374,7 @@ to set uniforms,
 
   Compiler = require("../../execute/Compiler");
 
-  module.exports = ShaderGraphView = React.createClass({
+  R.create("ShaderGraphView", {
     drawFn: function(canvas) {
       var apply, colorMap, compiler, contourMap, fragmentSrc, s, shader, vertexSrc;
       apply = this.props.apply;
@@ -2428,7 +2395,7 @@ to set uniforms,
       return shader.draw();
     },
     render: function() {
-      return CanvasView({
+      return R.CanvasView({
         drawFn: this.drawFn,
         ref: "canvas"
       });

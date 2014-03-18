@@ -1,11 +1,4 @@
-R = React.DOM
-cx = React.addons.classSet
-BlockView = require("./BlockView")
-MainGraphView = require("./MainGraphView")
-DraggingView = require("./DraggingView")
-
-
-OutputSwitchView = React.createClass
+R.create "OutputSwitchView",
   handleChange: (e) ->
     # TODO controller
     editor.outputSwitch = e.target.selectedOptions[0].value
@@ -26,7 +19,7 @@ OutputSwitchView = React.createClass
         R.option {value: "Contour Map"}, "Contour Map"
 
 
-module.exports = EditorView = React.createClass
+R.create "EditorView",
   handleMouseDown: (e) ->
     if editor.dragging?
       unless editor.dragging.text
@@ -37,14 +30,14 @@ module.exports = EditorView = React.createClass
       editor.unsetSelection()
 
   render: ->
-    classNames = cx {
+    classNames = R.cx {
       editor: true
       dragging: editor.dragging?
     }
     R.div {className: classNames, style: {cursor: editor.dragging?.cursor ? ""}, onMouseDown: @handleMouseDown},
-      MainGraphView {}
+      R.MainGraphView {}
       R.div {className: "manager"},
-        BlockView {block: editor.rootBlock}
-      OutputSwitchView {}
+        R.BlockView {block: editor.rootBlock}
+      R.OutputSwitchView {}
       R.div {className: "dragging"},
-        DraggingView {}
+        R.DraggingView {}

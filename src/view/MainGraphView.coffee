@@ -1,14 +1,9 @@
-R = React.DOM
-cx = React.addons.classSet
 lerp = require("../util/lerp")
 Param = require("../model/Param")
-GridView = require("./rendering/GridView")
-GraphView = require("./rendering/GraphView")
-ShaderGraphView = require("./rendering/ShaderGraphView")
 config = require("../config")
 
 
-MainCartesianGraphView = React.createClass
+R.create "MainCartesianGraphView",
   render: ->
     graphViews = []
 
@@ -26,10 +21,10 @@ MainCartesianGraphView = React.createClass
             styleOpts = _.clone(config.styles.spreadPositive)
           styleOpts.globalAlpha = lerp(i, 1, spreadNum, config.spreadOpacityMax, config.spreadOpacityMin)
           spreadOffset = spreadDistance * i * neg
-          graphViews.push(GraphView {apply: resultApply, key: "spread" + (i*neg),styleOpts, spreadOffset})
+          graphViews.push(R.GraphView {apply: resultApply, key: "spread" + (i*neg),styleOpts, spreadOffset})
 
     # Result
-    graphViews.push(GraphView {apply: resultApply, key: "result", styleOpts: config.styles.resultApply})
+    graphViews.push(R.GraphView {apply: resultApply, key: "result", styleOpts: config.styles.resultApply})
 
     # Hovered Apply
     if apply = editor.hoveredApply
@@ -40,28 +35,28 @@ MainCartesianGraphView = React.createClass
           else
             styleOpts = config.styles.apply
           graphViews.push(GraphView {apply: param, key: "param"+paramIndex, styleOpts})
-      graphViews.push(GraphView {apply, key: "hoveredApply", styleOpts: config.styles.hoveredApply})
+      graphViews.push(R.GraphView {apply, key: "hoveredApply", styleOpts: config.styles.hoveredApply})
 
     # Hovered Param
     if param = editor.hoveredParam
-      graphViews.push(GraphView {apply: param, key: "hoveredParam", styleOpts: config.styles.hoveredParam})
+      graphViews.push(R.GraphView {apply: param, key: "hoveredParam", styleOpts: config.styles.hoveredParam})
 
     R.span {},
-      GridView {}
+      R.GridView {}
       graphViews
 
 
-MainShaderGraphView = React.createClass
+R.create "MainShaderGraphView",
   render: ->
     R.span {style: {opacity: config.shaderOpacity}},
-      ShaderGraphView {apply: editor.hoveredApply ? editor.rootBlock.root}
-      GridView {}
+      R.ShaderGraphView {apply: editor.hoveredApply ? editor.rootBlock.root}
+      R.GridView {}
 
 
-module.exports = MainGraphView = React.createClass
+R.create "MainGraphView",
   render: ->
     R.div {className: "main"},
       if editor.shaderView
-        MainShaderGraphView {}
+        R.MainShaderGraphView {}
       else
-        MainCartesianGraphView {}
+        R.MainCartesianGraphView {}
