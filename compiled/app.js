@@ -357,7 +357,10 @@
     return requestAnimationFrame(function() {
       refreshView();
       Persistence.saveState(editor);
-      return willRefreshNextFrame = false;
+      willRefreshNextFrame = false;
+      if (editor.timeParam) {
+        return refresh();
+      }
     });
   };
 
@@ -602,6 +605,7 @@
       this.rootBlock = null;
       this.xParam = null;
       this.yParam = null;
+      this.timeParam = null;
       this.hoveredParam = null;
       this.hoveredApply = null;
       this.selectedBlock = null;
@@ -705,6 +709,25 @@
     return Param;
 
   })();
+
+}).call(this);
+}, "model/Timer": function(exports, require, module) {(function() {
+  var Timer;
+
+  module.exports = new (Timer = (function() {
+    function Timer() {
+      this.startMillis = Date.now();
+    }
+
+    Timer.prototype.currentTime = function() {
+      var millis;
+      millis = Date.now() - this.startMillis;
+      return millis / 1000;
+    };
+
+    return Timer;
+
+  })());
 
 }).call(this);
 }, "model/builtInFns": function(exports, require, module) {(function() {
@@ -1715,6 +1738,8 @@
             return R.i({}, "x");
           } else if (editor.yParam === param) {
             return R.i({}, "y");
+          } else if (editor.timeParam === param) {
+            return R.i({}, "time");
           } else {
             return truncate(param.value);
           }
@@ -1779,10 +1804,10 @@
       var param;
       param = this.props.param;
       if (key.command) {
-        if (param.axis === "result") {
-          return param.axis = "x";
+        if (editor.timeParam === param) {
+          return editor.timeParam = null;
         } else {
-          return param.axis = "result";
+          return editor.timeParam = param;
         }
       } else if (key.shift) {
         if (editor.xParam === param) {
@@ -2275,11 +2300,13 @@
 
 }).call(this);
 }, "view/rendering/GraphView": function(exports, require, module) {(function() {
-  var Compiler, Graph, Param, editor, evaluate;
+  var Compiler, Graph, Param, Timer, editor, evaluate;
 
   Graph = require("./Graph");
 
   Param = require("../../model/Param");
+
+  Timer = require("../../model/Timer");
 
   editor = require("../../editor");
 
@@ -2298,6 +2325,7 @@
       _ref = this.props, apply = _ref.apply, spreadOffset = _ref.spreadOffset, styleOpts = _ref.styleOpts;
       compiler = new Compiler();
       compiler.substitute(editor.xParam, "x");
+      compiler.substitute(editor.timeParam, Timer.currentTime());
       if (spreadParam = editor.spreadParam()) {
         compiler.substitute(spreadParam, spreadParam.value + spreadOffset);
       }
@@ -2504,9 +2532,11 @@ to set uniforms,
 
 }).call(this);
 }, "view/rendering/ShaderGraphView": function(exports, require, module) {(function() {
-  var Compiler, Shader, editor;
+  var Compiler, Shader, Timer, editor;
 
   Shader = require("./Shader");
+
+  Timer = require("../../model/Timer");
 
   editor = require("../../editor");
 
@@ -2520,6 +2550,7 @@ to set uniforms,
       compiler = new Compiler();
       compiler.substitute(editor.xParam, "x");
       compiler.substitute(editor.yParam, "y");
+      compiler.substitute(editor.timeParam, Timer.currentTime());
       s = compiler.compile(apply, "glsl");
       vertexSrc = "precision mediump float;\n\nattribute vec3 vertexPosition;\n\nvoid main() {\n  gl_Position = vec4(vertexPosition, 1.0);\n}";
       colorMap = "float outputValue = compute(x, y);\ngl_FragColor = vec4(vec3(outputValue), 1);";

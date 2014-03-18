@@ -1,3 +1,19 @@
+Compiler needs to take a context: series of Apply's
+  A "Step" is a series of Apply's
+
+Make xParam, etc. use handleTransclusionDrop
+
+Start work on Block.createFn(applies)
+  Figure out referenced Params
+  Remove applies
+  Figure out where to put the new Fn
+  Make new Params for referenced Params
+
+Differentiate between a BuiltInFn and a CreatedFn
+
+
+
+
 
 
 Code cleanup

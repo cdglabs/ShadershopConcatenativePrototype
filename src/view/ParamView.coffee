@@ -98,6 +98,8 @@ R.create "ParamValueView",
           R.i {}, "x"
         else if editor.yParam == param
           R.i {}, "y"
+        else if editor.timeParam == param
+          R.i {}, "time"
         else
           truncate(param.value)
 
@@ -146,10 +148,14 @@ R.create "ParamView",
     {param} = @props
     # TODO controller
     if key.command
-      if param.axis == "result"
-        param.axis = "x"
+      # if param.axis == "result"
+      #   param.axis = "x"
+      # else
+      #   param.axis = "result"
+      if editor.timeParam == param
+        editor.timeParam = null
       else
-        param.axis = "result"
+        editor.timeParam = param
     else if key.shift
       if editor.xParam == param
         editor.xParam = null

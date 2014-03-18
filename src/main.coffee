@@ -19,6 +19,9 @@ refresh = ->
     Persistence.saveState(editor)
     willRefreshNextFrame = false
 
+    if editor.timeParam
+      refresh()
+
 refreshView = ->
   editorEl = document.querySelector("#editor")
   React.renderComponent(R.EditorView(), editorEl)

@@ -1,5 +1,7 @@
 Shader = require("./Shader")
 
+Timer = require("../../model/Timer")
+
 editor = require("../../editor")
 Compiler = require("../../execute/Compiler")
 
@@ -13,6 +15,7 @@ R.create "ShaderGraphView",
     compiler = new Compiler()
     compiler.substitute(editor.xParam, "x")
     compiler.substitute(editor.yParam, "y")
+    compiler.substitute(editor.timeParam, Timer.currentTime())
     s = compiler.compile(apply, "glsl")
 
     vertexSrc = """

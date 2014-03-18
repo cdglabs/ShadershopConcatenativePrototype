@@ -7,6 +7,7 @@ module.exports = class Editor
 
     @xParam = null
     @yParam = null
+    @timeParam = null
 
     @hoveredParam = null
     @hoveredApply = null

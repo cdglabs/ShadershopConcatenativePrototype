@@ -1,6 +1,8 @@
 Graph = require("./Graph")
 Param = require("../../model/Param")
 
+Timer = require("../../model/Timer")
+
 editor = require("../../editor")
 Compiler = require("../../execute/Compiler")
 evaluate = require("../../execute/evaluate")
@@ -14,6 +16,7 @@ R.create "GraphView",
     {apply, spreadOffset, styleOpts} = @props
     compiler = new Compiler()
     compiler.substitute(editor.xParam, "x")
+    compiler.substitute(editor.timeParam, Timer.currentTime())
     if spreadParam = editor.spreadParam()
       compiler.substitute(spreadParam, spreadParam.value + spreadOffset)
     return compiler.compile(apply, "js")
