@@ -57,5 +57,8 @@ module.exports = class Editor
     else
       @setSingleSelection(block, apply)
 
-    # TEMP
+
+
+  createFn: ->
+    return unless @selectedBlock
     @selectedBlock.createFn(@selectedApply1, @selectedApply2)

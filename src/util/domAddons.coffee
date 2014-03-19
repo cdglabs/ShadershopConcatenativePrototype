@@ -1,3 +1,6 @@
+_.concatMap = (array, fn) ->
+  _.flatten(_.map(array, fn), true)
+
 Element::matches ?= Element::webkitMatchesSelector ? Element::mozMatchesSelector ? Element::oMatchesSelector
 
 Element::closest = (selector) ->

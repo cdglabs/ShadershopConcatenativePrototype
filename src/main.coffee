@@ -58,6 +58,10 @@ key "d", (e) ->
     el = el.parentNode
 
 
+key "command+f", (e) ->
+  e.preventDefault()
+  editor.createFn()
+
 
 do ->
   apply = editor.rootBlock.root

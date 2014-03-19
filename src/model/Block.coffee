@@ -68,18 +68,31 @@ module.exports = class Block
       return []
 
   createFn: (apply1, apply2) ->
-    console.log apply1, apply2
+    appliesInRange = @appliesRange(apply1, apply2)
 
-    applies = @appliesRange(apply1, apply2)
-    console.log "applies", applies
+    appliesNotInRange = _.difference(@applies(), appliesInRange)
+    paramsNotInRange = _.concatMap appliesNotInRange, (apply) ->
+      apply.allParams()
+    outsideExprs = _.union(appliesNotInRange, paramsNotInRange)
+    # TODO: outsideExprs will also need to include the parameters *into* the
+    # block. This can already be seen in how editor.xParam should be
+    # considered outside. (Actually, maybe that is a bad example because maybe
+    # the xParam should just be a view onto a constant. However, I think this
+    # issue is still relevant if you were to make a Fn within a block and used
+    # one of the parameters passed into the block.)
 
-    dependencies = []
-    for apply in applies
-      for dependentParam in apply.dependentParams()
-        dependencies.push(dependentParam)
+    # Ensure that the only apply from appliesInRange that is in outsideExprs
+    # is the last one (ie its output). Otherwise we have a reference into the
+    # new fn that is not its output.
+    potentialConflicts = _.intersection(outsideExprs, appliesInRange)
+    potentialConflicts = _.without(potentialConflicts, _.last(appliesInRange))
+    if potentialConflicts.length > 0
+      console.warn "Cannot create function, conflicts:", potentialConflicts
+      return
 
-    dependencies = _.unique(dependencies)
-    dependencies = _.difference(dependencies, applies)
+    dependencies = _.concatMap appliesInRange, (apply) ->
+      apply.dependentParams()
+    dependencies = _.intersection(dependencies, outsideExprs)
 
     console.log "dependencies", dependencies
 

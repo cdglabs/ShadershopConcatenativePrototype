@@ -404,6 +404,11 @@
     return _results;
   });
 
+  key("command+f", function(e) {
+    e.preventDefault();
+    return editor.createFn();
+  });
+
   (function() {
     var Compiler, apply, compiler;
     apply = editor.rootBlock.root;
@@ -610,25 +615,42 @@
     };
 
     Block.prototype.createFn = function(apply1, apply2) {
-      var applies, apply, dependencies, dependentParam, _i, _j, _len, _len1, _ref;
-      console.log(apply1, apply2);
-      applies = this.appliesRange(apply1, apply2);
-      console.log("applies", applies);
-      dependencies = [];
-      for (_i = 0, _len = applies.length; _i < _len; _i++) {
-        apply = applies[_i];
-        _ref = apply.dependentParams();
-        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-          dependentParam = _ref[_j];
-          dependencies.push(dependentParam);
-        }
+      var appliesInRange, appliesNotInRange, dependencies, outsideExprs, paramsNotInRange, potentialConflicts;
+      appliesInRange = this.appliesRange(apply1, apply2);
+      appliesNotInRange = _.difference(this.applies(), appliesInRange);
+      paramsNotInRange = _.concatMap(appliesNotInRange, function(apply) {
+        return apply.allParams();
+      });
+      outsideExprs = _.union(appliesNotInRange, paramsNotInRange);
+      potentialConflicts = _.intersection(outsideExprs, appliesInRange);
+      potentialConflicts = _.without(potentialConflicts, _.last(appliesInRange));
+      if (potentialConflicts.length > 0) {
+        console.warn("Cannot create function, conflicts:", potentialConflicts);
+        return;
       }
-      dependencies = _.unique(dependencies);
-      dependencies = _.difference(dependencies, applies);
+      dependencies = _.concatMap(appliesInRange, function(apply) {
+        return apply.dependentParams();
+      });
+      dependencies = _.intersection(dependencies, outsideExprs);
       return console.log("dependencies", dependencies);
     };
 
     return Block;
+
+  })();
+
+}).call(this);
+}, "model/CreatedFn": function(exports, require, module) {(function() {
+  var CreatedFn;
+
+  module.exports = CreatedFn = (function() {
+    function CreatedFn() {
+      this.title = "New function!";
+      this.block = null;
+      this.defaultParams = [];
+    }
+
+    return CreatedFn;
 
   })();
 
@@ -693,9 +715,15 @@
 
     Editor.prototype.setRangeSelection = function(block, apply) {
       if (this.selectedApply1 && this.selectedBlock === block) {
-        this.selectedApply2 = apply;
+        return this.selectedApply2 = apply;
       } else {
-        this.setSingleSelection(block, apply);
+        return this.setSingleSelection(block, apply);
+      }
+    };
+
+    Editor.prototype.createFn = function() {
+      if (!this.selectedBlock) {
+        return;
       }
       return this.selectedBlock.createFn(this.selectedApply1, this.selectedApply2);
     };
@@ -1013,6 +1041,10 @@
 }).call(this);
 }, "util/domAddons": function(exports, require, module) {(function() {
   var _base, _ref, _ref1;
+
+  _.concatMap = function(array, fn) {
+    return _.flatten(_.map(array, fn), true);
+  };
 
   if ((_base = Element.prototype).matches == null) {
     _base.matches = (_ref = (_ref1 = Element.prototype.webkitMatchesSelector) != null ? _ref1 : Element.prototype.mozMatchesSelector) != null ? _ref : Element.prototype.oMatchesSelector;
