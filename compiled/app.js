@@ -118,6 +118,7 @@
     editor.rootBlock = new Block();
     startApply = new Apply(builtInFns.constantFn);
     editor.rootBlock.root = startApply;
+    editor.xParam = startApply.params[1];
   }
 
   window.editor = editor;
